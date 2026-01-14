@@ -1,0 +1,37 @@
+# Entorno virtual de Python
+.venv/
+
+# Archivos de Python compilados
+__pycache__/
+*.py[cod]
+
+# Archivos de configuración de usuario
+*.env
+*.env.*
+
+# Archivos de logs
+*.log
+
+# Archivos de datos
+*.csv
+*.mat
+*.dat
+*.pickle
+*.h5
+*.xlsx
+*.xls
+*.json
+*.tsv
+*.parquet
+*.feather
+*.sav
+*.pkl
+*.npz
+*.npy
+
+# Archivos de Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+
+# Archivos del sistema operativo
+.DS_Store
+Thumbs.db
