@@ -1,9 +1,10 @@
-from matplotlib.figure import Figure
-import pandas as pd
-import numpy as np
-import pickle
 import os
-import openpyxl
+import numpy as np
+import pandas as pd
+import pickle
+from dotenv import load_dotenv
+
+from matplotlib.figure import Figure
 
 from Funciones.Utils.utils_get_vars_dic import *
 from Funciones.Utils.utils_get_config_vars import *
@@ -93,6 +94,9 @@ def cargar_diccionario_pickle(ruta_archivo):
     Retorna:
     dict: Diccionario cargado desde el archivo.
     """
+
+    ruta_archivo = ruta_archivo+".pkl"
+    
     if not os.path.isfile(ruta_archivo):
         raise FileNotFoundError(f"No se encontró el archivo: {ruta_archivo}")
     
@@ -105,6 +109,19 @@ def cargar_diccionario_pickle(ruta_archivo):
 def crear_rango_de_fechas_sintetico(fecha_de_inicio: pd.Timestamp, fecha_de_fin: pd.Timestamp, delta_tiempo: str) -> pd.DatetimeIndex:
     tspan_sintetico = pd.date_range(start=fecha_de_inicio, end=fecha_de_fin, freq=delta_tiempo)
     return tspan_sintetico
+
+#####################
+
+def crear_ruta_a_carpeta(carpeta: str) -> str:
+    """ Crea la ruta completa a una carpeta utilizando la variable de entorno 'ruta_al_NAS' si está disponible.
+    carpeta: Ruta relativa a la carpeta deseada."""
+    load_dotenv() # Cargar variables de entorno desde el archivo .env
+    ruta_al_NAS = os.getenv("ruta_al_NAS")    
+    ruta_completa = carpeta
+    if ruta_al_NAS:
+        ruta_completa = os.path.join(ruta_al_NAS, carpeta)        
+    
+    return ruta_completa
 
 #####################
 

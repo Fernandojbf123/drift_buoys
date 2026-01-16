@@ -14,18 +14,6 @@ from Funciones.Utils.utils_get_config_vars import *
 from Funciones.Utils.utils_get_vars_dic import *
 
 #################### FUNCIONES #########################
-def crear_ruta_al_excel_de_despliegue_de_sondas() -> str:
-    """ Crea la ruta completa al archivo Excel de despliegue de sondas,
-    utilizando la variable de entorno 'ruta_al_NAS' si está disponible."""
-    load_dotenv() # Cargar variables de entorno desde el archivo .env
-    ruta_al_NAS = os.getenv("ruta_al_NAS")    
-    ruta_excel = get_ruta_al_excel_de_despliegue_de_sondas()
-    if ruta_al_NAS:
-        ruta_completa = os.path.join(ruta_al_NAS, ruta_excel)
-    else:
-        ruta_completa = ruta_excel
-    return ruta_completa
-
 
 def buscar_nombre_de_archivo_de_sonda():
     """A partir de la lista se seriales de las sondas indicadas en el archivo de configuración,
@@ -34,12 +22,10 @@ def buscar_nombre_de_archivo_de_sonda():
         rutas_de_sondas: lista de rutas completas a los archivos CSV de las sondas encontradas -> lista de strings
         seriales_encontrados: lista de seriales de sondas para las que se encontraron archivos CSV -> lista de strings
     """
-
-    carpeta_de_datos_crudos = get_carpeta_datos_crudos()
-    seriales_de_sondas = get_seriales_sondas()
-    
+    carpeta_de_datos_crudos = crear_ruta_a_carpeta(get_carpeta_datos_crudos())
     archivos_en_carpeta = os.listdir(carpeta_de_datos_crudos)
 
+    seriales_de_sondas = get_seriales_sondas()
     if not archivos_en_carpeta:
         raise FileNotFoundError(f"No se encontraron archivos en la carpeta: {carpeta_de_datos_crudos}") 
     if not seriales_de_sondas:
@@ -111,7 +97,8 @@ def leer_excel_de_despliegue_de_sondas(seriales_encontrados: list) -> pd.DataFra
         longitud_de_despliegue = float
         campania = string
     """
-    ruta_al_excel_de_despliegue_de_sondas = crear_ruta_al_excel_de_despliegue_de_sondas()
+    ruta_al_excel_de_despliegue_de_sondas = crear_ruta_a_carpeta(get_ruta_al_excel_de_despliegue_de_sondas())   
+    ruta_al_excel_de_despliegue_de_sondas = ruta_al_excel_de_despliegue_de_sondas + ".xlsx"
     try:
 
         df_excel = pd.read_excel(ruta_al_excel_de_despliegue_de_sondas)
@@ -119,9 +106,9 @@ def leer_excel_de_despliegue_de_sondas(seriales_encontrados: list) -> pd.DataFra
 
         df_excel['serie_de_sonda'] = df_excel['serie_de_sonda'].astype(int).astype(str)
         
-        df_excel['fecha_y_hora_de_despliegue'] = pd.to_datetime(df_excel['fecha_y_hora_de_despliegue'], format="%d-%m-%Y %H:%M")
-        df_excel['fecha_y_hora_de_la_primera_transmision'] = pd.to_datetime(df_excel['fecha_y_hora_de_la_primera_transmision'], format="%d-%m-%Y %H:%M")
-        df_excel['fecha_y_hora_de_ultima_transmision'] = pd.to_datetime(df_excel['fecha_y_hora_de_ultima_transmision'], format="%d-%m-%Y %H:%M")
+        df_excel['fecha_y_hora_de_despliegue'] = pd.to_datetime(df_excel['fecha_y_hora_de_despliegue'], format="%d/%m/%Y %H:%M")
+        df_excel['fecha_y_hora_de_la_primera_transmision'] = pd.to_datetime(df_excel['fecha_y_hora_de_la_primera_transmision'], format="%d/%m/%Y %H:%M")
+        df_excel['fecha_y_hora_de_ultima_transmision'] = pd.to_datetime(df_excel['fecha_y_hora_de_ultima_transmision'], format="%d/%m/%Y %H:%M")
         df_excel['latitud_de_despliegue'] = df_excel['latitud_de_despliegue'].str.split(' ').str[0].astype(float)
         df_excel['longitud_de_despliegue'] = df_excel['longitud_de_despliegue'].str.split(' ').str[0].astype(float)
         df_excel['campania'] = df_excel['campania']

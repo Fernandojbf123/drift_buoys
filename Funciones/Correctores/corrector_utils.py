@@ -3,27 +3,9 @@ import numpy as np
 from scipy.interpolate import interp1d
 import matplotlib.dates as mdates  
 
-
+from Funciones.Utils.utils_get_config_vars import *
+from Funciones.Utils.utils_get_vars_dic import *
 import Configs.configuracion_general
-
-
-##############################################################
-
-# Funciones auxiliares para obtener datos de configuración actualizados
-def _get_config_value(key):
-    """Obtiene un valor de la configuración general de forma dinámica"""
-    import importlib
-    importlib.reload(Configs.configuracion_general)
-    return Configs.configuracion_general.general_config[key]
-
-def get_carpeta_datos_crudos():
-    return _get_config_value("carpeta_de_datos_crudos")
-
-def get_seriales_sondas():
-    return _get_config_value("seriales_de_sondas")
-
-def get_delta_tiempo():
-    return _get_config_value("delta_tiempo")
 
 
 ############### # FUNCIONES DE CORRECCIÓN DE DATOS ###############

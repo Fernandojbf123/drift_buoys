@@ -60,7 +60,7 @@ def Gra_corrientes_transmision(dataFrame:pd.DataFrame, NS_sonda:str, tspan_colum
        
     # Crear figura con 5 filas × 1 columna
     fig, axs = plt.subplots(nrows=len(get_variables_graficar()), figsize=(15, 10))
-    
+        
     # Variables a graficar
     var_names = get_variables_graficar()
     ylabels = get_ylabels(var_names)
@@ -83,10 +83,10 @@ def Gra_corrientes_transmision(dataFrame:pd.DataFrame, NS_sonda:str, tspan_colum
         data = dataFrame[var_name].dropna()
         
         # Graficar serie de tiempo
-        Gra_serie_de_tiempo(dataFrame=dataFrame, var_name=var_name, tspan=tspan_num, ax=ax_serie)
+        ax_serie = Gra_serie_de_tiempo(dataFrame=dataFrame, var_name=var_name, tspan=tspan_num, ax=ax_serie)
         
         # Configurar límites y etiquetas
-        ax_serie = Gra_asignar_ylim(data, var_name, ax_serie, hist=False)
+        Gra_asignar_ylim(data, var_name, ax_serie, hist=False)
         
         ax_serie.set_ylabel(ylabel, font=tipo_de_letra, fontweight='bold', fontsize=yticksize)
         ax_serie.tick_params(axis='y', labelsize=yticksize)

@@ -40,8 +40,7 @@ def Gra_asignar_ylim(var_value, var_name, ax, hist=False, bins=None,fontsize=12)
     maxi = np.nanmax(var_value)
     # Calcular el rango y el margen
     range_y = maxi - mini
-    padding_factor = range_y * 0.05 # 5% de margen a cada lado
-    padding_y = range_y * padding_factor
+    padding_y = range_y * 0.05  # 5% de margen a cada lado
 
     # Variables que empiezan en 0
     if var_name.lower() in ["rap_corriente","Hs", "Hm", "Tp"]:
@@ -49,8 +48,9 @@ def Gra_asignar_ylim(var_value, var_name, ax, hist=False, bins=None,fontsize=12)
         ylim_max = maxi + padding_y
 
     elif var_name.lower() in ["temperatura_mar","temperatura_aire"]:
-        ylim_min = np.floor(mini - padding_y)
-        ylim_max = np.ceil(maxi + padding_y)
+        # Para temperatura: límites enteros exactos sin padding
+        ylim_min = np.floor(mini)-1
+        ylim_max = np.ceil(maxi)+1
 
     else:  # Todas las variables que no sean ["rap_corriente","Hs", "Hm", "Tp"] ni direccion
         ylim_min = mini - padding_y
@@ -69,5 +69,11 @@ def Gra_asignar_ylim(var_value, var_name, ax, hist=False, bins=None,fontsize=12)
 
     # Asignar los ejes
     ax.set_ylim(ylim_min, ylim_max)
-    ax.yaxis.set_major_locator(MaxNLocator(nbins=5))
+    
+    # Para temperatura, forzar ticks enteros
+    if var_name.lower() in ["temperatura_mar","temperatura_aire"]:
+        ax.yaxis.set_major_locator(MaxNLocator(integer=True))
+    else:
+        ax.yaxis.set_major_locator(MaxNLocator(nbins=5))
+    
     return ax   
