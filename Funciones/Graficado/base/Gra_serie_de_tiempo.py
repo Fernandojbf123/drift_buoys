@@ -1,8 +1,9 @@
 import numpy as np
 import pandas as pd
-from Funciones.Graficado.Gra_calcular_ylim import Gra_calcular_ylim
+from Funciones.Graficado.base.Gra_calcular_ylim import Gra_calcular_ylim
 from matplotlib.lines import Line2D
- 
+
+
 def Gra_serie_de_tiempo(dataFrame, var_name, tspan, ax):
     """
     Descripción:
@@ -18,5 +19,5 @@ def Gra_serie_de_tiempo(dataFrame, var_name, tspan, ax):
     ax.plot(tspan, varValue, marker='.', markersize=3,
             linestyle='None', color=colors[0], label=var_name)
     ax.grid()
-    
+
     return ax

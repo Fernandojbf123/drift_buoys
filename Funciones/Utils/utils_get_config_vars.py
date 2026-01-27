@@ -71,3 +71,6 @@ def get_numero_bins_histograma():
 
 def get_variables_graficar():
     return _get_config_value("variables_a_graficar")
+
+def get_coordenadas_del_mapa():
+    return _get_config_value("coordenadas_del_mapa")
