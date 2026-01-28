@@ -1,5 +1,6 @@
 import cartopy.crs as ccrs
 import cartopy.feature as cfeature
+from cartopy.mpl.gridliner import LONGITUDE_FORMATTER, LATITUDE_FORMATTER
 
 
 def graficar_mapa_cartopy(ax, lon_min, lon_max, lat_min, lat_max):
@@ -22,6 +23,5 @@ def graficar_mapa_cartopy(ax, lon_min, lon_max, lat_min, lat_max):
     ax.set_yticks(yticks, crs=ccrs.PlateCarree())
 
     # Formatear etiquetas de los ticks
-    from cartopy.mpl.gridliner import LONGITUDE_FORMATTER, LATITUDE_FORMATTER
     ax.xaxis.set_major_formatter(LONGITUDE_FORMATTER)
     ax.yaxis.set_major_formatter(LATITUDE_FORMATTER)

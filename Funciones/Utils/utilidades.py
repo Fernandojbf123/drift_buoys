@@ -3,6 +3,7 @@ import numpy as np
 import pandas as pd
 import pickle
 from dotenv import load_dotenv
+import netCDF4 as nc
 
 from matplotlib.figure import Figure
 
@@ -82,6 +83,41 @@ def cambiar_fechas_a_pd_datetime(df: pd.DataFrame, serial:str) -> pd.DataFrame:
         print(f"Ocurrió un error al cambiar el formato de las fechas para la sonda {serial}: {e}")
     
     return df
+#######################
+
+def cargar_datos_de_batimetria() -> dict:
+    """ Carga datos de batimetría desde un archivo NetCDF. Especificada en el archivo de configuración general.
+    Salida
+    
+    datos_batimetria = {
+        "lon": array_like,
+        "lat": array_like,
+        "elevation": array_like,
+        "curvas_de_batimetria": array_like
+    }
+    
+    """
+    datos_batimetria = {
+        "lon": None,
+        "lat": None,
+        "elevation": None,
+        "curvas_de_batimetria": get_curvas_de_batimetria()
+    }
+    
+    ruta = get_ruta_a_datos_batimetria()
+        
+    with nc.Dataset(ruta) as data:
+        lon = data.variables['lon'][:]
+        lat = data.variables['lat'][:]
+        elevation = data.variables['elevation'][:,:]
+
+        LON, LAT = np.meshgrid(lon, lat)   
+    
+        datos_batimetria["lon"] = LON
+        datos_batimetria["lat"] = LAT
+        datos_batimetria["elevation"] = elevation
+    
+    return datos_batimetria
 #######################
 
 def cargar_diccionario_pickle(ruta_archivo):

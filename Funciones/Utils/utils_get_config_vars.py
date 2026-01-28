@@ -74,3 +74,13 @@ def get_variables_graficar():
 
 def get_coordenadas_del_mapa():
     return _get_config_value("coordenadas_del_mapa")
+
+def get_escala_de_color_rapidez():
+    return _get_config_value("escala_de_color_rapidez")
+
+def get_ruta_a_datos_batimetria():
+    return _get_config_value("ruta_a_datos_batimetria")
+
+def get_curvas_de_batimetria():
+    curvas = _get_config_value("curvas_de_batimetria")
+    return sorted(curvas)

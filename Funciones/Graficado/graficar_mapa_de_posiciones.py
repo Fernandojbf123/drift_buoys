@@ -1,14 +1,21 @@
+import numpy as np
+import cartopy.crs as ccrs
 import matplotlib.pyplot as plt
 from matplotlib.colors import LinearSegmentedColormap
-import cartopy.crs as ccrs
-from .base.Gra_mapa_cartopy import graficar_mapa_cartopy
+import netCDF4 as nc
+
+
 from Funciones.Utils.utils_get_config_vars import *
 from Funciones.Utils.utilidades import *
 from Funciones.Carga.cargar_datos_csv import leer_excel_de_despliegue_de_sondas 
+from .base.Gra_mapa_cartopy import graficar_mapa_cartopy
+from .base.Gra_batimetria_en_mapa import graficar_batimetria_en_mapa        
+from .base.Gra_trayectorias_de_sonda import graficar_trayectorias_de_sonda
+from .base.Gra_dar_formato_a_mapa import dar_formato_a_mapa
 
 ################################################################################
 
-def graficar_mapa_con_posiciones():
+def graficar_mapa_con_posiciones(mostrar_figura: bool = False) -> None:
     """
     Grafica un mapa de posiciones geográficas dentro de los límites dados.
     Utiliza la función graficar_mapa_cartopy para crear el mapa base.
@@ -22,9 +29,7 @@ def graficar_mapa_con_posiciones():
     
     tspan_column='tspan_rounded'
     origen_de_los_datos = get_origen_de_los_datos()
-    tipo_de_letra = get_tipo_letra()
-    tamanio_de_letra = get_tamanio_letra()
-    titlesize = tamanio_de_letra + 6
+    
     
     ruta_a_la_carpeta_de_datos_procesados = crear_ruta_a_carpeta(get_carpeta_guardado_datos_procesados())
     nombre_del_archivo_de_datos_procesados = get_nombre_archivo_datos_procesados()
@@ -36,6 +41,9 @@ def graficar_mapa_con_posiciones():
     # Cargar datos de despliegue desde Excel
     df_excel_de_despliegue = leer_excel_de_despliegue_de_sondas(seriales_de_sondas)
     
+    # Cargar datos de batimetría desde el archivo NetCDF
+    datos_de_batimetria = cargar_datos_de_batimetria()
+    
     # Recorrer cada sonda en el diccionario
     for serial in seriales_de_sondas:
 
@@ -43,56 +51,56 @@ def graficar_mapa_con_posiciones():
             print(f"Advertencia: Serial {serial} no encontrado en los datos")
             continue
         
-        # Obtener posiciones iniciales del excel de despliegue
-        lat_ini_series = df_excel_de_despliegue[df_excel_de_despliegue['serie_de_sonda'] == serial]['latitud_de_despliegue']
-        lon_ini_series = df_excel_de_despliegue[df_excel_de_despliegue['serie_de_sonda'] == serial]['longitud_de_despliegue']
-        lat_ini = float(lat_ini_series.iloc[0]) if not lat_ini_series.empty else None
-        lon_ini = -float(lon_ini_series.iloc[0]) if not lon_ini_series.empty else None
+        # Datos de la sonda
+        df_datos_de_la_sonda = datos[serial]
         
-        # Obtener posiciones y rapidez de corriente del diccionario de datos
-        df = datos[serial]
-        latitud = df['latitud']
-        longitud = df['longitud']   
-        rap_corriente = df['rap_corriente']
-        lat_fin = latitud.iloc[-1]
-        lon_fin = longitud.iloc[-1]
-        
-         # Obtener tspan (el eje X - en formato pd.DatetimeIndex)
-        tspan = df[tspan_column] if tspan_column else df.index
-        
-        cmap = LinearSegmentedColormap.from_list("azul_rojo", ["blue", "red"])
-    
+        # Obtener tspan (el eje X - en formato pd.DatetimeIndex)
+        tspan = df_datos_de_la_sonda[tspan_column] if tspan_column else df_datos_de_la_sonda.index
+            
         fig, ax = plt.subplots(figsize=(16, 7),
                                subplot_kw={'projection': ccrs.PlateCarree()})
 
+
         graficar_mapa_cartopy(ax, lon_min, lon_max, lat_min, lat_max)
-        sc = plt.scatter(longitud, latitud, c=rap_corriente, cmap=cmap, s=10, vmin=0, vmax=1.5, transform=ccrs.PlateCarree())
-        plt.colorbar(sc, label='Rapidez de la corriente (m/s)', orientation='vertical', pad=0.02, aspect=30)
-        plt.scatter([lon_ini], [lat_ini], c='yellow', edgecolors='black', linewidths=2, s=50, transform=ccrs.PlateCarree())
-        plt.scatter([lon_fin], [lat_fin], c='red', edgecolors='black', linewidths=2, s=50, transform=ccrs.PlateCarree())
+        graficar_batimetria_en_mapa(ax, datos_de_batimetria = datos_de_batimetria)
+        
+        obj_mapeable = graficar_trayectorias_de_sonda(df_excel_de_despliegue, serial, df_datos_de_la_sonda) # devuelve el objeto mapeable para la colorbar
         
         
-        ## Estética del gráfico
-        # Preparar el título de la figura y de guardado
+        # Preparar las propiedades del mapa (títulos, etiquetas, colorbar, etc.)
         t0str = tspan.min().strftime('%Y%m%d')
         tEstr = tspan.max().strftime('%Y%m%d')
         strDeFechas = str(f"{t0str}-{tEstr}")
-        tituloBase = str(f"MAPA-DE-TRAYECTORIAS-SONDA-OCEANOGRÁFICA-NS-{serial}-{origen_de_los_datos}-{strDeFechas}")
+        titulo = str(f"MAPA DE TRAYECTORIAS SONDA OCEANOGRÁFICA")
+        subtitulo = str(f"NS-{serial}-{origen_de_los_datos}-{strDeFechas}")
         
-        plt.grid(True, which='both', linestyle='--', color='gray', alpha=0.5)        
-        plt.title(tituloBase, font=tipo_de_letra, fontweight='bold', fontsize=titlesize)
-        nombre_de_figura = tituloBase.replace(" ", "_").replace("-", "_").replace("Á", "A")
-
-        # Ajustar layout
-        plt.tight_layout()
-        # plt.show()  # mostrar la figura en el notebook
-        plt.close(fig)  # Cierra la figura para evitar que se muestre automáticamente
+        propieadades_de_mapa = {
+            "obj_axes": ax, 
+            "titulo": titulo, 
+            "subtitulo": subtitulo, 
+            "ylabel":'', 
+            "xlabel": '', 
+            "grid": True, 
+            "obj_mapeable": obj_mapeable, 
+            "colorbar_label": 'Rapidez de la corriente (m/s)', 
+            "colorbar_min": get_escala_de_color_rapidez()["minimo"], 
+            "colorbar_max": get_escala_de_color_rapidez()["maximo"], 
+        }
+        
+        # Aplicar el formato al mapa con las propiedades definidas
+        dar_formato_a_mapa(propieadades_de_mapa)
+        
+        # Mostrar y cerrar figura
+        if mostrar_figura:
+            plt.show()
+        else:
+            plt.close(fig)  # Cierra la figura para evitar que se muestre automáticamente
 
         # Guardar figura
+        nombre_de_figura = (titulo + subtitulo).replace(" ", "_").replace("-", "_").replace("Á", "A")
         guardar_figura(figura=fig,
-                       ruta_a_carpeta=crear_ruta_a_carpeta(
-                           get_carpeta_guardado_figuras()),
-                       nombre_archivo=nombre_de_figura,
+                       ruta_a_carpeta=crear_ruta_a_carpeta(get_carpeta_guardado_figuras()),
+                       nombre_archivo= nombre_de_figura,
                        formato=get_formato_figuras(),
                        resolucion=get_resolucion_de_figuras())
         

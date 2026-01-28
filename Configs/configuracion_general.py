@@ -11,6 +11,8 @@ general_config = {
     # Ruta a la carpeta con los datos crudos
     "carpeta_de_datos_crudos": "Med_2025-2026/Reportes_Edit/Reporte_10.3/202512/datos_crudos",
     "cantidad_de_decimales": 4,  # Cantidad de decimales a los que se redondearán los datos
+    # Ruta a los datos de batimetría del GOM
+    "ruta_a_datos_batimetria": "C:/programacion/codigos_python/bases_de_datos/batimetria_GEBCO_GOM_2023.nc",
 
     # Lista de seriales de sondas a analizar
     "seriales_de_sondas": ["4876187", "4878196", "4878205", "4878218"],
@@ -25,6 +27,7 @@ general_config = {
     "carpeta_de_guardado_de_figuras": "C:/Users/Atmosfera/Desktop/datos_procesados/doris/202512",
 
     # 3. De las figuras
+    # 3.1. Generales
     "formato_de_figuras": "png",  # Opciones: 'png', 'jpg', 'svg', 'pdf'
     "resolucion_de_figuras": 300,  # en dpi
     "origen_de_los_datos": "REALT",  # Opciones: 'REALT', 'MEM'
@@ -32,10 +35,15 @@ general_config = {
     "tipo_de_letra": "Arial",  # Opciones: 'Arial', 'Times New Roman', 'Calibri'
     "tamanio_de_letra": 12,  # Tamaño de letra en las figuras
     "numero_de_bins_histograma": 30,  # Número de bins en los histogramas
-    # Se graficaran series de tiempo e histogramas para estas variables, en ese mismo orden.
+    # 3.2. De las series de tiempo
+    # Variables a graficar en las series de tiempo y su orden
     "variables_a_graficar": ["temperatura_mar", "u_corriente", "v_corriente", "rap_corriente", "dir_corriente"],
+    
+    # 3.3. Del mapa de trayectorias
     "coordenadas_del_mapa": {"lon_min": -98, 
                              "lon_max": -90, 
                              "lat_min": 18, 
-                             "lat_max": 26}
+                             "lat_max": 26},
+    "escala_de_color_rapidez": {"minimo": 0.0, "maximo": 1.5},  # en m/s
+    "curvas_de_batimetria": [-25, -100, -500, -1000, -2000],  # en metros
 }
