@@ -102,19 +102,19 @@ def leer_excel_de_despliegue_de_sondas(seriales_encontrados: list) -> pd.DataFra
     try:
 
         df_excel = pd.read_excel(ruta_al_excel_de_despliegue_de_sondas)
-        df_excel = df_excel[df_excel['serie_de_sonda'].notna()]
+        df_excel_filtrado = df_excel[df_excel['fecha_y_hora_de_la_primera_transmision'].notna()].copy()
 
-        df_excel['serie_de_sonda'] = df_excel['serie_de_sonda'].astype(int).astype(str)
-        
-        df_excel['fecha_y_hora_de_despliegue'] = pd.to_datetime(df_excel['fecha_y_hora_de_despliegue'], format="%d/%m/%Y %H:%M")
-        df_excel['fecha_y_hora_de_la_primera_transmision'] = pd.to_datetime(df_excel['fecha_y_hora_de_la_primera_transmision'], format="%d/%m/%Y %H:%M")
-        df_excel['fecha_y_hora_de_ultima_transmision'] = pd.to_datetime(df_excel['fecha_y_hora_de_ultima_transmision'], format="%d/%m/%Y %H:%M")
-        df_excel['latitud_de_despliegue'] = df_excel['latitud_de_despliegue'].str.split(' ').str[0].astype(float)
-        df_excel['longitud_de_despliegue'] = df_excel['longitud_de_despliegue'].str.split(' ').str[0].astype(float)
-        df_excel['campania'] = df_excel['campania']
+        df_excel_filtrado['serie_de_sonda'] = df_excel_filtrado['serie_de_sonda'].astype(float).astype(int).astype(str)   
+     
+        df_excel_filtrado['fecha_y_hora_de_despliegue'] = pd.to_datetime(df_excel_filtrado['fecha_y_hora_de_despliegue'], format="%d/%m/%Y %H:%M")
+        df_excel_filtrado['fecha_y_hora_de_la_primera_transmision'] = pd.to_datetime(df_excel_filtrado['fecha_y_hora_de_la_primera_transmision'], format="%d/%m/%Y %H:%M")
+        df_excel_filtrado['fecha_y_hora_de_ultima_transmision'] = pd.to_datetime(df_excel_filtrado['fecha_y_hora_de_ultima_transmision'], format="%d/%m/%Y %H:%M")
+        df_excel_filtrado['latitud_de_despliegue'] = df_excel_filtrado['latitud_de_despliegue'].str.split(' ').str[0].astype(float)
+        df_excel_filtrado['longitud_de_despliegue'] = df_excel_filtrado['longitud_de_despliegue'].str.split(' ').str[0].astype(float)
+        df_excel_filtrado['campania'] = df_excel_filtrado['campania']
      
         # Encontrar sondas sin datos
-        sondas_sin_datos = df_excel[df_excel['fecha_y_hora_de_la_primera_transmision'].isna()]['serie_de_sonda'].tolist()
+        sondas_sin_datos = df_excel_filtrado[df_excel_filtrado['fecha_y_hora_de_la_primera_transmision'].isna()]['serie_de_sonda'].tolist()
 
         # Avisarle a usuario qué sondas no tienen datos y que serán excluidas del analisis
         seriales_de_sondas = get_seriales_sondas()
@@ -122,9 +122,9 @@ def leer_excel_de_despliegue_de_sondas(seriales_encontrados: list) -> pd.DataFra
             if serial not in seriales_encontrados or serial in sondas_sin_datos:
                 print(f"La sonda {serial} no tiene datos cargados y será excluida del análisis.")   
 
-        df_excel = df_excel[df_excel["serie_de_sonda"].isin(seriales_encontrados)].reset_index(drop=True)
+        df_excel_filtrado = df_excel_filtrado[df_excel_filtrado["serie_de_sonda"].isin(seriales_encontrados)].reset_index(drop=True)
         
-        return df_excel
+        return df_excel_filtrado
     
     except FileNotFoundError:
         raise FileNotFoundError(f"No se encontró el archivo Excel en la ruta: {ruta_al_excel_de_despliegue_de_sondas}")
@@ -140,12 +140,13 @@ def seleccionar_rango_de_fechas(diccionario: dict, df_excel_de_despliegue: pd.Da
     df_excel_de_despliegue: DataFrame con la información de despliegue de las sondas.
     diccionario: diccionario con los dataframes de cada sonda cargados.
 
-    Retorna un diccionario con los dataframes filtrados por rango de fechas.
+    Retorna un diccionario con los dataframes para cada serial que tenga datos dentro del rango de fechas del estudio.
     """
     fecha_de_inicio_del_analisis = get_fecha_de_inicio_del_analisis() # de configuraciones
     fecha_de_fin_del_analisis = get_fecha_de_fin_del_analisis() # de configuraciones
     
-    output_dic = copy.deepcopy(diccionario)
+    output_dic = {}
+    
     for serial in seriales_encontrados:
         
         fecha_de_primera_medicion = df_excel_de_despliegue[df_excel_de_despliegue["serie_de_sonda"]==serial]["fecha_y_hora_de_la_primera_transmision"].values[0] # del excel de despliegue
@@ -154,18 +155,21 @@ def seleccionar_rango_de_fechas(diccionario: dict, df_excel_de_despliegue: pd.Da
         fecha_de_inicio = max(fecha_de_inicio_del_analisis, fecha_de_primera_medicion) # fecha de inicio es la menor entre la fecha de inicio del análisis y la fecha de la primera medición
         fecha_de_fin = min(fecha_de_fin_del_analisis, fecha_de_la_ultima_medicion) # fecha de fin es la mayor entre la fecha de fin del análisis y la fecha de la última medición
 
-        df = output_dic[serial]
+        df = diccionario[serial]
         mask = (df["tspan_de_envio"] >= fecha_de_inicio) & (df["tspan_de_envio"] <= fecha_de_fin)
-        output_dic[serial] = df.loc[mask].reset_index(drop=True)
+        pre_output = df.loc[mask].reset_index(drop=True)
+        if pre_output.empty:
+            print(f"La sonda {serial} no tiene datos en el rango de fechas {get_fecha_de_inicio_del_analisis()}-{get_fecha_de_fin_del_analisis()}") 
+        else:
+            output_dic[serial] = pre_output.copy()
 
     return output_dic
 
-def buscar_y_eliminar_duplicados(diccionario: dict, seriales_encontrados: list)-> dict:
+def buscar_y_eliminar_duplicados(diccionario: dict)-> dict:
     """ Busca y elimina los datos duplicados en cada dataframe del diccionario dado.
-    seriales_encontrados: lista de seriales de sondas para las que se encontraron archivos CSV -> lista de strings
     Retorna un diccionario con los dataframes sin datos duplicados.
     """
-    
+    seriales_encontrados = list(diccionario.keys())
     for serial in seriales_encontrados: # los keys del diccionario son el número de serie de cada sonda
         df = diccionario[serial] # DataFrame de la sonda antes del filtrado
         duplicados_explicitos = buscar_duplicados_explicitos(data = df)
@@ -174,23 +178,22 @@ def buscar_y_eliminar_duplicados(diccionario: dict, seriales_encontrados: list)-
     return diccionario
 
 
-def ordernar_datos_por_fecha(diccionario: dict, seriales_encontrados: list) -> dict:
+def ordernar_datos_por_fecha(diccionario: dict) -> dict:
     """ Ordena los datos de cada dataframe del diccionario por la columna de fechas 'tspan_de_envio'.
-    seriales_encontrados: lista de seriales de sondas para las que se encontraron archivos CSV -> lista de strings
     """
+    seriales_encontrados = list(diccionario.keys())
     for serial in seriales_encontrados:
         df = diccionario[serial]
         diccionario[serial] = ordenar_df_por_fecha(data = df,serial_de_sonda=serial)
     return diccionario
 
-def crear_tspan_redondeado(diccionario: dict, seriales_encontrados: list)->dict:
+def crear_tspan_redondeado(diccionario: dict)->dict:
     """ recibe el diccionario que contiene los dataframe de cada sonda y modifica el tspan de cada dataframe.
-    seriales_encontrados: lista de seriales de sondas para las que se encontraron archivos CSV -> lista de strings
-    
     Regla de redondeo:
     Si HH:MM es < 30 mins se redondea a HH:00
     Si HH:MM es >=30 y <=59 se redondea a HH:30"""
-
+    
+    seriales_encontrados = list(diccionario.keys())
     for serial in seriales_encontrados:
         df = diccionario[serial]
         tspan_mod = [tspan_value.replace(minute=0) if tspan_value.minute < 30 else tspan_value.replace(minute=30) for tspan_value in df["tspan_de_envio"]]
@@ -199,17 +202,20 @@ def crear_tspan_redondeado(diccionario: dict, seriales_encontrados: list)->dict:
     
     return diccionario
 
-def existen_fechas_redondeadas_duplicadas(diccionario: dict, seriales_encontrados: list) -> bool:
+def existen_fechas_redondeadas_duplicadas(diccionario: dict) -> bool:
     """ Verifica si existen fechas redondeadas duplicadas en los dataframes del diccionario.
     seriales_encontrados: lista de seriales de sondas para las que se encontraron archivos CSV -> lista de strings
     """
+    seriales_encontrados = list(diccionario.keys())
     for serial in seriales_encontrados:
         df = diccionario[serial]
-        duplicados = df["tspan_rounded"].value_counts()
-        duplicados_implicitos = duplicados[duplicados > 1]
+        duplicados_implicitos = df[df["tspan_rounded"].duplicated()]
         if not duplicados_implicitos.empty:
-            print(duplicados_implicitos)
-            raise ValueError(f"Se encontraron {duplicados_implicitos.sum()} fechas redondeadas duplicadas en la sonda {serial}. Deteniendo ejecución")
+            print(f"Las siguientes fechas redondeadas están duplicadas en la sonda {serial}.")
+            print(duplicados_implicitos[["tspan_de_envio","tspan_rounded"]])
+            print("actualmente se deja solo la primera ocurrencia, se eliminan las demás. Se suguiere hacer una funcion que distribuya a la hora anterior y/o siguiente.")
+            df = df.drop_duplicates(subset="tspan_rounded", keep='first')
+
     return print("No se encontraron fechas redondeadas duplicadas en ninguna sonda.")
 
 def get_cols_names_sin_tspan(diccionario: dict) -> list:
@@ -232,11 +238,13 @@ def crear_diccionario_con_dataframes_vacios(diccionario: dict, keys: list) -> di
     output_dic = {}
     for serial in diccionario.keys():
         df = diccionario[serial]
-        fecha_de_primera_medicion = df["tspan_de_envio"].min()
-        fecha_de_ultima_medicion = df["tspan_de_envio"].max()
-
-        fecha_de_inicio = fecha_de_primera_medicion.replace(minute=0) if fecha_de_primera_medicion.minute < 30 else fecha_de_primera_medicion.replace(minute=30) # redondear la fecha inicial
-        fecha_de_fin = fecha_de_ultima_medicion.replace(minute=0) if fecha_de_ultima_medicion.minute < 30 else fecha_de_ultima_medicion.replace(minute=30) # redondear la fecha final
+        
+        if df.empty:
+            print(f"El dataframe de la sonda {serial} está vacío. Avanzando a la siguiente sonda")
+            continue
+        
+        fecha_de_inicio = df["tspan_rounded"].min()
+        fecha_de_fin = df["tspan_rounded"].max()
         tspan_sintetico = crear_rango_de_fechas_sintetico(fecha_de_inicio, fecha_de_fin, delta_tiempo)
         
         output_dic[serial] = {}

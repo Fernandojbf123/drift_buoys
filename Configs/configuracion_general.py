@@ -5,26 +5,27 @@ general_config = {
     # Ruta al archivo excel con información de las sondas
     "ruta_al_excel_de_despliegue_de_sondas": "Med_2025-2026/General/Sondas_DORIS/2026_01_despliegues_de_DORIS",
     # Formato: 'AAAA-MM-DD HH:MM:SS'
-    "fecha_de_inicio_del_analisis": "2025-12-01 00:00:00",
+    "fecha_de_inicio_del_analisis": "2026-01-01 00:00:00",
     # Formato: 'AAAA-MM-DD HH:MM:SS'
-    "fecha_de_fin_del_analisis": "2025-12-31 23:59:59",
+    "fecha_de_fin_del_analisis": "2026-01-31 23:59:59",
     # Ruta a la carpeta con los datos crudos
-    "carpeta_de_datos_crudos": "Med_2025-2026/Reportes_Edit/Reporte_10.3/202512/datos_crudos",
+    "carpeta_de_datos_crudos": "Med_2025-2026/Reportes_Edit/Reporte_10.3/202601/datos_crudos",
     "cantidad_de_decimales": 4,  # Cantidad de decimales a los que se redondearán los datos
     # Ruta a los datos de batimetría del GOM
     "ruta_a_datos_batimetria": "C:/programacion/codigos_python/bases_de_datos/batimetria_GEBCO_GOM_2023.nc",
 
     # Lista de seriales de sondas a analizar
-    "seriales_de_sondas": ["4876187", "4878196", "4878205", "4878218"],
+    "seriales_de_sondas": ["4876187", "4878196", "4878205", "4878218","4866704","4878221","4878503","4876191","4876190"],
+    # "seriales_de_sondas": ["4878221"],
 
     # 2. Del guardado
     # Ruta a la carpeta para guardar los datos procesados
-    "carpeta_de_guardado_de_datos_procesados": "C:/Users/Atmosfera/Desktop/datos_procesados/doris/202512",
+    "carpeta_de_guardado_de_datos_procesados": "C:/Users/Atmosfera/Desktop/datos_procesados/doris/202601",
     # Nombre del archivo para guardar los datos procesados (formato pickle)
     "nombre_del_archivo_de_datos_procesados": "datos_procesados_sondas_oceanograficas",
     "nombre_del_excel_de_porcentajes": "porcentajes_de_las_sondas",
     # Ruta a la carpeta para guardar las figuras
-    "carpeta_de_guardado_de_figuras": "C:/Users/Atmosfera/Desktop/datos_procesados/doris/202512",
+    "carpeta_de_guardado_de_figuras": "C:/Users/Atmosfera/Desktop/datos_procesados/doris/202601",
 
     # 3. De las figuras
     # 3.1. Generales
