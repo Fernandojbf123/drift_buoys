@@ -1,18 +1,13 @@
-import numpy as np
+########################### IMPORTS NO TOCAR#####################################
 import cartopy.crs as ccrs
 import matplotlib.pyplot as plt
-from matplotlib.colors import LinearSegmentedColormap
-import netCDF4 as nc
-
-
 from Funciones.Utils.utils_get_config_vars import *
 from Funciones.Utils.utilidades import *
 from Funciones.Carga.cargar_datos_csv import leer_excel_de_despliegue_de_sondas 
 from .base.Gra_mapa_cartopy import graficar_mapa_cartopy
 from .base.Gra_batimetria_en_mapa import graficar_batimetria_en_mapa        
 from .base.Gra_trayectorias_de_sonda import graficar_trayectorias_de_sonda
-from .base.Gra_dar_formato_a_mapa import dar_formato_a_mapa
-
+from Funciones.Graficado.base.Gra_dar_formato_a_figuras import dar_formato_al_mapa
 ################################################################################
 
 def graficar_mapa_con_posiciones(mostrar_figura: bool = False) -> None:
@@ -88,7 +83,7 @@ def graficar_mapa_con_posiciones(mostrar_figura: bool = False) -> None:
         }
         
         # Aplicar el formato al mapa con las propiedades definidas
-        dar_formato_a_mapa(propieadades_de_mapa)
+        dar_formato_al_mapa(propieadades_de_mapa)
         
         # Mostrar y cerrar figura
         if mostrar_figura:

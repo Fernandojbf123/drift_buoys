@@ -10,7 +10,7 @@ from Funciones.Utils.utilidades import *
 ################################################################################
 
 
-def graficar_series_y_guardar() -> None:
+def graficar_series_y_guardar(mostrar_figura:bool=False) -> None:
     """
     Descripción:
         Función envoltorio que recorre un diccionario de DataFrames (uno por sonda)
@@ -49,13 +49,15 @@ def graficar_series_y_guardar() -> None:
 
         df = datos[serial]
         # Generar figura para los datos a graficar seleccionados en configuración
-        fig, tituloFigura = Gra_series_de_tiempo_telemetria(
-            dataFrame=df, NS_sonda=serial, tspan_column='tspan_rounded')
+        fig, tituloFigura = Gra_series_de_tiempo_telemetria(dataFrame=df, 
+                                                            NS_sonda=serial, 
+                                                            tspan_column='tspan_rounded',
+                                                            mostrar_figura=mostrar_figura)
 
+        
         # Guardar figura
         guardar_figura(figura=fig,
-                       ruta_a_carpeta=crear_ruta_a_carpeta(
-                           get_carpeta_guardado_figuras()),
+                       ruta_a_carpeta=crear_ruta_a_carpeta(get_carpeta_guardado_figuras()),
                        nombre_archivo=tituloFigura,
                        formato=get_formato_figuras(),
                        resolucion=get_resolucion_de_figuras())

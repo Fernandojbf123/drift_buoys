@@ -17,6 +17,8 @@ var_names = {
 }
 
 # Este diccionario proporciona etiquetas legibles para cada variable, que se utilizan en los gráficos y reportes.
+# El key es el nombre estandarizado de la variable y debe coincidir con el key de la variable var_names
+# El value es la etiqueta con unidades.
 ylabels = {
     "temperatura_mar": "Temp (°C)",
     "rap_corriente": "Rap (m/s)",

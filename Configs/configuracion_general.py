@@ -15,14 +15,15 @@ general_config = {
     "ruta_a_datos_batimetria": "C:/programacion/codigos_python/bases_de_datos/batimetria_GEBCO_GOM_2023.nc",
 
     # Lista de seriales de sondas a analizar
-    "seriales_de_sondas": ["4876187", "4878196", "4878205", "4878218","4866704","4878221","4878503","4876191","4876190"],
-    # "seriales_de_sondas": ["4878221"],
+    # "seriales_de_sondas": ["4876187", "4878196", "4878205", "4878218","4866704","4878221","4878503","4876191","4876190"],
+    "seriales_de_sondas": ["4876190","4878196","4876187"],
 
     # 2. Del guardado
     # Ruta a la carpeta para guardar los datos procesados
     "carpeta_de_guardado_de_datos_procesados": "C:/Users/Atmosfera/Desktop/datos_procesados/doris/202601",
     # Nombre del archivo para guardar los datos procesados (formato pickle)
     "nombre_del_archivo_de_datos_procesados": "datos_procesados_sondas_oceanograficas",
+    "nombre_del_archivo_de_datos_previos_a_la_fecha_de_estudio": "datos_previos_al_estudio",
     "nombre_del_excel_de_porcentajes": "porcentajes_de_las_sondas",
     # Ruta a la carpeta para guardar las figuras
     "carpeta_de_guardado_de_figuras": "C:/Users/Atmosfera/Desktop/datos_procesados/doris/202601",
@@ -38,7 +39,7 @@ general_config = {
     "numero_de_bins_histograma": 30,  # Número de bins en los histogramas
     # 3.2. De las series de tiempo
     # Variables a graficar en las series de tiempo y su orden
-    "variables_a_graficar": ["temperatura_mar", "u_corriente", "v_corriente", "rap_corriente", "dir_corriente"],
+    "variables_a_graficar": ["temperatura_mar", "u_corriente", "v_corriente", "rap_corriente", "dir_corriente","voltaje"],
     
     # 3.3. Del mapa de trayectorias
     "coordenadas_del_mapa": {"lon_min": -98, 

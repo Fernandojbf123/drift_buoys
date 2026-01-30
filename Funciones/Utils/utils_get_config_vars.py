@@ -33,6 +33,9 @@ def get_carpeta_guardado_datos_procesados():
 def get_nombre_archivo_datos_procesados():
     return _get_config_value("nombre_del_archivo_de_datos_procesados")
 
+def get_nombre_del_archivo_de_datos_previos_a_la_fecha_de_estudio():
+    return _get_config_value("nombre_del_archivo_de_datos_previos_a_la_fecha_de_estudio")
+
 def get_nombre_del_excel_de_porcentajes():
     return _get_config_value("nombre_del_excel_de_porcentajes")
 

@@ -1,21 +1,22 @@
 ####################### N O  T O C A R ############################################
+import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 from matplotlib.figure import Figure
-from matplotlib.ticker import FuncFormatter
 
-from Funciones.Graficado.base.Gra_asignar_ylim import Gra_asignar_ylim
-from Funciones.Graficado.base.Gra_serie_de_tiempo import Gra_serie_de_tiempo
-from Funciones.Graficado.base.GraFormatoFecha import GraFormatoFecha
-from Funciones.Graficado.base.Gra_calcular_xticks import Gra_calcular_xticks
+from Funciones.Graficado.base.Gra_dar_formato_a_figuras import *
+from Funciones.Graficado.base.Gra_serie_de_tiempo import graficar_serie_de_tiempo
 
 from Funciones.Utils.utils_get_config_vars import *
 from Funciones.Utils.utils_get_vars_dic import *
 ##################################################################################
 
 
-def Gra_series_de_tiempo_telemetria(dataFrame: pd.DataFrame, NS_sonda: str, tspan_column=None) -> tuple[Figure, str]:
+def Gra_series_de_tiempo_telemetria(dataFrame: pd.DataFrame, 
+                                    NS_sonda: str, 
+                                    tspan_column=None,
+                                    mostrar_figura:bool=False) -> tuple[Figure, str]:
     """
     Descripción:
         Genera gráficos de transmision para datos del ADCP con hasta 5 subplots organizados en 5 filas.
@@ -48,84 +49,62 @@ def Gra_series_de_tiempo_telemetria(dataFrame: pd.DataFrame, NS_sonda: str, tspa
         Gráficos-base 
     """
 
-    origen_de_los_datos = get_origen_de_los_datos()
-
-    tipo_de_letra = get_tipo_letra()
-    tamanio_de_letra = get_tamanio_letra()
-    titlesize = tamanio_de_letra + 6
-    yticksize = tamanio_de_letra + 3
-
-    numero_de_bins_histograma = get_numero_bins_histograma()
-
-    # Crear figura
-    fig, axs = plt.subplots(
-        nrows=len(get_variables_graficar()), figsize=(15, 10))
-
+    ## Paso 1. Crear obj figura y array de objs axes
+    fig, axes = plt.subplots(nrows=len(get_variables_graficar()), figsize=(15, 10))
+    axes = np.atleast_1d(axes)  # Asegurar que axes es siempre un array 1D
+    
     # Variables a graficar
     var_names = get_variables_graficar()
     ylabels = get_ylabels(var_names)
     variables = list(zip(var_names, ylabels))
-
-    # Obtener tspan (el eje X - en formato pd.DatetimeIndex)
-    tspan = dataFrame[tspan_column] if tspan_column else dataFrame.index
-    # Cambiar tspan a formato mdates
+    
+    # Eliminar los nans del dataframe
+    df = dataFrame.dropna(subset="tspan_rounded").copy()
+    
+    ## Paso 2. # Graficar una serie de tiempo por cada axes
+    tspan = df[tspan_column] if tspan_column else df.index
     tspan_num = mdates.date2num(tspan)
-
-    # Calcular límites del eje X ¡
-    xlim_min, xlim_max, xticks_finales = Gra_calcular_xticks(tspan, n_ticks=len(var_names))
-    # Ajustar el formato del eje X para que quede dia/mes/año (eg. 01/Dic/2025)
-    formateador = FuncFormatter(GraFormatoFecha)
-
-    # Iterar sobre las filas según la cantidad de variables a graficar
+        
     for idx, (var_name, ylabel) in enumerate(variables):
-        # Subplot izquierdo: Serie de tiempo
-        ax_serie = axs[idx]
-        data = dataFrame[var_name].dropna()
+        ax = axes[idx]
+        ax = graficar_serie_de_tiempo(
+            axe=ax,
+            datos=df,
+            var_name=var_name,
+            tspan_num = tspan_num,
+        )
+        
+        propiedades_del_axe = {
+            "obj_axes": ax,  # axis de matplotlib
+            "var_name":var_name,
+            "var_value": df[var_name],
+            "tspan": tspan,
+            "ylabel":ylabel,
+            "xlabel": '',
+            "is_xticks_on": True if idx == len(variables) - 1 else False,
 
-        # Graficar serie de tiempo
-        ax_serie = Gra_serie_de_tiempo(
-            dataFrame=dataFrame, var_name=var_name, tspan=tspan_num, ax=ax_serie)
+        }
+        # Paso 3. Dar formato al axe
+        dar_formato_al_axe(propiedades_del_axe)
+    
+    # Paso 4. Crear título de la figura y nombre de guardado
+    titulo_de_figura, nombre_de_guardado = crear_titulo_de_figura_y_nombre_de_guardado(tspan=tspan, NS_sonda=NS_sonda)
+    
+    propiedades_de_la_figura = {
+        "fig": fig,
+        "axes": axes,
+        "tspan": tspan,
+        "titulo_de_figura": titulo_de_figura,
+        "NS_sonda": NS_sonda,
+    }
+    
+    # Paso 5. Dar formato a la figura
+    dar_formato_a_figura_de_series_de_tiempo(propiedades_de_la_figura)
 
-        # Configurar límites y etiquetas
-        Gra_asignar_ylim(data, var_name, ax_serie, hist=False)
-
-        ax_serie.set_ylabel(ylabel, font=tipo_de_letra,
-                            fontweight='bold', fontsize=yticksize)
-        ax_serie.tick_params(axis='y', labelsize=yticksize)
-
-        ax_serie.set_xlim([xlim_min, xlim_max])
-        ax_serie.set_xticks(xticks_finales)
-        ax_serie.tick_params(axis='x', labelsize=yticksize)
-
-        ax_serie.grid(True, color='gray', linestyle='-', linewidth=0.4)
-        ax_serie.set_axisbelow(True)
-
-        # Quitar etiquetas X excepto en la última fila
-        ax_serie.tick_params(labelbottom=False)
-        if idx == len(variables) - 1:  # solo el último subplot tiene etiquetas del eje X
-            ax_serie.tick_params(labelbottom=True)
-            ax_serie.xaxis.set_major_formatter(formateador)
-            for label in ax_serie.get_xticklabels():
-                label.set_fontweight('bold')
-
-    # Alinear etiquetas del eje Y
-    fig.align_ylabels(axs[:])
-
-    # Preparar el título de la figura y de guardado
-    t0str = tspan.min().strftime('%Y%m%d')
-    tEstr = tspan.max().strftime('%Y%m%d')
-    strDeFechas = str(f"{t0str}-{tEstr}")
-    tituloBase = str(
-        f"SONDA-OCEANOGRÁFICA-NS-{NS_sonda}-{origen_de_los_datos}-{strDeFechas}")
-    tituloFig = tituloBase
-    fig.suptitle(tituloFig, font=tipo_de_letra,
-                 fontweight='bold', fontsize=titlesize, y=0.98)
-    nombre_de_figura = tituloFig.replace(
-        " ", "_").replace("-", "_").replace("Á", "A")
-
-    # Ajustar layout
-    plt.tight_layout()
-    plt.subplots_adjust(wspace=0.3, hspace=0.15)
-
-    plt.close(fig)
-    return fig, nombre_de_figura
+    # Mostrar o cerrar la figura según el parámetro
+    if mostrar_figura:
+        plt.show()
+    else:
+        plt.close(fig)
+        
+    return fig, nombre_de_guardado

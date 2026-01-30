@@ -1,14 +1,6 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Sat Nov 29 14:23:30 2025
-
-@author: Atmosfera
-"""
-
+import numpy as np
 import pandas as pd
-import matplotlib.dates as mdates
 import locale
-
 
 # Meses en español
 try:
@@ -39,15 +31,47 @@ except:
 def Gra_calcular_xticks(tspan: pd.DatetimeIndex, n_ticks:int =5)-> tuple:
     fecha_inicial = tspan.min()
     fecha_final = tspan.max()
-
-    # ticks diarios (solo fechas)
-    ticks = pd.date_range(
-        start=fecha_inicial.normalize(),
-        end=fecha_final.normalize(),
-        periods=n_ticks
-    )
-
-    # límite derecho: fin completo del último día
-    fecha_final_expandida = fecha_final.normalize() + pd.Timedelta(days=1.2)
-
-    return fecha_inicial, fecha_final_expandida, ticks
+    
+    diferencia = fecha_final.normalize() - fecha_inicial.normalize() + pd.Timedelta(days=1)
+    
+    if diferencia.days >=6:
+        # ticks cada día
+        ticks = pd.date_range(
+            start=fecha_inicial.normalize(),
+            end=fecha_final.normalize(),
+            freq='D'
+        )
+        
+        xlim = (fecha_inicial.normalize() - pd.Timedelta(days=1), fecha_final + pd.Timedelta(days=1))
+        formato_ticks = "days"
+    
+    
+    elif diferencia.days < 6  and diferencia.days >2:
+        # ticks cada día
+        ticks = pd.date_range(
+            start=fecha_inicial.normalize(),
+            end=fecha_final.normalize(),
+            freq='D'
+        )
+        n_ticks = diferencia.days
+        
+        xlim = (fecha_inicial.normalize() - pd.Timedelta(hours=2), fecha_final + pd.Timedelta(hours=2))
+        formato_ticks = "days"
+    
+    elif diferencia.days <= 2:
+        ticks = pd.date_range(
+            start=fecha_inicial,
+            end=fecha_final,
+            freq='h'
+        )
+        
+        xlim = (fecha_inicial - pd.Timedelta(hours=1), fecha_final + pd.Timedelta(hours=1)) 
+        formato_ticks = "hours"
+    
+    # seleccionar n_ticks equiespaciados (Deben ser 5 salvo que sea el caso (entre 3 y 4 días))
+    if len(ticks) >= n_ticks:
+        # 5 índices equiespaciados, siempre el primero y el último
+        indices = np.linspace(0, len(ticks)-1, n_ticks, dtype=int)
+        ticks = ticks[indices]
+            
+    return xlim, ticks, formato_ticks

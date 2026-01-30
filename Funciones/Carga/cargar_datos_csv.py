@@ -132,28 +132,42 @@ def leer_excel_de_despliegue_de_sondas(seriales_encontrados: list) -> pd.DataFra
         raise ValueError(f"Ocurrió un error al leer el archivo Excel: {e}")
 
 
-def seleccionar_rango_de_fechas(diccionario: dict, df_excel_de_despliegue: pd.DataFrame, seriales_encontrados: list)-> dict:
-    """ Recibe el diccionario con los dataframe de cada serial cargado. 
-    Filtra los datos para que solo queden los que están dentro del rango de fechas especificado en la configuración general.
-
-    seriales_encontrados: lista de seriales de sondas para las que se encontraron archivos CSV -> lista de strings
-    df_excel_de_despliegue: DataFrame con la información de despliegue de las sondas.
-    diccionario: diccionario con los dataframes de cada sonda cargados.
-
-    Retorna un diccionario con los dataframes para cada serial que tenga datos dentro del rango de fechas del estudio.
-    """
-    fecha_de_inicio_del_analisis = get_fecha_de_inicio_del_analisis() # de configuraciones
-    fecha_de_fin_del_analisis = get_fecha_de_fin_del_analisis() # de configuraciones
+def seleccionar_rango_de_fechas(diccionario: dict, 
+                                df_excel_de_despliegue: pd.DataFrame, 
+                                seriales_encontrados: list,
+                                buscar_fechas_anteriores_al_estudio: bool = False)-> dict:
+    """ Selecciona los datos dentro del rango de fechas.
+    Este rango puede ser el definido en la configuración general 
+    o 
+    puede ser desde la fecha de la primera medición hasta la fecha del inicio del análisis (para sondas liberadas en meses anteriores al análisis).
     
+    Parámetros:
+        diccionario (dict): Diccionario con los dataframes de cada sonda.
+        df_excel_de_despliegue (pd.DataFrame): DataFrame con la información de despliegue de las sondas.
+        seriales_encontrados (list): Lista de seriales de sondas para las que se encontraron archivos CSV -> lista de strings
+        buscar_fechas_anteriores_al_estudio (bool): Si es True, el rango de fechas se define desde la fecha de la primera medición hasta la fecha de inicio del análisis.
+    
+    Retorna:
+        dict: Diccionario con los dataframes de cada sonda filtrados por el rango de fechas.
+    """
     output_dic = {}
+    
+    fecha_de_inicio_del_analisis = get_fecha_de_inicio_del_analisis()
+    fecha_de_fin_del_analisis = get_fecha_de_fin_del_analisis()
     
     for serial in seriales_encontrados:
         
+        # Caso general: se usan las fechas definidas en la configuración general
         fecha_de_primera_medicion = df_excel_de_despliegue[df_excel_de_despliegue["serie_de_sonda"]==serial]["fecha_y_hora_de_la_primera_transmision"].values[0] # del excel de despliegue
         fecha_de_la_ultima_medicion = diccionario[serial]["tspan_de_envio"].max() # de los datos cargados
-        
         fecha_de_inicio = max(fecha_de_inicio_del_analisis, fecha_de_primera_medicion) # fecha de inicio es la menor entre la fecha de inicio del análisis y la fecha de la primera medición
         fecha_de_fin = min(fecha_de_fin_del_analisis, fecha_de_la_ultima_medicion) # fecha de fin es la mayor entre la fecha de fin del análisis y la fecha de la última medición
+
+        
+        # Esto se activa si quiero buscar las fechas desde la liberación hasta la fecha en que inicia el análisis (caso de sondas liberadas en meses anteriores al análisis)
+        if buscar_fechas_anteriores_al_estudio:
+            fecha_de_inicio = fecha_de_primera_medicion # fecha de inicio es la menor entre la fecha de inicio del análisis y la fecha de la primera medición
+            fecha_de_fin = fecha_de_inicio_del_analisis # fecha de fin es la mayor entre la fecha de fin del análisis y la fecha de la última medición
 
         df = diccionario[serial]
         mask = (df["tspan_de_envio"] >= fecha_de_inicio) & (df["tspan_de_envio"] <= fecha_de_fin)
