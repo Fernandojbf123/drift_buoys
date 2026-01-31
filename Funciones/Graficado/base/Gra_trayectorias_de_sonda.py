@@ -2,7 +2,11 @@ import pandas as pd
 import cartopy.crs as ccrs
 import matplotlib.pyplot as plt
 
-def graficar_trayectorias_de_sonda(df_excel_de_despliegue: pd.DataFrame, serial: str, df_datos_de_la_sonda: pd.DataFrame) -> plt.PathCollection:
+def graficar_trayectorias_de_sonda(df_excel_de_despliegue: pd.DataFrame, 
+                                   serial: str,
+                                   df_datos_de_la_sonda: pd.DataFrame = None,
+                                   df_datos_previos_de_la_sonda: pd.DataFrame = None,
+                                   graficar_trayectorias_pasadas: bool = True) -> plt.PathCollection:
     """
     Descripción:
         Grafica la trayectoria completa de una boya derivadora (drift buoy) sobre un mapa,
@@ -63,21 +67,44 @@ def graficar_trayectorias_de_sonda(df_excel_de_despliegue: pd.DataFrame, serial:
     Categoría:
         Gráficos
     """
-    # Obtener posiciones iniciales del excel de despliegue
-    lat_ini_series = df_excel_de_despliegue[df_excel_de_despliegue['serie_de_sonda'] == serial]['latitud_de_despliegue']
-    lon_ini_series = df_excel_de_despliegue[df_excel_de_despliegue['serie_de_sonda'] == serial]['longitud_de_despliegue']
-    lat_ini = float(lat_ini_series.iloc[0]) if not lat_ini_series.empty else None
-    lon_ini = -float(lon_ini_series.iloc[0]) if not lon_ini_series.empty else None
-        
-    # Obtener posiciones y rapidez de corriente del diccionario de datos
     
-    latitud = df_datos_de_la_sonda['latitud']
-    longitud = df_datos_de_la_sonda['longitud']   
-    rap_corriente = df_datos_de_la_sonda['rap_corriente']
-    lat_fin = latitud.iloc[-1]
-    lon_fin = longitud.iloc[-1]
+    # Eliminar NaNs
+    df_datos_de_la_sonda = df_datos_de_la_sonda.dropna(subset=["tspan_de_envio"]) 
     
-    obj_mapeable = plt.scatter(longitud, latitud, c=rap_corriente, cmap="jet", s=10, vmin=0, vmax=1.5, transform=ccrs.PlateCarree())
+     # Obtener posiciones iniciales del excel de despliegue
+    lat_ini = df_datos_de_la_sonda["latitud"].iloc[0]
+    lon_ini = df_datos_de_la_sonda["longitud"].iloc[0]
+    
+    # Obtener posiciones y rapidez de corriente del periodo de estudio
+    latitud_estudio = df_datos_de_la_sonda['latitud']
+    longitud_estudio = df_datos_de_la_sonda['longitud']   
+    rap_corriente_estudio = df_datos_de_la_sonda['rap_corriente']
+    
+    
+    # Posición final
+    lat_fin = latitud_estudio.iloc[-1]
+    lon_fin = longitud_estudio.iloc[-1]
+    
+    obj_mapeable = plt.scatter(longitud_estudio, 
+                               latitud_estudio, 
+                               c=rap_corriente_estudio, 
+                               cmap="jet", 
+                               s=10, 
+                               vmin=0, vmax=1.5, 
+                               transform=ccrs.PlateCarree())
+    
+    if graficar_trayectorias_pasadas and df_datos_previos_de_la_sonda is not None:
+        df_datos_previos_de_la_sonda = df_datos_previos_de_la_sonda.dropna(subset=["tspan_de_envio"])
+        latitud_pasada = df_datos_previos_de_la_sonda['latitud']
+        longitud_pasada = df_datos_previos_de_la_sonda['longitud']
+        plt.scatter(longitud_pasada, latitud_pasada, c='black', linestyle='--', s=1, transform=ccrs.PlateCarree())
+        # plt.plot(longitud_pasada, latitud_pasada, linestyle='--', color='black', marker='', linewidth=1.5, transform=ccrs.PlateCarree())
+
+        lat_ini = df_datos_previos_de_la_sonda["latitud"].iloc[0]
+        lon_ini = df_datos_previos_de_la_sonda["longitud"].iloc[0]
+
+    print(f"sonda {serial} lat ini= {lat_ini}, lon ini= {lon_ini}")
+
     plt.scatter([lon_ini], [lat_ini], c='yellow', edgecolors='black', linewidths=2, s=50, transform=ccrs.PlateCarree())
     plt.scatter([lon_fin], [lat_fin], c='red', edgecolors='black', linewidths=2, s=50, transform=ccrs.PlateCarree())
     

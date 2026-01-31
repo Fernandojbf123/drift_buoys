@@ -7,7 +7,7 @@ from Funciones.Carga.cargar_datos_csv import leer_excel_de_despliegue_de_sondas
 from .base.Gra_mapa_cartopy import graficar_mapa_cartopy
 from .base.Gra_batimetria_en_mapa import graficar_batimetria_en_mapa        
 from .base.Gra_trayectorias_de_sonda import graficar_trayectorias_de_sonda
-from Funciones.Graficado.base.Gra_dar_formato_a_figuras import dar_formato_al_mapa
+from Funciones.Graficado.base.Gra_dar_formato_a_figuras import *
 ################################################################################
 
 def graficar_mapa_con_posiciones(mostrar_figura: bool = False) -> None:
@@ -29,8 +29,10 @@ def graficar_mapa_con_posiciones(mostrar_figura: bool = False) -> None:
     ruta_a_la_carpeta_de_datos_procesados = crear_ruta_a_carpeta(get_carpeta_guardado_datos_procesados())
     nombre_del_archivo_de_datos_procesados = get_nombre_archivo_datos_procesados()
     ruta_de_archivo = os.path.join(ruta_a_la_carpeta_de_datos_procesados, nombre_del_archivo_de_datos_procesados)
+    ruta_al_archivo_de_datos_previos_a_la_fecha_de_estudio = os.path.join(ruta_a_la_carpeta_de_datos_procesados, get_nombre_del_archivo_de_datos_previos_a_la_fecha_de_estudio())
 
-    datos = cargar_diccionario_pickle(ruta_de_archivo)
+    datos = cargar_diccionario_pickle(ruta_de_archivo) # Son los datos del periodo de vigencia
+    datos_previos_a_la_fecha_de_estudio = cargar_diccionario_pickle(ruta_al_archivo_de_datos_previos_a_la_fecha_de_estudio) # Son los datos previos a la fecha de estudio
     seriales_de_sondas = get_seriales_sondas()
     
     # Cargar datos de despliegue desde Excel
@@ -48,6 +50,7 @@ def graficar_mapa_con_posiciones(mostrar_figura: bool = False) -> None:
         
         # Datos de la sonda
         df_datos_de_la_sonda = datos[serial]
+        df_datos_previos_de_la_sonda = datos_previos_a_la_fecha_de_estudio.get(serial,None)
         
         # Obtener tspan (el eje X - en formato pd.DatetimeIndex)
         tspan = df_datos_de_la_sonda[tspan_column] if tspan_column else df_datos_de_la_sonda.index
@@ -59,20 +62,19 @@ def graficar_mapa_con_posiciones(mostrar_figura: bool = False) -> None:
         graficar_mapa_cartopy(ax, lon_min, lon_max, lat_min, lat_max)
         graficar_batimetria_en_mapa(ax, datos_de_batimetria = datos_de_batimetria)
         
-        obj_mapeable = graficar_trayectorias_de_sonda(df_excel_de_despliegue, serial, df_datos_de_la_sonda) # devuelve el objeto mapeable para la colorbar
+        obj_mapeable = graficar_trayectorias_de_sonda(df_excel_de_despliegue = df_excel_de_despliegue, 
+                                                      serial = serial, 
+                                                      df_datos_de_la_sonda = df_datos_de_la_sonda, 
+                                                      df_datos_previos_de_la_sonda = df_datos_previos_de_la_sonda,
+                                                      graficar_trayectorias_pasadas = get_graficar_trayectorias_pasadas()) # devuelve el objeto mapeable para la colorbar
         
-        
+        dic_titulos = crear_titulos_de_mapa_y_nombre_de_guardado(tspan = tspan, NS_sonda= serial)
+                
         # Preparar las propiedades del mapa (títulos, etiquetas, colorbar, etc.)
-        t0str = tspan.min().strftime('%Y%m%d')
-        tEstr = tspan.max().strftime('%Y%m%d')
-        strDeFechas = str(f"{t0str}-{tEstr}")
-        titulo = str(f"MAPA DE TRAYECTORIAS SONDA OCEANOGRÁFICA")
-        subtitulo = str(f"NS-{serial}-{origen_de_los_datos}-{strDeFechas}")
-        
         propieadades_de_mapa = {
             "obj_axes": ax, 
-            "titulo": titulo, 
-            "subtitulo": subtitulo, 
+            "titulo": dic_titulos["titulo"], 
+            "subtitulo": dic_titulos["subtitulo"], 
             "ylabel":'', 
             "xlabel": '', 
             "grid": True, 
@@ -92,10 +94,9 @@ def graficar_mapa_con_posiciones(mostrar_figura: bool = False) -> None:
             plt.close(fig)  # Cierra la figura para evitar que se muestre automáticamente
 
         # Guardar figura
-        nombre_de_figura = (titulo + subtitulo).replace(" ", "_").replace("-", "_").replace("Á", "A")
         guardar_figura(figura=fig,
                        ruta_a_carpeta=crear_ruta_a_carpeta(get_carpeta_guardado_figuras()),
-                       nombre_archivo= nombre_de_figura,
+                       nombre_archivo= dic_titulos["nombre_de_guardado"],
                        formato=get_formato_figuras(),
                        resolucion=get_resolucion_de_figuras())
         

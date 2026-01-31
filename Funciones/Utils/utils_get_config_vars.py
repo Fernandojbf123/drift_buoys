@@ -87,3 +87,6 @@ def get_ruta_a_datos_batimetria():
 def get_curvas_de_batimetria():
     curvas = _get_config_value("curvas_de_batimetria")
     return sorted(curvas)
+
+def get_graficar_trayectorias_pasadas():
+    return _get_config_value("graficar_trayectorias_pasadas")

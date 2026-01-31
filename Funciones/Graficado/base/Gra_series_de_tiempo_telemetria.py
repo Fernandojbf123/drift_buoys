@@ -88,7 +88,7 @@ def Gra_series_de_tiempo_telemetria(dataFrame: pd.DataFrame,
         dar_formato_al_axe(propiedades_del_axe)
     
     # Paso 4. Crear título de la figura y nombre de guardado
-    titulo_de_figura, nombre_de_guardado = crear_titulo_de_figura_y_nombre_de_guardado(tspan=tspan, NS_sonda=NS_sonda)
+    titulo_de_figura, nombre_de_guardado = crear_titulo_de_figura_serie_de_tiempo_y_nombre_de_guardado(tspan=tspan, NS_sonda=NS_sonda)
     
     propiedades_de_la_figura = {
         "fig": fig,

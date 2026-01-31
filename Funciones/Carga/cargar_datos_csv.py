@@ -172,6 +172,7 @@ def seleccionar_rango_de_fechas(diccionario: dict,
         df = diccionario[serial]
         mask = (df["tspan_de_envio"] >= fecha_de_inicio) & (df["tspan_de_envio"] <= fecha_de_fin)
         pre_output = df.loc[mask].reset_index(drop=True)
+        
         if pre_output.empty:
             print(f"La sonda {serial} no tiene datos en el rango de fechas {get_fecha_de_inicio_del_analisis()}-{get_fecha_de_fin_del_analisis()}") 
         else:

@@ -482,7 +482,7 @@ def asignar_ylim(obj_axes: Axes, var_value: list, var_name: str, ylabelsize: flo
     return obj_axes, obj_axes_2
 
 
-def crear_titulo_de_figura_y_nombre_de_guardado(tspan: pd.DatetimeIndex, NS_sonda: str) -> tuple:
+def crear_titulo_de_figura_serie_de_tiempo_y_nombre_de_guardado(tspan: pd.DatetimeIndex, NS_sonda: str) -> tuple:
     origen_de_los_datos = get_origen_de_los_datos()
     # Preparar el título de la figura y de guardado
     t0str = tspan.min().strftime('%Y%m%d')
@@ -554,31 +554,17 @@ def dar_formato_al_mapa(propieadades_de_mapa) -> None:
     Categoría:
         Gráficos
     """
-    
-    propieadades_de_mapa_default = {
-        "obj_axes": None,  # axis de matplotlib
-        "titulo": '', 
-        "subtitulo":'', 
-        "ylabel":'', 
-        "xlabel": '', 
-        "grid": True, 
-        "obj_mapeable": None, 
-        "colorbar_label": '', 
-        "colorbar_min": 0, 
-        "colorbar_max": 1.5, 
-    }
-    
     # Extraer propiedades con valores por defecto si no se proporcionan
-    obj_axes = propieadades_de_mapa.get("obj_axes", propieadades_de_mapa_default["obj_axes"])
-    titulo = propieadades_de_mapa.get("titulo", propieadades_de_mapa_default["titulo"]) 
-    subtitulo = propieadades_de_mapa.get("subtitulo", propieadades_de_mapa_default["subtitulo"]) 
-    ylabel = propieadades_de_mapa.get("ylabel", propieadades_de_mapa_default["ylabel"]) 
-    xlabel = propieadades_de_mapa.get("xlabel", propieadades_de_mapa_default["xlabel"]) 
-    grid = propieadades_de_mapa.get("grid", propieadades_de_mapa_default["grid"]) 
-    obj_mapeable = propieadades_de_mapa.get("obj_mapeable", propieadades_de_mapa_default["obj_mapeable"]) 
-    colorbar_label = propieadades_de_mapa.get("colorbar_label", propieadades_de_mapa_default["colorbar_label"]) 
-    minimo = propieadades_de_mapa.get("colorbar_min", propieadades_de_mapa_default["colorbar_min"]) 
-    maximo = propieadades_de_mapa.get("colorbar_max", propieadades_de_mapa_default["colorbar_max"]) 
+    obj_axes = propieadades_de_mapa.get("obj_axes", None)
+    titulo = propieadades_de_mapa.get("titulo", '') 
+    subtitulo = propieadades_de_mapa.get("subtitulo", '') 
+    ylabel = propieadades_de_mapa.get("ylabel", '') 
+    xlabel = propieadades_de_mapa.get("xlabel", '') 
+    grid = propieadades_de_mapa.get("grid", True) 
+    obj_mapeable = propieadades_de_mapa.get("obj_mapeable", None) 
+    colorbar_label = propieadades_de_mapa.get("colorbar_label", '') 
+    minimo = propieadades_de_mapa.get("colorbar_min", 0) 
+    maximo = propieadades_de_mapa.get("colorbar_max", 1.5) 
     
     tipo_de_letra = get_tipo_letra() # fontfamily
     tamanio_de_letra = get_tamanio_letra()
@@ -622,3 +608,63 @@ def dar_formato_al_mapa(propieadades_de_mapa) -> None:
             label.set_fontsize(colorbar_ticksize)
     
     plt.tight_layout()
+    
+def crear_titulos_de_mapa_y_nombre_de_guardado(tspan: pd.DatetimeIndex, NS_sonda: str) -> dict:
+    """
+    Descripción:
+        Genera el título principal, subtítulo y nombre de archivo para un mapa de trayectorias
+        de sonda oceanográfica. Formatea las fechas y combina información del número de serie
+        de la sonda con el origen de los datos.
+
+    Parámetros:
+        tspan (pd.DatetimeIndex): Índice de fechas que representa el rango temporal de los datos.
+            Se utiliza para extraer las fechas inicial y final.
+        NS_sonda (str): Número de serie de la sonda oceanográfica (sin el prefijo "NS-").
+
+    Retorna:
+        dict: Diccionario con tres elementos:
+            - "titulo" (str): Título principal del mapa.
+            - "subtitulo" (str): Subtítulo con detalles de la sonda, origen y fechas.
+            - "nombre_de_guardado" (str): Nombre de archivo sin espacios ni caracteres especiales.
+
+    Ejemplo:
+        >>> import pandas as pd
+        >>> tspan = pd.date_range('2025-01-15', '2025-01-25', freq='H')
+        >>> NS_sonda = '300534063808640'
+        >>> resultado = crear_titulos_de_mapa_y_nombre_de_guardado(tspan, NS_sonda)
+        >>> print(resultado["titulo"])
+        'MAPA DE TRAYECTORIAS SONDA OCEANOGRÁFICA'
+        >>> print(resultado["subtitulo"])
+        'NS-300534063808640-IOOS-20250115-20250125'
+        >>> print(resultado["nombre_de_guardado"])
+        'MAPA_DE_TRAYECTORIAS_SONDA_OCEANOGRAFICANS_300534063808640_IOOS_20250115_20250125'
+
+    Notas:
+        - Las fechas se formatean como 'YYYYMMDD'.
+        - El origen de los datos se obtiene de la función get_origen_de_los_datos().
+        - En el nombre de guardado, los espacios se reemplazan por guiones bajos.
+        - Los guiones se reemplazan por guiones bajos en el nombre de guardado.
+        - Las letras acentuadas (Á) se normalizan en el nombre de guardado.
+
+    Funciones auxiliares:
+        - get_origen_de_los_datos(): Obtiene el origen configurado de los datos
+
+    Categoría:
+        Gráficos
+    """
+    
+    origen_de_los_datos = get_origen_de_los_datos()
+    t0str = tspan.min().strftime('%Y%m%d')
+    tEstr = tspan.max().strftime('%Y%m%d')
+    strDeFechas = str(f"{t0str}-{tEstr}")
+    titulo = str(f"MAPA DE TRAYECTORIAS SONDA OCEANOGRÁFICA")
+    subtitulo = str(f"NS-{NS_sonda}-{origen_de_los_datos}-{strDeFechas}") 
+    nombre_de_guardado = (titulo + subtitulo).replace(" ", "_").replace("-", "_").replace("Á", "A")
+
+    output = {
+        "titulo": titulo,
+        "subtitulo": subtitulo,
+        "nombre_de_guardado": nombre_de_guardado
+    }
+
+    return output
