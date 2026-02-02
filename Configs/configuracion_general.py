@@ -16,7 +16,7 @@ general_config = {
 
     # Lista de seriales de sondas a analizar
     "seriales_de_sondas": ["4876187", "4878196", "4878205", "4878218","4866704","4878221","4878503","4876191","4876190"],
-    # "seriales_de_sondas": ["4876190","4878196","4876187"],
+    # "seriales_de_sondas": ["4878218"],
 
     # 2. Del guardado
     # Ruta a la carpeta para guardar los datos procesados

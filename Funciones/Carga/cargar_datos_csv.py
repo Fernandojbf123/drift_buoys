@@ -303,6 +303,96 @@ def merge_df_vacio_con_datos(diccionario_con_datos: dict, diccionario_con_dfs_va
 
     return output_dic
 
+def eliminar_nans_iniciales(dic_anteriores: dict, dic_estudio: dict) -> tuple:
+    """ Elimina los NaNs iniciales y finales de cada dataframe del diccionario.
+    Los NaNs intermedios se mantienen.
+    """
+    output_dic_anteriores = dic_anteriores.copy()
+    output_dic_estudio = dic_estudio.copy()
+    
+    seriales = list(dic_estudio.keys())
+    for serial in seriales:
+        
+        # Si la sonda tiene datos anteriores al estudio (se eliminan esos NaNs iniciales)
+        if serial in dic_anteriores: 
+            df_anteriores = dic_anteriores[serial]
+            # Eliminar NaNs iniciales hasta la primera fila con datos
+            row = df_anteriores.loc[0,:]
+            while pd.isna(row["tspan_de_envio"]) or pd.isna(row["latitud"]):
+                df_anteriores = df_anteriores.drop(index=df_anteriores.index[0]).reset_index(drop=True)
+                row = df_anteriores.loc[0,:]
+            output_dic_anteriores[serial] = df_anteriores
+        
+        # La sonda solo tiene datos dentro del periodo de estudio
+        else:
+            df_estudio = dic_estudio[serial]
+            # Eliminar NaNs iniciales hasta la primera fila con datos
+            row = df_estudio.loc[0,:]
+            while pd.isna(row["tspan_de_envio"]) or pd.isna(row["latitud"]):
+                df_estudio = df_estudio.drop(index=df_estudio.index[0]).reset_index(drop=True)
+                row = df_estudio.loc[0,:]
+            output_dic_estudio[serial] = df_estudio
+
+    return output_dic_anteriores, output_dic_estudio
+
+def eliminar_nans_finales(dic_estudio: dict) -> dict:
+    """ Elimina los NaNs finales de cada dataframe del diccionario.
+    Los NaNs intermedios se mantienen.
+    """
+    output_dic_estudio = dic_estudio.copy()
+    
+    seriales = list(dic_estudio.keys())
+    for serial in seriales:
+        
+        df_estudio = dic_estudio[serial]
+        # Eliminar NaNs finales hasta la última fila con datos
+        row = df_estudio.loc[df_estudio.index[-1],:]
+        while pd.isna(row["tspan_de_envio"]) or pd.isna(row["latitud"]):
+            df_estudio = df_estudio.drop(index=df_estudio.index[-1]).reset_index(drop=True)
+            row = df_estudio.loc[df_estudio.index[-1],:]
+        output_dic_estudio[serial] = df_estudio
+
+    return output_dic_estudio
+
+def agregar_coordenadas_de_despliegue_corregidas_al_excel_de_despliegue(dic_anteriores: dict, dic_estudio: dict) -> None:
+    """ Agrega las columnas de latitud y longitud de despliegue corregidas al dataframe de despliegue de las sondas.
+    Las coordenadas corregidas se obtienen del primer valor no NaN de latitud y longitud en el dataframe de cada sonda en el diccionario.
+    
+    PENDIENTE HACER
+    """
+    
+    ruta_al_excel_de_despliegue_de_sondas = crear_ruta_a_carpeta(get_ruta_al_excel_de_despliegue_de_sondas())   
+    ruta_al_excel_de_despliegue_de_sondas = ruta_al_excel_de_despliegue_de_sondas + ".xlsx"
+    df_excel = pd.read_excel(ruta_al_excel_de_despliegue_de_sondas)
+    df_excel_filtrado = df_excel[df_excel['fecha_y_hora_de_la_primera_transmision'].notna()].copy()
+    df_excel_filtrado['serie_de_sonda'] = df_excel_filtrado['serie_de_sonda'].astype(float).astype(int).astype(str) 
+    
+    seriales = list(dic_estudio.keys())
+    for serial in seriales:
+        if serial in dic_anteriores:
+            df = dic_anteriores[serial]
+        else:
+            df = dic_estudio[serial]
+    
+        row = df.loc[0,:]
+        latitud_despliegue_corregida = row["latitud"]
+        longitud_despliegue_corregida = row["longitud"]
+        fecha_y_hora_de_primera_medicion_corregida = row["tspan_rounded"]
+    
+        idx = None
+        idx = df_excel_filtrado[df_excel_filtrado['serie_de_sonda'] == serial].index[0]
+        if idx is not None: 
+            df_excel.loc[idx, "fecha_y_hora_de_medicion_redondeada"] = fecha_y_hora_de_primera_medicion_corregida
+            df_excel.loc[idx, "latitud_corregida"] = latitud_despliegue_corregida
+            df_excel.loc[idx, "longitud_corregida"] = longitud_despliegue_corregida
+            print(f"Sonda {serial}: Latitud corregida: {latitud_despliegue_corregida}, Longitud corregida: {longitud_despliegue_corregida}, Fecha y hora de primera medicion corregida: {fecha_y_hora_de_primera_medicion_corregida}")
+   
+    # Guardar el DataFrame modificado de nuevo en el archivo Excel
+    ruta_al_excel_de_despliegue_de_sondas = crear_ruta_a_carpeta(get_ruta_al_excel_de_despliegue_de_sondas())   
+    ruta_al_excel_de_despliegue_de_sondas = ruta_al_excel_de_despliegue_de_sondas +"_corregido.xlsx"
+    df_excel.to_excel(ruta_al_excel_de_despliegue_de_sondas, index=False)
+    
+
 def agregar_componentes_de_la_velocidad(diccionario: dict) -> dict:
     """ Agrega las columnas de velocidad u y v al dataframe de cada sonda en el diccionario."""
     seriales = list(diccionario.keys())

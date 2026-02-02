@@ -23,8 +23,6 @@ def graficar_mapa_con_posiciones(mostrar_figura: bool = False) -> None:
     lat_max = coords_mapa["lat_max"]
     
     tspan_column='tspan_rounded'
-    origen_de_los_datos = get_origen_de_los_datos()
-    
     
     ruta_a_la_carpeta_de_datos_procesados = crear_ruta_a_carpeta(get_carpeta_guardado_datos_procesados())
     nombre_del_archivo_de_datos_procesados = get_nombre_archivo_datos_procesados()
