@@ -184,6 +184,9 @@ def buscar_y_eliminar_duplicados(diccionario: dict)-> dict:
     """ Busca y elimina los datos duplicados en cada dataframe del diccionario dado.
     Retorna un diccionario con los dataframes sin datos duplicados.
     """
+    if not diccionario:
+        return diccionario  # Retorna el diccionario vacío si no hay datos
+    
     seriales_encontrados = list(diccionario.keys())
     for serial in seriales_encontrados: # los keys del diccionario son el número de serie de cada sonda
         df = diccionario[serial] # DataFrame de la sonda antes del filtrado
@@ -196,6 +199,9 @@ def buscar_y_eliminar_duplicados(diccionario: dict)-> dict:
 def ordernar_datos_por_fecha(diccionario: dict) -> dict:
     """ Ordena los datos de cada dataframe del diccionario por la columna de fechas 'tspan_de_envio'.
     """
+    if not diccionario:
+        return diccionario  # Retorna el diccionario vacío si no hay datos
+    
     seriales_encontrados = list(diccionario.keys())
     for serial in seriales_encontrados:
         df = diccionario[serial]
@@ -207,6 +213,8 @@ def crear_tspan_redondeado(diccionario: dict)->dict:
     Regla de redondeo:
     Si HH:MM es < 30 mins se redondea a HH:00
     Si HH:MM es >=30 y <=59 se redondea a HH:30"""
+    if not diccionario:
+        return diccionario  # Retorna el diccionario vacío si no hay datos
     
     seriales_encontrados = list(diccionario.keys())
     for serial in seriales_encontrados:
@@ -221,26 +229,39 @@ def existen_fechas_redondeadas_duplicadas(diccionario: dict) -> bool:
     """ Verifica si existen fechas redondeadas duplicadas en los dataframes del diccionario.
     seriales_encontrados: lista de seriales de sondas para las que se encontraron archivos CSV -> lista de strings
     """
+    output_dic = diccionario.copy()
+    if not diccionario:
+        return output_dic  # Retorna el diccionario vacío si no hay datos
+    
     seriales_encontrados = list(diccionario.keys())
     for serial in seriales_encontrados:
-        df = diccionario[serial]
+        df = output_dic[serial]
         duplicados_implicitos = df[df["tspan_rounded"].duplicated()]
         if not duplicados_implicitos.empty:
             print(f"Las siguientes fechas redondeadas están duplicadas en la sonda {serial}.")
             print(duplicados_implicitos[["tspan_de_envio","tspan_rounded"]])
             print("actualmente se deja solo la primera ocurrencia, se eliminan las demás. Se suguiere hacer una funcion que distribuya a la hora anterior y/o siguiente.")
             df = df.drop_duplicates(subset="tspan_rounded", keep='first')
-
-    return print("No se encontraron fechas redondeadas duplicadas en ninguna sonda.")
+            output_dic[serial] = df.reset_index(drop=True)
+        else: 
+            print(f"No se encontraron fechas redondeadas en la sonda {serial}.")
+        
+    return output_dic
 
 def get_cols_names_sin_tspan(diccionario: dict) -> list:
     """ Devuelve una lista con los nombres de las columnas del dataframe dado, excluyendo las columnas de fechas 'tspan_de_envio' y 'tspan_rounded'.
     """
+    columnas = None
+    if not diccionario:
+        return columnas  # Retorna None si el diccionario está vacío
+    
     seriales = list(diccionario.keys())
     data = diccionario[seriales[0]] # tomar el dataframe de la primera sonda. 
+    
     columnas = list(data.columns)
     columnas.remove("tspan_de_envio")
     columnas.remove("tspan_rounded")
+
     return columnas
 
 def crear_diccionario_con_dataframes_vacios(diccionario: dict, keys: list) -> dict:
@@ -249,8 +270,10 @@ def crear_diccionario_con_dataframes_vacios(diccionario: dict, keys: list) -> di
     keys: lista de nombres de columnas que debe tener cada dataframe vacío (excluyendo tspan_de_envio y tspan_rounded)
     """
     delta_tiempo = get_delta_tiempo()
-    
     output_dic = {}
+    if not diccionario:
+        return output_dic  # Retorna el diccionario vacío si no hay datos
+    
     for serial in diccionario.keys():
         df = diccionario[serial]
         
@@ -278,7 +301,7 @@ def crear_diccionario_con_dataframes_vacios(diccionario: dict, keys: list) -> di
 
         df = pd.DataFrame(diccionario_de_apoyo) # Crear DataFrame vacío con las fechas sintéticas y columnas vacías
         output_dic[serial] = df # Asignar el DataFrame vacío al diccionario de salida
-    
+        
     return output_dic
 
 def merge_df_vacio_con_datos(diccionario_con_datos: dict, diccionario_con_dfs_vacios: dict) -> dict:
@@ -291,7 +314,9 @@ def merge_df_vacio_con_datos(diccionario_con_datos: dict, diccionario_con_dfs_va
 
     output_dic = {}
     seriales = list(diccionario_con_datos.keys())
-
+    if not diccionario_con_datos: 
+        return output_dic  # Retorna el diccionario vacío si no hay datos
+    
     for serial in seriales:
         df_vacio = diccionario_con_dfs_vacios[serial].set_index("tspan") # Buscar el dataframe vacío de la sonda y asignar tspan como índice
         df_sonda = diccionario_con_datos[serial].set_index("tspan_rounded") # Buscar el dataframe con datos de la sonda y asignar tspan_rounded como índice
@@ -310,9 +335,11 @@ def eliminar_nans_iniciales(dic_anteriores: dict, dic_estudio: dict) -> tuple:
     output_dic_anteriores = dic_anteriores.copy()
     output_dic_estudio = dic_estudio.copy()
     
+    if not dic_anteriores and not dic_estudio:
+        return output_dic_anteriores, output_dic_estudio
+    
     seriales = list(dic_estudio.keys())
     for serial in seriales:
-        
         # Si la sonda tiene datos anteriores al estudio (se eliminan esos NaNs iniciales)
         if serial in dic_anteriores: 
             df_anteriores = dic_anteriores[serial]
@@ -340,6 +367,9 @@ def eliminar_nans_finales(dic_estudio: dict) -> dict:
     Los NaNs intermedios se mantienen.
     """
     output_dic_estudio = dic_estudio.copy()
+    
+    if not dic_estudio:
+        return output_dic_estudio
     
     seriales = list(dic_estudio.keys())
     for serial in seriales:

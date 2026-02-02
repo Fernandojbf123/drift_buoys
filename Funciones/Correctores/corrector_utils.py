@@ -35,7 +35,9 @@ def eliminar_datos_espurios(diccionario: dict) -> dict:
     """ Busca filas donde la rapidez sea mayor a 2 m/s y reemplaza todos los valores 
     de esa fila con NaN, excepto las columnas tspan_rounded y tspan_de_envio."""
     seriales_de_sondas = list(diccionario.keys())
-
+    if not diccionario:
+        return diccionario  # Retorna el diccionario vacío si no hay datos
+    
     for serial in seriales_de_sondas:
         df = diccionario[serial].copy()
         # Crear máscara para identificar filas con rapidez > 2

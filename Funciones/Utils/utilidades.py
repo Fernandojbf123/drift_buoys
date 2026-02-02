@@ -171,6 +171,10 @@ def guardar_diccionario_como_pickle(diccionario: dict, ruta: str,nombre_archivo:
     Salida:
     None
     """
+    if not diccionario:
+        print(f"El diccionario está vacío. No se guardará el archivo {nombre_archivo}.")
+        return
+    
     if not os.path.exists(ruta):
         os.makedirs(ruta)
 
