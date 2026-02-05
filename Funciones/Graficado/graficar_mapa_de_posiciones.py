@@ -31,7 +31,10 @@ def graficar_mapa_con_posiciones(mostrar_figura: bool = False) -> None:
     ruta_al_archivo_de_datos_previos_a_la_fecha_de_estudio = os.path.join(ruta_a_la_carpeta_de_datos_procesados, get_nombre_del_archivo_de_datos_previos_a_la_fecha_de_estudio())
 
     datos = cargar_diccionario_pickle(ruta_de_archivo) # Son los datos del periodo de vigencia
-    datos_previos_a_la_fecha_de_estudio = cargar_diccionario_pickle(ruta_al_archivo_de_datos_previos_a_la_fecha_de_estudio) # Son los datos previos a la fecha de estudio
+    
+    if get_graficar_trayectorias_pasadas(): # Si se solicita cargar las trayectorias pasadas
+        datos_previos_a_la_fecha_de_estudio = cargar_diccionario_pickle(ruta_al_archivo_de_datos_previos_a_la_fecha_de_estudio) # Son los datos previos a la fecha de estudio
+    
     seriales_de_sondas = get_seriales_sondas()
     
     # Cargar datos de despliegue desde Excel
@@ -53,7 +56,11 @@ def graficar_mapa_con_posiciones(mostrar_figura: bool = False) -> None:
         
         # Datos de la sonda
         df_datos_de_la_sonda = datos[serial]
-        df_datos_previos_de_la_sonda = datos_previos_a_la_fecha_de_estudio.get(serial,None)
+        
+        if get_graficar_trayectorias_pasadas(): # Si se solicita graficar las trayectorias pasadas
+            df_datos_previos_de_la_sonda = datos_previos_a_la_fecha_de_estudio.get(serial,None)
+        else:
+            df_datos_previos_de_la_sonda = None
         
         # Obtener tspan (el eje X - en formato pd.DatetimeIndex)
         tspan = df_datos_de_la_sonda[tspan_column] if tspan_column else df_datos_de_la_sonda.index
