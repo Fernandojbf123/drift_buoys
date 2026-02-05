@@ -34,7 +34,7 @@ def graficar_series_y_guardar(mostrar_figura:bool=False) -> None:
     """
     # Cargar datos procesados
     ruta_a_la_carpeta_de_datos_procesados = crear_ruta_a_carpeta(get_carpeta_guardado_datos_procesados())
-    nombre_del_archivo_de_datos_procesados = get_nombre_archivo_datos_procesados()
+    nombre_del_archivo_de_datos_procesados = "datos_interpolados"#get_nombre_archivo_datos_procesados()
     ruta_de_archivo = os.path.join(ruta_a_la_carpeta_de_datos_procesados, nombre_del_archivo_de_datos_procesados)
 
     datos = cargar_diccionario_pickle(ruta_de_archivo)

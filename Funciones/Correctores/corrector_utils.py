@@ -3,11 +3,9 @@ import numpy as np
 from scipy.interpolate import interp1d
 import matplotlib.dates as mdates  
 
+from Funciones.Utils.utilidades import uv2polar
 from Funciones.Utils.utils_get_config_vars import *
 from Funciones.Utils.utils_get_vars_dic import *
-import Configs.configuracion_general
-
-
 ############### # FUNCIONES DE CORRECCIÓN DE DATOS ###############
 
 ################# B #################
@@ -76,14 +74,18 @@ def interpolar_datos_faltantes(diccionario: dict) -> dict:
             tspan_numeric_real = mdates.date2num(new_data["tspan_rounded"])
 
             for column in data.columns:
-                if pd.api.types.is_numeric_dtype(data[column]) and "tspan" not in column:
+                if pd.api.types.is_numeric_dtype(data[column]) and "tspan" not in column and column != "rap_corriente" and column != "dir_corriente":
                     # obtener función de interpolación
                     f = interp1d(tspan_numeric_real, new_data[column], kind='linear', fill_value=np.nan, bounds_error=False)
                     # interpolar en las fechas completas
                     data[column] = f(tspan_numeric_completo)
+            
+            # Ahora se corrige rap_corriente y dir_corriente por separado (La rap y dir se deben calcular apartir de las componentes u y v)
+            data["dir_corriente"], data["rap_corriente"] = uv2polar(data["u_corriente"], data["v_corriente"])
+
             # guardo el dataframe con los datos interpolados
             output_dic[serial_de_sonda] = data
-
+            
     except Exception as e:
          raise ValueError(f"Ocurrió un error al interpolar los datos: {e}")
 

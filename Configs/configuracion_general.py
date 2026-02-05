@@ -13,6 +13,8 @@ general_config = {
     "cantidad_de_decimales": 4,  # Cantidad de decimales a los que se redondearán los datos
     # Ruta a los datos de batimetría del GOM
     "ruta_a_datos_batimetria": "C:/programacion/codigos_python/bases_de_datos/batimetria_GEBCO_GOM_2023.nc",
+     # Ruta a los datos de topografía ETOPO1_Ice_g_gmt4 (se usan para dar los colores de tierra)
+    "ruta_a_datos_topografia": "C:/programacion/codigos_python/bases_de_datos/topografia_ETOPO1_Ice_g_gmt4.nc",
 
     # Lista de seriales de sondas a analizar
     "seriales_de_sondas": ["4876187", "4878196", "4878205", "4878218","4866704","4878221","4878503","4876191","4876190"],

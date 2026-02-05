@@ -450,7 +450,7 @@ def asignar_ylim(obj_axes: Axes, var_value: list, var_name: str, ylabelsize: flo
         ylim_min = 0      
         ylim_max = maxi + padding_y
 
-    elif var_name.lower() in ["temperatura_mar","temperatura_aire"]:
+    elif var_name.lower() in ["temperatura_mar","temperatura_aire","voltaje"]:
         # Para temperatura: límites enteros exactos sin padding
         ylim_min = np.floor(mini)-1
         ylim_max = np.ceil(maxi)+1
@@ -474,7 +474,7 @@ def asignar_ylim(obj_axes: Axes, var_value: list, var_name: str, ylabelsize: flo
     obj_axes.set_ylim(ylim_min, ylim_max)
     
     # Para temperatura, forzar ticks enteros
-    if var_name.lower() in ["temperatura_mar","temperatura_aire"]:
+    if var_name.lower() in ["temperatura_mar","temperatura_aire","voltaje"]:
         obj_axes.yaxis.set_major_locator(MaxNLocator(integer=True))
     else:
         obj_axes.yaxis.set_major_locator(MaxNLocator(nbins=5))

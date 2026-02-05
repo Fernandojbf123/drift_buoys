@@ -120,6 +120,102 @@ def cargar_datos_de_batimetria() -> dict:
     return datos_batimetria
 #######################
 
+def cargar_datos_de_topografia() -> dict:
+    """ Carga datos de topografía desde un archivo NetCDF. Especificada en el archivo de configuración general.
+    Salida
+    
+    datos_topografia = {
+        "lon": array_like,
+        "lat": array_like,
+        "elevation": array_like
+    }
+    
+    """
+    datos_topografia = {
+        "lon": None,
+        "lat": None,
+        "elevation": None,
+    }
+ 
+    ruta = get_ruta_a_datos_topografia()
+        
+    with nc.Dataset(ruta) as data:
+        lon = np.array(data.variables['x'][:])
+        lat = np.array(data.variables['y'][:])
+        elevation = np.array(data.variables['z'][:,:])
+    
+        datos_topografia["lon"] = lon
+        datos_topografia["lat"] = lat
+        datos_topografia["elevacion"] = elevation
+    
+    return datos_topografia
+#######################
+def recortar_datos_de_topografia_a_area_de_estudio(datos_de_topografia: dict, lon_min: float, lon_max: float, lat_min: float, lat_max: float) -> dict:
+    """ Recorta los datos de topografía a un área de estudio definida por los límites dados.
+    
+    Parámetros:
+        datos_de_topografia (dict): Diccionario con los datos de topografía que debe contener:
+            - "lon" (array 2D): Malla de longitudes (grados).
+            - "lat" (array 2D): Malla de latitudes (grados).
+            - "elevacion" (array 2D): Matriz con datos de elevación/profundidad (metros).
+        lon_min (float): Longitud mínima del área a recortar (grados, oeste negativo).
+        lon_max (float): Longitud máxima del área a recortar (grados, oeste negativo).
+        lat_min (float): Latitud mínima del área a recortar (grados).
+        lat_max (float): Latitud máxima del área a recortar (grados).
+
+    Retorna:
+        dict: Diccionario con los datos de topografía recortados al área de estudio.
+    """
+    lon = datos_de_topografia["lon"]
+    lat = datos_de_topografia["lat"]
+    elevacion = datos_de_topografia["elevacion"]
+    
+    mask_lon = (lon >= lon_min) & (lon <= lon_max)
+    mask_lat = (lat >= lat_min) & (lat <= lat_max)
+    
+    lon_recortado = lon[mask_lon]
+    lat_recortado = lat[mask_lat]
+    elevacion_recortada = elevacion[np.ix_(mask_lat, mask_lon)]
+    
+    datos_recortados = {
+        "lon": np.array(lon_recortado),
+        "lat": np.array(lat_recortado),
+        "elevacion": np.array(elevacion_recortada)
+    }
+    
+    return datos_recortados
+
+#######################
+def reemplazar_valores_de_topografia(datos_de_topografia: dict, valor_a_reemplazar: float, nuevo_valor: float) -> dict:
+    """ Reemplaza valores inferiores a un valor dado en los datos de topografía con un nuevo valor.
+    
+    Parámetros:
+        datos_de_topografia (dict): Diccionario con los datos de topografía que debe contener:
+            - "lon" (array 2D): Malla de longitudes (grados).
+            - "lat" (array 2D): Malla de latitudes (grados).
+            - "elevation" (array 2D): Matriz con datos de elevación/profundidad (metros).
+        valor_a_reemplazar (float): Valor que se desea reemplazar en la matriz de elevación.
+        nuevo_valor (float): Nuevo valor que reemplazará al valor especificado.
+
+    Retorna:
+        dict: Diccionario con los datos de topografía actualizados.
+    """
+    lon = datos_de_topografia["lon"]
+    lat = datos_de_topografia["lat"]
+    elevacion = datos_de_topografia["elevacion"]
+    
+    elevacion[elevacion < valor_a_reemplazar] = nuevo_valor
+    
+    datos_actualizados = {
+        "lon": lon,
+        "lat": lat,
+        "elevacion": elevacion
+    }
+    
+    return datos_actualizados
+
+#######################
+
 def cargar_diccionario_pickle(ruta_archivo):
     """
     Carga un diccionario desde un archivo pickle.

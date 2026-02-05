@@ -90,3 +90,6 @@ def get_curvas_de_batimetria():
 
 def get_graficar_trayectorias_pasadas():
     return _get_config_value("graficar_trayectorias_pasadas")
+
+def get_ruta_a_datos_topografia():
+    return _get_config_value("ruta_a_datos_topografia")

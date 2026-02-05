@@ -5,6 +5,7 @@ from Funciones.Utils.utils_get_config_vars import *
 from Funciones.Utils.utilidades import *
 from Funciones.Carga.cargar_datos_csv import leer_excel_de_despliegue_de_sondas 
 from .base.Gra_mapa_cartopy import graficar_mapa_cartopy
+from .base.Gra_mapa_topografia import graficar_mapa_topografico
 from .base.Gra_batimetria_en_mapa import graficar_batimetria_en_mapa        
 from .base.Gra_trayectorias_de_sonda import graficar_trayectorias_de_sonda
 from Funciones.Graficado.base.Gra_dar_formato_a_figuras import *
@@ -25,7 +26,7 @@ def graficar_mapa_con_posiciones(mostrar_figura: bool = False) -> None:
     tspan_column='tspan_rounded'
     
     ruta_a_la_carpeta_de_datos_procesados = crear_ruta_a_carpeta(get_carpeta_guardado_datos_procesados())
-    nombre_del_archivo_de_datos_procesados = get_nombre_archivo_datos_procesados()
+    nombre_del_archivo_de_datos_procesados = "datos_interpolados" #get_nombre_archivo_datos_procesados()
     ruta_de_archivo = os.path.join(ruta_a_la_carpeta_de_datos_procesados, nombre_del_archivo_de_datos_procesados)
     ruta_al_archivo_de_datos_previos_a_la_fecha_de_estudio = os.path.join(ruta_a_la_carpeta_de_datos_procesados, get_nombre_del_archivo_de_datos_previos_a_la_fecha_de_estudio())
 
@@ -38,6 +39,10 @@ def graficar_mapa_con_posiciones(mostrar_figura: bool = False) -> None:
     
     # Cargar datos de batimetría desde el archivo NetCDF
     datos_de_batimetria = cargar_datos_de_batimetria()
+    
+    datos_de_topografia = cargar_datos_de_topografia()
+    datos_de_topografia = recortar_datos_de_topografia_a_area_de_estudio(datos_de_topografia, lon_min, lon_max, lat_min, lat_max)
+    datos_de_topografia = reemplazar_valores_de_topografia(datos_de_topografia, valor_a_reemplazar=-10, nuevo_valor=-10)
     
     # Recorrer cada sonda en el diccionario
     for serial in seriales_de_sondas:
@@ -58,6 +63,7 @@ def graficar_mapa_con_posiciones(mostrar_figura: bool = False) -> None:
 
 
         graficar_mapa_cartopy(ax, lon_min, lon_max, lat_min, lat_max)
+        graficar_mapa_topografico(axe=ax, topografia=datos_de_topografia, lon_min=lon_min, lon_max=lon_max, lat_min=lat_min, lat_max=lat_max)
         graficar_batimetria_en_mapa(ax, datos_de_batimetria = datos_de_batimetria)
         
         obj_mapeable = graficar_trayectorias_de_sonda(df_excel_de_despliegue = df_excel_de_despliegue, 
