@@ -167,10 +167,13 @@ boyas_doris/
 
 ### 6. **Variables de Ambiente** (`.env`)
 Archivo en la raíz del proyecto para proteger rutas al NAS y mantener la privacidad.
+También se debe incluir las coordenadas al laboratorio
 
 **Configuración:**
 ```dotenv
 ruta_al_NAS = 192.XXX.XXX.XXX
+lon_coe = -90.00000; en coordenadas decimales
+lat_coe = 50.000000; en coordenadas decimales
 ```
 
 ---
