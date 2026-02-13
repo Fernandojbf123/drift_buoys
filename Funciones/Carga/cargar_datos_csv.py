@@ -133,8 +133,6 @@ def leer_excel_de_despliegue_de_sondas(seriales_encontrados: list) -> pd.DataFra
 
 
 def seleccionar_rango_de_fechas(diccionario: dict, 
-                                df_excel_de_despliegue: pd.DataFrame, 
-                                seriales_encontrados: list,
                                 buscar_fechas_anteriores_al_estudio: bool = False)-> dict:
     """ Selecciona los datos dentro del rango de fechas.
     Este rango puede ser el definido en la configuración general 
@@ -143,8 +141,6 @@ def seleccionar_rango_de_fechas(diccionario: dict,
     
     Parámetros:
         diccionario (dict): Diccionario con los dataframes de cada sonda.
-        df_excel_de_despliegue (pd.DataFrame): DataFrame con la información de despliegue de las sondas.
-        seriales_encontrados (list): Lista de seriales de sondas para las que se encontraron archivos CSV -> lista de strings
         buscar_fechas_anteriores_al_estudio (bool): Si es True, el rango de fechas se define desde la fecha de la primera medición hasta la fecha de inicio del análisis.
     
     Retorna:
@@ -155,28 +151,41 @@ def seleccionar_rango_de_fechas(diccionario: dict,
     fecha_de_inicio_del_analisis = get_fecha_de_inicio_del_analisis()
     fecha_de_fin_del_analisis = get_fecha_de_fin_del_analisis()
     
-    for serial in seriales_encontrados:
-        
+    ruta_al_excel_de_despliegue_de_sondas = crear_ruta_a_carpeta(get_ruta_al_excel_de_despliegue_de_sondas())   
+    ruta_al_excel_de_despliegue_de_sondas = ruta_al_excel_de_despliegue_de_sondas + "_corregido.xlsx"
+    df_excel = pd.read_excel(ruta_al_excel_de_despliegue_de_sondas)
+    df_excel.dropna(subset=['serie_de_sonda'], inplace=True) # elimino ausentes o nulos para que la conversion no de error
+    df_excel['serie_de_sonda'] = df_excel['serie_de_sonda'].astype(float).astype(int).astype(str)
+    
+    for serial in list(diccionario.keys()):
+        idx = df_excel[df_excel['serie_de_sonda'] == serial].index[0]
         # Caso general: se usan las fechas definidas en la configuración general
-        fecha_de_primera_medicion = df_excel_de_despliegue[df_excel_de_despliegue["serie_de_sonda"]==serial]["fecha_y_hora_de_la_primera_transmision"].values[0] # del excel de despliegue
+        fecha_de_primera_medicion = pd.to_datetime(df_excel.loc[idx, "fecha_y_hora_de_despliegue_corregida"], format="%Y-%m-%d %H:%M:%S")    # del excel de despliegue
         fecha_de_la_ultima_medicion = diccionario[serial]["tspan_de_envio"].max() # de los datos cargados
         fecha_de_inicio = max(fecha_de_inicio_del_analisis, fecha_de_primera_medicion) # fecha de inicio es la menor entre la fecha de inicio del análisis y la fecha de la primera medición
         fecha_de_fin = min(fecha_de_fin_del_analisis, fecha_de_la_ultima_medicion) # fecha de fin es la mayor entre la fecha de fin del análisis y la fecha de la última medición
-
         
+        df = diccionario[serial]
+        mask = (df["tspan_de_envio"] >= fecha_de_inicio) & (df["tspan_de_envio"] <= fecha_de_fin)
+        msg = ""
+        
+        if mask.empty:
+            msg = f"La sonda {serial} no tiene datos en el rango de fechas {get_fecha_de_inicio_del_analisis()}-{get_fecha_de_fin_del_analisis()}"
+            
         # Esto se activa si quiero buscar las fechas desde la liberación hasta la fecha en que inicia el análisis (caso de sondas liberadas en meses anteriores al análisis)
         if buscar_fechas_anteriores_al_estudio:
             fecha_de_inicio = fecha_de_primera_medicion # fecha de inicio es la menor entre la fecha de inicio del análisis y la fecha de la primera medición
             fecha_de_fin = fecha_de_inicio_del_analisis # fecha de fin es la mayor entre la fecha de fin del análisis y la fecha de la última medición
-
-        df = diccionario[serial]
-        mask = (df["tspan_de_envio"] >= fecha_de_inicio) & (df["tspan_de_envio"] <= fecha_de_fin)
+            mask = (df["tspan_de_envio"] < fecha_de_inicio)  
+            if mask.empty:
+                msg = f"La sonda {serial} no tiene datos anteriores a la fecha de inicio del análisis o a la fecha de la primera medición)."
+        
         pre_output = df.loc[mask].reset_index(drop=True)
         
-        if pre_output.empty:
-            print(f"La sonda {serial} no tiene datos en el rango de fechas {get_fecha_de_inicio_del_analisis()}-{get_fecha_de_fin_del_analisis()}") 
-        else:
-            output_dic[serial] = pre_output.copy()
+        if msg:
+            print(msg)
+        
+        output_dic[serial] = pre_output.copy()
 
     return output_dic
 
@@ -229,13 +238,13 @@ def existen_fechas_redondeadas_duplicadas(diccionario: dict) -> bool:
     """ Verifica si existen fechas redondeadas duplicadas en los dataframes del diccionario.
     seriales_encontrados: lista de seriales de sondas para las que se encontraron archivos CSV -> lista de strings
     """
-    output_dic = diccionario.copy()
+    output_dic = None
     if not diccionario:
         return output_dic  # Retorna el diccionario vacío si no hay datos
     
     seriales_encontrados = list(diccionario.keys())
     for serial in seriales_encontrados:
-        df = output_dic[serial]
+        df = diccionario[serial]
         duplicados_implicitos = df[df["tspan_rounded"].duplicated()]
         if not duplicados_implicitos.empty:
             print(f"Las siguientes fechas redondeadas están duplicadas en la sonda {serial}.")
@@ -244,7 +253,7 @@ def existen_fechas_redondeadas_duplicadas(diccionario: dict) -> bool:
             df = df.drop_duplicates(subset="tspan_rounded", keep='first')
             output_dic[serial] = df.reset_index(drop=True)
         else: 
-            print(f"No se encontraron fechas redondeadas en la sonda {serial}.")
+            print(f"No se encontraron fechas redondeadas duplicadas en la sonda {serial}.")
         
     return output_dic
 
@@ -312,11 +321,12 @@ def merge_df_vacio_con_datos(diccionario_con_datos: dict, diccionario_con_dfs_va
     en donde deben haber datos entre el inicio y fin del análisis. Si en una fecha hay datos, se mantienen esos datos, si no tiene datos,
     se coloca NaN o "" según el tipo de dato de la columna."""
 
-    output_dic = {}
-    seriales = list(diccionario_con_datos.keys())
+    output_dic = None
+    
     if not diccionario_con_datos: 
         return output_dic  # Retorna el diccionario vacío si no hay datos
     
+    seriales = list(diccionario_con_datos.keys())
     for serial in seriales:
         df_vacio = diccionario_con_dfs_vacios[serial].set_index("tspan") # Buscar el dataframe vacío de la sonda y asignar tspan como índice
         df_sonda = diccionario_con_datos[serial].set_index("tspan_rounded") # Buscar el dataframe con datos de la sonda y asignar tspan_rounded como índice
@@ -332,11 +342,12 @@ def eliminar_nans_iniciales(dic_anteriores: dict, dic_estudio: dict) -> tuple:
     """ Elimina los NaNs iniciales y finales de cada dataframe del diccionario.
     Los NaNs intermedios se mantienen.
     """
+
+    if not dic_anteriores or not dic_estudio:
+        return dic_anteriores, dic_estudio
+    
     output_dic_anteriores = dic_anteriores.copy()
     output_dic_estudio = dic_estudio.copy()
-    
-    if not dic_anteriores and not dic_estudio:
-        return output_dic_anteriores, output_dic_estudio
     
     seriales = list(dic_estudio.keys())
     for serial in seriales:
@@ -384,7 +395,7 @@ def eliminar_nans_finales(dic_estudio: dict) -> dict:
 
     return output_dic_estudio
 
-def agregar_coordenadas_de_despliegue_corregidas_al_excel_de_despliegue(dic_anteriores: dict, dic_estudio: dict) -> None:
+def agregar_coordenadas_de_despliegue_corregidas_al_excel_de_despliegue(diccionario) -> None:
     """ Agrega las columnas de latitud y longitud de despliegue corregidas al dataframe de despliegue de las sondas.
     Las coordenadas corregidas se obtienen del primer valor no NaN de latitud y longitud en el dataframe de cada sonda en el diccionario.
     
@@ -394,37 +405,39 @@ def agregar_coordenadas_de_despliegue_corregidas_al_excel_de_despliegue(dic_ante
     ruta_al_excel_de_despliegue_de_sondas = crear_ruta_a_carpeta(get_ruta_al_excel_de_despliegue_de_sondas())   
     ruta_al_excel_de_despliegue_de_sondas = ruta_al_excel_de_despliegue_de_sondas + ".xlsx"
     df_excel = pd.read_excel(ruta_al_excel_de_despliegue_de_sondas)
-    df_excel_filtrado = df_excel[df_excel['fecha_y_hora_de_la_primera_transmision'].notna()].copy()
+    df_excel_filtrado = df_excel.dropna(subset=['serie_de_sonda']).copy() # elimino ausentes o nulos para que la conversion no de error
     df_excel_filtrado['serie_de_sonda'] = df_excel_filtrado['serie_de_sonda'].astype(float).astype(int).astype(str) 
+    df_excel_filtrado["fecha_y_hora_de_despliegue_corregida"] = pd.to_datetime(df_excel_filtrado["fecha_y_hora_de_despliegue_corregida"]) # asegurar que el tipo sea string para evitar errores al asignar las fechas corregidas. Luego se vuelve a convertir a datetime al guardar el excel corregido.
     
-    seriales = list(dic_estudio.keys())
+    seriales = list(diccionario.keys())
     for serial in seriales:
-        if serial in dic_anteriores:
-            df = dic_anteriores[serial]
-        else:
-            df = dic_estudio[serial]
-    
+        df = diccionario[serial]
         row = df.loc[0,:]
         latitud_despliegue_corregida = row["latitud"]
         longitud_despliegue_corregida = row["longitud"]
-        fecha_y_hora_de_primera_medicion_corregida = row["tspan_rounded"]
-    
+        tspan_de_envio = pd.to_datetime(row["tspan_de_envio"],format="%Y-%m-%d %H:%M:%S")
+        # tspan_rounded = tspan_de_envio.replace(minute=0) if tspan_de_envio.minute < 30 else tspan_de_envio.replace(minute=30)
+        
         idx = None
         idx = df_excel_filtrado[df_excel_filtrado['serie_de_sonda'] == serial].index[0]
         if idx is not None: 
-            df_excel.loc[idx, "fecha_y_hora_de_medicion_redondeada"] = fecha_y_hora_de_primera_medicion_corregida
-            df_excel.loc[idx, "latitud_corregida"] = latitud_despliegue_corregida
-            df_excel.loc[idx, "longitud_corregida"] = longitud_despliegue_corregida
-            print(f"Sonda {serial}: Latitud corregida: {latitud_despliegue_corregida}, Longitud corregida: {longitud_despliegue_corregida}, Fecha y hora de primera medicion corregida: {fecha_y_hora_de_primera_medicion_corregida}")
+            df_excel_filtrado.loc[idx, "fecha_y_hora_de_despliegue_corregida"] = tspan_de_envio
+            df_excel_filtrado.loc[idx, "latitud_corregida"] = latitud_despliegue_corregida
+            df_excel_filtrado.loc[idx, "longitud_corregida"] = longitud_despliegue_corregida
+            print(f"Sonda {serial}: Latitud corregida: {latitud_despliegue_corregida}, Longitud corregida: {longitud_despliegue_corregida}, Fecha y hora de despliegue corregida: {tspan_de_envio}")
    
     # Guardar el DataFrame modificado de nuevo en el archivo Excel
     ruta_al_excel_de_despliegue_de_sondas = crear_ruta_a_carpeta(get_ruta_al_excel_de_despliegue_de_sondas())   
     ruta_al_excel_de_despliegue_de_sondas = ruta_al_excel_de_despliegue_de_sondas +"_corregido.xlsx"
-    df_excel.to_excel(ruta_al_excel_de_despliegue_de_sondas, index=False)
+    df_excel_filtrado.to_excel(ruta_al_excel_de_despliegue_de_sondas, index=False)
     
 
 def agregar_componentes_de_la_velocidad(diccionario: dict) -> dict:
     """ Agrega las columnas de velocidad u y v al dataframe de cada sonda en el diccionario."""
+    
+    if not diccionario:
+        return diccionario  # Retorna el diccionario vacío si no hay datos
+    
     seriales = list(diccionario.keys())
     for serial in seriales:
         df = diccionario[serial]

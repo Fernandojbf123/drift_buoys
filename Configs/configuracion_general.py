@@ -5,10 +5,10 @@ general_config = {
     # Ruta al archivo excel con información de las sondas
     "ruta_al_excel_de_despliegue_de_sondas": "Med_2025-2026/General/Sondas_DORIS/2026_01_despliegues_de_DORIS",
     # Formato: 'AAAA-MM-DD HH:MM:SS'
-    "fecha_de_inicio_del_analisis": "2025-12-30 00:00:00",
+    "fecha_de_inicio_del_analisis": "2025-12-01 00:00:00",
     "fecha_de_fin_del_analisis": "2025-12-31 23:59:59",
     # Ruta a la carpeta con los datos crudos
-    "carpeta_de_datos_crudos": "C:/Users/Atmosfera/Desktop/datos_procesados/doris/202601/pruebas_lab",
+    "carpeta_de_datos_crudos": "C:/Users/Atmosfera/Desktop/datos_crudos/doris/202512/",
     "cantidad_de_decimales": 4,  # Cantidad de decimales a los que se redondearán los datos
     # Ruta a los datos de batimetría del GOM
     "ruta_a_datos_batimetria": "C:/programacion/codigos_python/bases_de_datos/batimetria_GEBCO_GOM_2023.nc",
@@ -16,18 +16,19 @@ general_config = {
     "ruta_a_datos_topografia": "C:/programacion/codigos_python/bases_de_datos/topografia_ETOPO1_Ice_g_gmt4.nc",
 
     # Lista de seriales de sondas a analizar
-    # "seriales_de_sondas": ["4876187", "4878196", "4878205", "4878218","4866704","4878221","4878503","4876191","4876190"],
-    "seriales_de_sondas": ["4866704","4878221","4878503","4876191","4876190"],
+    # "seriales_de_sondas": ["4876187", "4878196", "4878205", "4878218","4866704","4878221","4878503","4876191","4876190"], # Todas
+    "seriales_de_sondas": ["4876187", "4878196", "4878205", "4878218"], # diciembre 2025
+    # "seriales_de_sondas": ["4866704","4878221","4878503","4876191","4876190"], # Enero 2026
 
     # 2. Del guardado
     # Ruta a la carpeta para guardar los datos procesados
-    "carpeta_de_guardado_de_datos_procesados": "C:/Users/Atmosfera/Desktop/datos_procesados/doris/202601/pruebas_lab",
+    "carpeta_de_guardado_de_datos_procesados": "C:/Users/Atmosfera/Desktop/datos_procesados/doris/202512/",
     # Nombre del archivo para guardar los datos procesados (formato pickle)
     "nombre_del_archivo_de_datos_procesados": "datos_procesados_sondas_oceanograficas",
     "nombre_del_archivo_de_datos_previos_a_la_fecha_de_estudio": "datos_previos_al_estudio",
     "nombre_del_excel_de_porcentajes": "porcentajes_de_las_sondas",
     # Ruta a la carpeta para guardar las figuras
-    "carpeta_de_guardado_de_figuras": "C:/Users/Atmosfera/Desktop/datos_procesados/doris/202601/pruebas_lab",
+    "carpeta_de_guardado_de_figuras": "C:/Users/Atmosfera/Desktop/datos_procesados/doris/202512/",
 
     # 3. De las figuras
     # 3.1. Generales
