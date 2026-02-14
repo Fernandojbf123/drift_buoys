@@ -85,7 +85,7 @@ def cargar_datos_de_sonda(rutas_de_sondas: list, seriales_de_sondas: list)-> dic
     return output_dir
 
 
-def leer_excel_de_despliegue_de_sondas(seriales_encontrados: list) -> pd.DataFrame:
+def leer_excel_de_despliegue_de_sondas_corregido() -> pd.DataFrame:
     """ Lee el archivo Excel que contiene la información de despliegue de las sondas y devuelve un dataframe con datos de despliegue de las sondas 
     para las que se encontraron datos.
 
@@ -98,33 +98,14 @@ def leer_excel_de_despliegue_de_sondas(seriales_encontrados: list) -> pd.DataFra
         campania = string
     """
     ruta_al_excel_de_despliegue_de_sondas = crear_ruta_a_carpeta(get_ruta_al_excel_de_despliegue_de_sondas())   
-    ruta_al_excel_de_despliegue_de_sondas = ruta_al_excel_de_despliegue_de_sondas + ".xlsx"
+    ruta_al_excel_de_despliegue_de_sondas = ruta_al_excel_de_despliegue_de_sondas + "_corregido.xlsx"
     try:
 
         df_excel = pd.read_excel(ruta_al_excel_de_despliegue_de_sondas)
-        df_excel_filtrado = df_excel[df_excel['fecha_y_hora_de_la_primera_transmision'].notna()].copy()
-
-        df_excel_filtrado['serie_de_sonda'] = df_excel_filtrado['serie_de_sonda'].astype(float).astype(int).astype(str)   
-     
-        df_excel_filtrado['fecha_y_hora_de_despliegue'] = pd.to_datetime(df_excel_filtrado['fecha_y_hora_de_despliegue'], format="%d/%m/%Y %H:%M")
-        df_excel_filtrado['fecha_y_hora_de_la_primera_transmision'] = pd.to_datetime(df_excel_filtrado['fecha_y_hora_de_la_primera_transmision'], format="%d/%m/%Y %H:%M")
-        df_excel_filtrado['fecha_y_hora_de_ultima_transmision'] = pd.to_datetime(df_excel_filtrado['fecha_y_hora_de_ultima_transmision'], format="%d/%m/%Y %H:%M")
-        df_excel_filtrado['latitud_de_despliegue'] = df_excel_filtrado['latitud_de_despliegue'].str.split(' ').str[0].astype(float)
-        df_excel_filtrado['longitud_de_despliegue'] = df_excel_filtrado['longitud_de_despliegue'].str.split(' ').str[0].astype(float)
-        df_excel_filtrado['campania'] = df_excel_filtrado['campania']
-     
-        # Encontrar sondas sin datos
-        sondas_sin_datos = df_excel_filtrado[df_excel_filtrado['fecha_y_hora_de_la_primera_transmision'].isna()]['serie_de_sonda'].tolist()
-
-        # Avisarle a usuario qué sondas no tienen datos y que serán excluidas del analisis
-        seriales_de_sondas = get_seriales_sondas()
-        for serial in seriales_de_sondas:
-            if serial not in seriales_encontrados or serial in sondas_sin_datos:
-                print(f"La sonda {serial} no tiene datos cargados y será excluida del análisis.")   
-
-        df_excel_filtrado = df_excel_filtrado[df_excel_filtrado["serie_de_sonda"].isin(seriales_encontrados)].reset_index(drop=True)
+        df_excel.dropna(subset=['serie_de_sonda'], inplace=True) # elimino ausentes o nulos para que la conversion no de error
+        df_excel['serie_de_sonda'] = df_excel['serie_de_sonda'].astype(float).astype(int).astype(str)
         
-        return df_excel_filtrado
+        return df_excel
     
     except FileNotFoundError:
         raise FileNotFoundError(f"No se encontró el archivo Excel en la ruta: {ruta_al_excel_de_despliegue_de_sondas}")

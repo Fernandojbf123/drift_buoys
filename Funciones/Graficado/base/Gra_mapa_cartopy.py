@@ -2,6 +2,7 @@ import cartopy.crs as ccrs
 import cartopy.feature as cfeature
 from cartopy.mpl.gridliner import LONGITUDE_FORMATTER, LATITUDE_FORMATTER
 from matplotlib.axes import Axes
+import numpy as np
 
 
 def graficar_mapa_cartopy(axe:Axes, lon_min: float, lon_max: float, lat_min: float, lat_max: float) -> None:
@@ -58,8 +59,13 @@ def graficar_mapa_cartopy(axe:Axes, lon_min: float, lon_max: float, lat_min: flo
     axe.add_feature(cfeature.RIVERS)
 
     # Agregar ticks en los ejes X (longitud) e Y (latitud)
-    xticks = list(range(int(lon_min), int(lon_max)+1, 2))
-    yticks = list(range(int(lat_min), int(lat_max)+1, 2))
+    if abs(lon_min) - abs(lon_max) <= 5:
+        delta_tick = 0.5
+    else:
+        delta_tick = 2
+        
+    xticks = list(np.arange(np.floor(lon_min), np.ceil(lon_max)+1, delta_tick))
+    yticks = list(np.arange(np.floor(lat_min), np.ceil(lat_max)+1, delta_tick))
     axe.set_xticks(xticks, crs=ccrs.PlateCarree())
     axe.set_yticks(yticks, crs=ccrs.PlateCarree())
 

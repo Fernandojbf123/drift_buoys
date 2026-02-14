@@ -27,3 +27,20 @@ ylabels = {
     "v_corriente": "v (m/s)",
     "voltaje": "Volt (V)"
 }
+
+puertos = {
+    "El Bellote": {"lon": -93.133841, "lat": 18.429949},
+    "Dos Bocas": {"lon": -93.1938, "lat": 18.4341667},
+    "Cd Carmen": {"lon": -91.839, "lat": 18.655},
+    "Sanchez Magallanes": {"lon": -93.853048, "lat": 18.299602},
+    "Coatzacoalcos": {"lon": -94.41, "lat": 18.14},
+    "Tecolutla": {"lon": -97.006, "lat": 20.474},
+    "Tuxpan": {"lon": -97.306757, "lat": 20.966327},
+    "Isla Aguada": {"lon": -91.507021, "lat": 18.819539},
+    "Pto_Veracruz": {"lon": -96.123816, "lat": 19.192781},
+    "Altamira": {"lon": -97.855436, "lat": 22.490824},
+    "Tampico": {"lon": -97.788611, "lat": 22.262412},
+    "La Pesca": {"lon": -97.776662, "lat": 23.787006},
+    "Alvarado": {"lon": -95.76181, "lat": 18.77143},
+    "El Mezquital": {"lon": -97.443055, "lat": 25.243333}
+}

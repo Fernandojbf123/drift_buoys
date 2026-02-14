@@ -71,7 +71,7 @@ def dar_formato_a_figura_de_series_de_tiempo(propiedades: dict) -> None:
 
     Funciones auxiliares:
         - get_tipo_letra(): Obtiene el tipo de fuente configurado
-        - get_tamanio_letra(): Obtiene el tamaño base de fuente
+        - get_tamanio_de_letra(): Obtiene el tamaño base de fuente
 
     Categoría:
         Gráficos
@@ -80,7 +80,7 @@ def dar_formato_a_figura_de_series_de_tiempo(propiedades: dict) -> None:
     axes = propiedades.get("axes", None)
     titulo_de_figura = propiedades.get("titulo_de_figura", "")
     tipo_de_letra = get_tipo_letra()
-    titlesize = get_tamanio_letra() + 6
+    titlesize = get_tamanio_de_letra() + 6
     
     # Alinear etiquetas del eje Y
     fig.align_ylabels(axes[:])
@@ -147,7 +147,7 @@ def dar_formato_al_axe(propiedades_del_axe: dict) -> None:
     is_xticks_on = propiedades_del_axe.get("is_xticks_on", False)
     
     tipo_de_letra = get_tipo_letra()
-    tamanio_de_letra = get_tamanio_letra()
+    tamanio_de_letra = get_tamanio_de_letra()
     ylabelsize = tamanio_de_letra
     yticksize = tamanio_de_letra
     xlabelsize = tamanio_de_letra
@@ -548,7 +548,7 @@ def dar_formato_al_mapa(propieadades_de_mapa) -> None:
         
     Funciones auxiliares:
         - get_tipo_letra(): Obtiene el tipo de fuente configurado
-        - get_tamanio_letra(): Obtiene el tamaño base de fuente
+        - get_tamanio_de_letra(): Obtiene el tamaño base de fuente
         - get_decimales_figuras(): Obtiene decimales para ticks del colorbar
         
     Categoría:
@@ -567,7 +567,7 @@ def dar_formato_al_mapa(propieadades_de_mapa) -> None:
     maximo = propieadades_de_mapa.get("colorbar_max", 1.5) 
     
     tipo_de_letra = get_tipo_letra() # fontfamily
-    tamanio_de_letra = get_tamanio_letra()
+    tamanio_de_letra = get_tamanio_de_letra()
     title_size = tamanio_de_letra + 4
     xlabelsize = tamanio_de_letra + 2
     ylabelsize = tamanio_de_letra + 2

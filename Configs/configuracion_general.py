@@ -17,7 +17,7 @@ general_config = {
 
     # Lista de seriales de sondas a analizar
     # "seriales_de_sondas": ["4876187", "4878196", "4878205", "4878218","4866704","4878221","4878503","4876191","4876190"], # Todas
-    "seriales_de_sondas": ["4876187", "4878196", "4878205", "4878218"], # diciembre 2025
+    "seriales_de_sondas": ["4878221", "4878218", "4876187", "4878205", "4878196"], # diciembre 2025
     # "seriales_de_sondas": ["4866704","4878221","4878503","4876191","4876190"], # Enero 2026
 
     # 2. Del guardado
@@ -51,4 +51,7 @@ general_config = {
     "escala_de_color_rapidez": {"minimo": 0.0, "maximo": 1.5},  # en m/s
     "graficar_trayectorias_pasadas": False,  # Si se grafican las trayectorias previas a la fecha de estudio
     "curvas_de_batimetria": [-25, -100, -500, -1000, -2000],  # en metros
+    
+    # 4. Del puerto de salida
+    "puerto_de_salida": "Cd Carmen"
 }

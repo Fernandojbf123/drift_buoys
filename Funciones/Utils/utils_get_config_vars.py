@@ -66,7 +66,7 @@ def get_decimales_figuras():
 def get_tipo_letra():
     return _get_config_value("tipo_de_letra")
 
-def get_tamanio_letra():
+def get_tamanio_de_letra():
     return _get_config_value("tamanio_de_letra")
 
 def get_numero_bins_histograma():
@@ -93,3 +93,6 @@ def get_graficar_trayectorias_pasadas():
 
 def get_ruta_a_datos_topografia():
     return _get_config_value("ruta_a_datos_topografia")
+
+def get_puerto_de_salida():
+    return _get_config_value("puerto_de_salida")

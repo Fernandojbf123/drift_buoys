@@ -3,7 +3,7 @@ import cartopy.crs as ccrs
 import matplotlib.pyplot as plt
 from Funciones.Utils.utils_get_config_vars import *
 from Funciones.Utils.utilidades import *
-from Funciones.Carga.cargar_datos_csv import leer_excel_de_despliegue_de_sondas 
+from Funciones.Carga.cargar_datos_csv import * 
 from .base.Gra_mapa_cartopy import graficar_mapa_cartopy
 from .base.Gra_mapa_topografia import graficar_mapa_topografico
 from .base.Gra_batimetria_en_mapa import graficar_batimetria_en_mapa        

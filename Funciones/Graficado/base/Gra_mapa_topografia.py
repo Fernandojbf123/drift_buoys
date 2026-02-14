@@ -53,13 +53,3 @@ def graficar_mapa_topografico(axe:Axes, topografia, lon_min: float, lon_max: flo
     axe.set_extent([lon_min, lon_max, lat_min, lat_max], crs=ccrs.PlateCarree())
     axe.pcolormesh(lon, lat, elevacion, cmap=newcmap, vmin=-4000, vmax=4000)
     axe.coastlines(resolution='10m')
-
-    # Agregar ticks en los ejes X (longitud) e Y (latitud)
-    xticks = list(range(int(lon_min), int(lon_max)+1, 2))
-    yticks = list(range(int(lat_min), int(lat_max)+1, 2))
-    axe.set_xticks(xticks, crs=ccrs.PlateCarree())
-    axe.set_yticks(yticks, crs=ccrs.PlateCarree())
-
-    # Formatear etiquetas de los ticks
-    axe.xaxis.set_major_formatter(LONGITUDE_FORMATTER)
-    axe.yaxis.set_major_formatter(LATITUDE_FORMATTER)

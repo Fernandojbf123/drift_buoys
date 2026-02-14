@@ -46,7 +46,7 @@ def graficar_batimetria_en_mapa(axe: Axes, datos_de_batimetria: dict) -> None:
         - Las líneas se dibujan en gris discontinuo con grosor de 0.8.
 
     Funciones auxiliares:
-        - get_tamanio_letra(): Obtiene el tamaño de fuente configurado para las etiquetas.
+        - get_tamanio_de_letra(): Obtiene el tamaño de fuente configurado para las etiquetas.
 
     Categoría:
         Gráficos
@@ -61,11 +61,11 @@ def graficar_batimetria_en_mapa(axe: Axes, datos_de_batimetria: dict) -> None:
     # Etiquetar cada curva de nivel con su profundidad: Esto se hizo de forma "automática". Busca el punto más cercano a una posición manual
     # se van definiendo las posiciones donde se pondrán las etiquetas para cada nivel.
     manual_positions = []
-    lat = 22
-    lon = -100
+    lat = 19 #22
+    lon = -92.5 #-100
     for seglist in contornos.allsegs:
-        lat -= 0.5
-        lon += 0.5
+        lat -= 0.1
+        lon += 0.05
         dif = 1000  # valor grande inicial
         if seglist:  # Si hay segmentos para este nivel
             for a , _ in enumerate(seglist):
@@ -78,8 +78,8 @@ def graficar_batimetria_en_mapa(axe: Axes, datos_de_batimetria: dict) -> None:
             manual_positions.append((x_closest, y_closest))
 
     # Ahora coloca una etiqueta en cada posición
-    axe.clabel(contornos, fmt='%d', fontsize=get_tamanio_letra()-5, colors='black', manual=manual_positions, inline=True, inline_spacing=5)
+    axe.clabel(contornos, fmt='%d', fontsize=get_tamanio_de_letra()-5, colors='black', manual=manual_positions, inline=True, inline_spacing=5)
 
 
-    # ax.clabel(contornos, fmt='%d', fontsize=get_tamanio_letra()-1, colors='black', inline=True, inline_spacing=10)
+    # ax.clabel(contornos, fmt='%d', fontsize=get_tamanio_de_letra()-1, colors='black', inline=True, inline_spacing=10)
     return None

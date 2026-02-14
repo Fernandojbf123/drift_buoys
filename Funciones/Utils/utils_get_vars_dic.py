@@ -1,4 +1,4 @@
-from Configs.diccionario_variables import ylabels, var_names
+from Configs.diccionario_variables import *
 # Funciones asociadas al diccionario de variables
 
 def obtener_nombres_estandarizados(nombres_de_columnas_crudas: list) -> list:
@@ -28,3 +28,6 @@ def obtener_nombres_estandarizados(nombres_de_columnas_crudas: list) -> list:
 
 def get_ylabels(var_names):
     return [ylabels[var] for var in var_names]
+
+def get_puertos():
+    return puertos
