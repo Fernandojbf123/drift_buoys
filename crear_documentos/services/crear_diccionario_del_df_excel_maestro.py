@@ -2,6 +2,9 @@ import os
 import pandas as pd
 from ..configs.manager_doc_config import get_ruta_a_carpeta_de_las_figuras
 
+def aux_crear_datos_para_tabla_2():
+    return None
+
 def crear_diccionario_del_df_excel_maestro(df: pd.DataFrame) -> dict:
     """Crea un diccionario a partir de un DataFrame del excel maestro.
 

@@ -6,6 +6,17 @@ from docx.oxml import OxmlElement
 from docx.oxml.ns import qn
 from docx.text.paragraph import Paragraph
 
+
+"""
+Este módulo contiene funciones para reemplazar marcadores de posición en párrafos de Word, incluyendo la inserción de imágenes con o sin títulos.
+Conceptos clave:
+paragraph - Un párrafo en Word, que puede contener múltiples runs.
+run - Es un fragmento de texto dentro de un párrafo que comparte el mismo formato.
+Un párrafo puede tener múltiples runs con diferentes formatos.
+ejemplo: "El valor es <<valor>>" podría estar dividido en 3 runs: ["El valor es ", "<<valor>>", ""]
+
+"""
+
 def insertar_parrafo_despues(paragraph, texto="", centrado=False):
     """Inserta un nuevo párrafo después del párrafo dado usando manipulación XML.
     
@@ -175,12 +186,13 @@ def aux_reemplazar_variable_en_parrafo(paragraph, key, value):
             run.text = run.text.replace(key, new_value)
         
         elif "<<" in run.text: # Si el marcador está dividido
-            paragraph.runs[irun].text = new_value
-            paragraph.runs[irun+1].text = ""
-            paragraph.runs[irun+2].text = ""
-            
-            return paragraph
-    
+            variable_word = "".join([paragraph.runs[irun].text, paragraph.runs[irun+1].text, paragraph.runs[irun+2].text])
+            if key in variable_word:
+                paragraph.runs[irun].text = variable_word.replace(key, new_value)
+                paragraph.runs[irun+1].text = ""
+                paragraph.runs[irun+2].text = ""
+                return paragraph
+
     
     
 def reemplazar_en_word(doc, diccionario_de_reemplazos):
