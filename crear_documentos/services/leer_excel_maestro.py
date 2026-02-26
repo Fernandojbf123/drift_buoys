@@ -1,5 +1,5 @@
 import pandas as pd
-from utils.utils_get_doc_config import *
+from crear_documentos.configs.manager_doc_config import *
 
 def leer_excel_maestro(nombre_de_hoja: str = "instalacion") -> pd.DataFrame:
     """Lee el excel maestro con la información de los despliegues de sondas y devuelve un DataFrame de pandas.

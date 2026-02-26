@@ -1,7 +1,7 @@
 import os
 from docx import Document
 
-from crear_documentos.utils.utils_get_doc_config import get_nombre_de_la_plantilla_de_word
+from crear_documentos.configs.manager_doc_config import get_nombre_de_la_plantilla_de_word
 
 
 def abrir_plantilla_doris() -> Document:
