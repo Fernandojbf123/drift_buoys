@@ -5,11 +5,11 @@ import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 from matplotlib.figure import Figure
 
-from Funciones.Graficado.base.Gra_dar_formato_a_figuras import *
-from Funciones.Graficado.base.Gra_serie_de_tiempo import graficar_serie_de_tiempo
+from services.Graficado.base.Gra_dar_formato_a_figuras import *
+from services.Graficado.base.Gra_serie_de_tiempo import graficar_serie_de_tiempo
 
-from Funciones.Utils.utils_get_config_vars import *
-from Funciones.Utils.utils_get_vars_dic import *
+from configs.manager_configuracion import *
+from configs.manager_diccionario_variables import *
 ##################################################################################
 
 

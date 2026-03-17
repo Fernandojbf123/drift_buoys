@@ -15,6 +15,7 @@ from matplotlib.axes import Axes
 from matplotlib.ticker import MaxNLocator
 
 from configs.manager_diccionario_variables import *
+from configs.manager_configuracion import *
 
 # Configurar locale para español (compatible con Windows)
 try:
@@ -181,7 +182,7 @@ def dar_formato_al_axe(propiedades_del_axe: dict) -> None:
     obj_axes.set_xlabel(xlabel, fontname=tipo_de_letra, fontweight='bold', fontsize=xlabelsize)
 
     # Calcular xlim y xticks
-    xlim, xticks_finales, xticks_format = calcular_xticks(tspan = tspan, n_ticks=5)
+    xlim, xticks_finales, xticks_format = calcular_xticks(tspan = tspan, n_ticks=10)
     # Asignar los xticks calculados
     obj_axes.set_xticks(xticks_finales)
     
@@ -248,45 +249,50 @@ def calcular_xticks(tspan: pd.DatetimeIndex, n_ticks:int =5)-> tuple:
     
     diferencia = fecha_final.normalize() - fecha_inicial.normalize() + pd.Timedelta(days=1)
     
-    if diferencia.days >=6:
-        # ticks cada día
-        ticks = pd.date_range(
-            start=fecha_inicial.normalize(),
-            end=fecha_final.normalize(),
-            freq='D'
-        )
-        
+    if diferencia.days-2 >=10 :
+        n_ticks = 5
         xlim = (fecha_inicial.normalize() - pd.Timedelta(days=1), fecha_final + pd.Timedelta(days=1))
         formato_ticks = "days"
     
-    
-    elif diferencia.days < 6  and diferencia.days >2:
-        # ticks cada día
-        ticks = pd.date_range(
-            start=fecha_inicial.normalize(),
-            end=fecha_final.normalize(),
-            freq='D'
-        )
-        n_ticks = diferencia.days
+    elif diferencia.days-2 == 9:
+        n_ticks = 9
         
+    elif diferencia.days-2 == 8 or diferencia.days-2 == 6 or diferencia.days-2 == 4:
+        n_ticks = 4
+        xlim = (fecha_inicial.normalize() - pd.Timedelta(hours=2), fecha_final + pd.Timedelta(hours=12))
+        formato_ticks = "days"
+        
+    elif diferencia.days-2 == 7:
+        n_ticks = 7
         xlim = (fecha_inicial.normalize() - pd.Timedelta(hours=2), fecha_final + pd.Timedelta(hours=2))
         formato_ticks = "days"
     
+    elif diferencia.days-2 == 5:
+        n_ticks = 5
+        xlim = (fecha_inicial.normalize() - pd.Timedelta(hours=2), fecha_final + pd.Timedelta(hours=2))
+        formato_ticks = "days"
+    
+    elif diferencia.days == 3:
+        n_ticks = 3
+        xlim = (fecha_inicial.normalize() - pd.Timedelta(hours=2), fecha_final + pd.Timedelta(hours=2))
+        formato_ticks = "hours"
+    
     elif diferencia.days <= 2:
-        ticks = pd.date_range(
-            start=fecha_inicial,
-            end=fecha_final,
-            freq='h'
-        )
-        
+        n_ticks = 4
         xlim = (fecha_inicial - pd.Timedelta(hours=1), fecha_final + pd.Timedelta(hours=1)) 
         formato_ticks = "hours"
     
+    # ticks cada día
+    ticks = pd.date_range(
+        start=fecha_inicial.normalize(),
+        end=fecha_final.normalize(),
+        freq='D'
+    )
+    
     # seleccionar n_ticks equiespaciados (Deben ser 5 salvo que sea el caso (entre 3 y 4 días))
-    if len(ticks) >= n_ticks:
-        # 5 índices equiespaciados, siempre el primero y el último
-        indices = np.linspace(0, len(ticks)-1, n_ticks, dtype=int)
-        ticks = ticks[indices]
+    # entre 7 a 3 índices equiespaciados, siempre el primero y el último
+    indices = np.linspace(0, len(ticks)-1, n_ticks, dtype=int)
+    ticks = ticks[indices]
             
     return xlim, ticks, formato_ticks
 
@@ -458,7 +464,7 @@ def asignar_ylim(obj_axes: Axes, var_value: list, var_name: str, ylabelsize: flo
     else:  # Todas las variables que no sean ["rap_corriente","Hs", "Hm", "Tp"] ni direccion
         ylim_min = mini - padding_y
         ylim_max = maxi + padding_y
-
+    
     # Variables de direccion
     if var_name in ['dir_corriente']:
         obj_axes.set_ylim([0, 360])
@@ -473,11 +479,16 @@ def asignar_ylim(obj_axes: Axes, var_value: list, var_name: str, ylabelsize: flo
     # Asignar los ejes
     obj_axes.set_ylim(ylim_min, ylim_max)
     
-    # Para temperatura, forzar ticks enteros
+    # Para temperatura y voltaje forzar ticks enteros
+    set_integer = False
     if var_name.lower() in ["temperatura_mar","temperatura_aire","voltaje"]:
-        obj_axes.yaxis.set_major_locator(MaxNLocator(integer=True))
-    else:
-        obj_axes.yaxis.set_major_locator(MaxNLocator(nbins=5))
+        set_integer = True
+    
+    set_nbins = len(obj_axes.get_yticks())
+    if set_nbins >= 7:
+        set_nbins = 5
+        
+    obj_axes.yaxis.set_major_locator(MaxNLocator(integer=set_integer, nbins=set_nbins))
     
     return obj_axes, obj_axes_2
 

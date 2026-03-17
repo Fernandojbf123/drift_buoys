@@ -1,6 +1,6 @@
 from matplotlib.axes import Axes
 import numpy as np
-from configs.manager_diccionario_variables import *
+from configs.manager_configuracion import *
 
 def graficar_batimetria_en_mapa(axe: Axes, datos_de_batimetria: dict) -> None:
     """

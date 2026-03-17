@@ -4,9 +4,9 @@ import numpy as np
 from dotenv import load_dotenv
 
 
-from Funciones.Graficado.base.Gra_series_de_tiempo_telemetria import Gra_series_de_tiempo_telemetria
-from Funciones.Utils.utils_get_config_vars import *
-from Funciones.Utils.utilidades import *
+from services.Graficado.base.Gra_series_de_tiempo_telemetria import Gra_series_de_tiempo_telemetria
+from configs.manager_configuracion import *
+from services.Utils.utilidades import *
 ################################################################################
 
 

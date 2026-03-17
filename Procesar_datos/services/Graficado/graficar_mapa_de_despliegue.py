@@ -1,14 +1,14 @@
 ########################### IMPORTS NO TOCAR#####################################
 import cartopy.crs as ccrs
 import matplotlib.pyplot as plt
-from Funciones.Utils.utils_get_config_vars import *
-from Funciones.Utils.utilidades import *
-from Funciones.Carga.cargar_datos_csv import leer_excel_de_despliegue_de_sondas_corregido 
+from configs.manager_configuracion import *
+from services.Utils.utilidades import *
+from services.Carga.cargar_datos_csv import leer_excel_de_despliegue_de_sondas_corregido 
 from .base.Gra_mapa_cartopy import graficar_mapa_cartopy
 from .base.Gra_mapa_topografia import graficar_mapa_topografico
 from .base.Gra_batimetria_en_mapa import graficar_batimetria_en_mapa        
 from .base.Gra_trayectorias_de_sonda import graficar_trayectorias_de_sonda
-from Funciones.Graficado.base.Gra_dar_formato_a_figuras import *
+from services.Graficado.base.Gra_dar_formato_a_figuras import *
 ################################################################################
 
 def graficar_mapa_de_despliegue(mostrar_figura: bool = False) -> None:
@@ -34,7 +34,7 @@ def graficar_mapa_de_despliegue(mostrar_figura: bool = False) -> None:
     
     seriales_a_analizar = get_seriales_sondas()
     
-    seriales_del_excel = df_excel_de_despliegue["serie_de_sonda"]
+    seriales_del_excel = df_excel_de_despliegue["serial_de_sonda"]
     lon = df_excel_de_despliegue["longitud_corregida"].dropna()
     lat = df_excel_de_despliegue["latitud_corregida"].dropna()
     

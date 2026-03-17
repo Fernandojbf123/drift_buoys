@@ -1,14 +1,14 @@
 ########################### IMPORTS NO TOCAR#####################################
 import cartopy.crs as ccrs
 import matplotlib.pyplot as plt
-from Funciones.Utils.utils_get_config_vars import *
-from Funciones.Utils.utilidades import *
-from Funciones.Carga.cargar_datos_csv import * 
+from configs.manager_configuracion import *
+from services.Utils.utilidades import *
+from services.Carga.cargar_datos_csv import * 
 from .base.Gra_mapa_cartopy import graficar_mapa_cartopy
 from .base.Gra_mapa_topografia import graficar_mapa_topografico
 from .base.Gra_batimetria_en_mapa import graficar_batimetria_en_mapa        
 from .base.Gra_trayectorias_de_sonda import graficar_trayectorias_de_sonda
-from Funciones.Graficado.base.Gra_dar_formato_a_figuras import *
+from services.Graficado.base.Gra_dar_formato_a_figuras import *
 ################################################################################
 
 def graficar_mapa_con_posiciones(mostrar_figura: bool = False) -> None:
@@ -38,7 +38,7 @@ def graficar_mapa_con_posiciones(mostrar_figura: bool = False) -> None:
     seriales_de_sondas = get_seriales_sondas()
     
     # Cargar datos de despliegue desde Excel
-    df_excel_de_despliegue = leer_excel_de_despliegue_de_sondas(seriales_de_sondas)
+    df_excel_de_despliegue = leer_excel_de_despliegue_de_sondas_corregido()
     
     # Cargar datos de batimetría desde el archivo NetCDF
     datos_de_batimetria = cargar_datos_de_batimetria()

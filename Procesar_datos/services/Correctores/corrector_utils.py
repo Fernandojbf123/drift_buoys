@@ -18,10 +18,10 @@ def buscar_duplicados_explicitos(data: pd.DataFrame) -> pd.DataFrame:
     return duplicados_explicitos
 
 ################# E #################
-def eliminar_datos_duplicados(data: pd.DataFrame, duplicados_explicitos, serie_de_sonda) -> pd.DataFrame:
+def eliminar_datos_duplicados(data: pd.DataFrame, duplicados_explicitos, serial_de_sonda) -> pd.DataFrame:
     """ Elimina los datos duplicados en los dataframes del diccionario dado."""
     if duplicados_explicitos.sum() > 0: # Si hay duplicados
-        print(f"Se encontraron {duplicados_explicitos.sum()} datos duplicados en la sonda {serie_de_sonda}. Eliminándolos...")  
+        print(f"Se encontraron {duplicados_explicitos.sum()} datos duplicados en la sonda {serial_de_sonda}. Eliminándolos...")  
         data.drop_duplicates(inplace=True)
 
     return data.reset_index(drop=True)
