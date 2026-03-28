@@ -35,8 +35,8 @@ def graficar_mapa_de_despliegue(mostrar_figura: bool = False) -> None:
     seriales_a_analizar = get_seriales_sondas()
     
     seriales_del_excel = df_excel_de_despliegue["serial_de_sonda"]
-    lon = df_excel_de_despliegue["longitud_corregida"].dropna()
-    lat = df_excel_de_despliegue["latitud_corregida"].dropna()
+    lon = df_excel_de_despliegue["longitud_maniobra"].dropna()
+    lat = df_excel_de_despliegue["latitud_maniobra"].dropna()
     
     # Obtener lat lon del puerto de salida
     puertos = get_puertos() # todos los puertos de la base de datos
@@ -65,12 +65,13 @@ def graficar_mapa_de_despliegue(mostrar_figura: bool = False) -> None:
     etiquetas = []
     lon_despliegues = []
     lat_despliegues = []
-    for (lon,lat, serial) in zip(lon,lat, seriales_del_excel):
-        if serial not in seriales_a_analizar:
-            continue
-        etiquetas.append(f"{serial}")
-        lon_despliegues.append(lon)
-        lat_despliegues.append(lat) 
+    
+    for serial in seriales_a_analizar:
+        idx = seriales_del_excel[seriales_del_excel == serial].index[0]
+        if idx is not None:
+            lon_despliegues.append(lon[idx])
+            lat_despliegues.append(lat[idx])
+            etiquetas.append(f"{serial}")
     
     ruta_lon.extend(lon_despliegues)
     ruta_lat.extend(lat_despliegues)

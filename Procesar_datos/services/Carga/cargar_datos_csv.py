@@ -140,7 +140,7 @@ def seleccionar_rango_de_fechas(diccionario: dict,
     for serial in list(diccionario.keys()):
         idx = df_excel[df_excel['serial_de_sonda'] == serial].index[0]
         # Caso general: se usan las fechas definidas en la configuración general
-        fecha_de_primera_medicion = pd.to_datetime(df_excel.loc[idx, "fecha_y_hora_de_despliegue_corregida"], format="%Y-%m-%d %H:%M:%S")    # del excel de despliegue
+        fecha_de_primera_medicion = pd.to_datetime(df_excel.loc[idx, "fecha_y_hora_de_despliegue_maniobra"], format="%Y-%m-%d %H:%M:%S")    # del excel de despliegue
         fecha_de_la_ultima_medicion = diccionario[serial]["tspan_de_envio"].max() # de los datos cargados
         fecha_de_inicio = max(fecha_de_inicio_del_analisis, fecha_de_primera_medicion) # fecha de inicio es la menor entre la fecha de inicio del análisis y la fecha de la primera medición
         fecha_de_fin = min(fecha_de_fin_del_analisis, fecha_de_la_ultima_medicion) # fecha de fin es la mayor entre la fecha de fin del análisis y la fecha de la última medición
@@ -362,7 +362,7 @@ def eliminar_nans_finales(dic_estudio: dict) -> dict:
     
     if not dic_estudio:
         return output_dic_estudio
-    
+        
     seriales = list(dic_estudio.keys())
     for serial in seriales:
         
@@ -376,9 +376,9 @@ def eliminar_nans_finales(dic_estudio: dict) -> dict:
 
     return output_dic_estudio
 
-def agregar_coordenadas_de_despliegue_corregidas_al_excel_de_despliegue(diccionario) -> None:
-    """ Agrega las columnas de latitud y longitud de despliegue corregidas al dataframe de despliegue de las sondas.
-    Las coordenadas corregidas se obtienen del primer valor no NaN de latitud y longitud en el dataframe de cada sonda en el diccionario.
+def agregar_coordenadas_de_despliegue_maniobras_al_excel_de_despliegue(diccionario) -> None:
+    """ Agrega las columnas de latitud y longitud de despliegue maniobras al dataframe de despliegue de las sondas.
+    Las coordenadas maniobras se obtienen del primer valor no NaN de latitud y longitud en el dataframe de cada sonda en el diccionario.
     
     PENDIENTE HACER
     """
@@ -388,24 +388,24 @@ def agregar_coordenadas_de_despliegue_corregidas_al_excel_de_despliegue(dicciona
     df_excel = pd.read_excel(ruta_al_excel_de_despliegue_de_sondas)
     df_excel_filtrado = df_excel.dropna(subset=['serial_de_sonda']).copy() # elimino ausentes o nulos para que la conversion no de error
     df_excel_filtrado['serial_de_sonda'] = df_excel_filtrado['serial_de_sonda'].astype(float).astype(int).astype(str) 
-    df_excel_filtrado["fecha_y_hora_de_despliegue_corregida"] = pd.to_datetime(df_excel_filtrado["fecha_y_hora_de_despliegue_corregida"]) # asegurar que el tipo sea string para evitar errores al asignar las fechas corregidas. Luego se vuelve a convertir a datetime al guardar el excel corregido.
+    df_excel_filtrado["fecha_y_hora_de_despliegue_maniobra"] = pd.to_datetime(df_excel_filtrado["fecha_y_hora_de_despliegue_maniobra"]) # asegurar que el tipo sea string para evitar errores al asignar las fechas maniobras. Luego se vuelve a convertir a datetime al guardar el excel corregido.
     
     seriales = list(diccionario.keys())
     for serial in seriales:
         df = diccionario[serial]
         row = df.loc[0,:]
-        latitud_despliegue_corregida = row["latitud"]
-        longitud_despliegue_corregida = row["longitud"]
+        latitud_despliegue_maniobra = row["latitud"]
+        longitud_despliegue_maniobra = row["longitud"]
         tspan_de_envio = pd.to_datetime(row["tspan_de_envio"],format="%Y-%m-%d %H:%M:%S")
         # tspan_rounded = tspan_de_envio.replace(minute=0) if tspan_de_envio.minute < 30 else tspan_de_envio.replace(minute=30)
         
         idx = None
         idx = df_excel_filtrado[df_excel_filtrado['serial_de_sonda'] == serial].index[0]
         if idx is not None: 
-            df_excel_filtrado.loc[idx, "fecha_y_hora_de_despliegue_corregida"] = tspan_de_envio
-            df_excel_filtrado.loc[idx, "latitud_corregida"] = latitud_despliegue_corregida
-            df_excel_filtrado.loc[idx, "longitud_corregida"] = longitud_despliegue_corregida
-            print(f"Sonda {serial}: Latitud corregida: {latitud_despliegue_corregida}, Longitud corregida: {longitud_despliegue_corregida}, Fecha y hora de despliegue corregida: {tspan_de_envio}")
+            df_excel_filtrado.loc[idx, "fecha_y_hora_de_despliegue_maniobra"] = tspan_de_envio
+            df_excel_filtrado.loc[idx, "latitud_maniobra"] = latitud_despliegue_maniobra
+            df_excel_filtrado.loc[idx, "longitud_maniobra"] = longitud_despliegue_maniobra
+            print(f"Sonda {serial}: Latitud maniobra: {latitud_despliegue_maniobra}, Longitud maniobra: {longitud_despliegue_maniobra}, Fecha y hora de despliegue maniobra: {tspan_de_envio}")
    
     # Guardar el DataFrame modificado de nuevo en el archivo Excel
     ruta_al_excel_de_despliegue_de_sondas = crear_ruta_a_carpeta(get_ruta_al_excel_de_despliegue_de_sondas())   

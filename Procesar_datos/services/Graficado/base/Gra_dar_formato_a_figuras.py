@@ -249,6 +249,7 @@ def calcular_xticks(tspan: pd.DatetimeIndex, n_ticks:int =5)-> tuple:
     
     diferencia = fecha_final.normalize() - fecha_inicial.normalize() + pd.Timedelta(days=1)
     
+    freq = "D"
     if diferencia.days-2 >=10 :
         n_ticks = 5
         xlim = (fecha_inicial.normalize() - pd.Timedelta(days=1), fecha_final + pd.Timedelta(days=1))
@@ -271,23 +272,34 @@ def calcular_xticks(tspan: pd.DatetimeIndex, n_ticks:int =5)-> tuple:
         n_ticks = 5
         xlim = (fecha_inicial.normalize() - pd.Timedelta(hours=2), fecha_final + pd.Timedelta(hours=2))
         formato_ticks = "days"
+        
     
     elif diferencia.days == 3:
         n_ticks = 3
-        xlim = (fecha_inicial.normalize() - pd.Timedelta(hours=2), fecha_final + pd.Timedelta(hours=2))
+        xlim = (fecha_inicial - pd.Timedelta(hours=2), fecha_final + pd.Timedelta(hours=2))
         formato_ticks = "hours"
+        freq = "h"
     
     elif diferencia.days <= 2:
-        n_ticks = 4
+        n_ticks = 5
         xlim = (fecha_inicial - pd.Timedelta(hours=1), fecha_final + pd.Timedelta(hours=1)) 
         formato_ticks = "hours"
+        freq = "h"
     
     # ticks cada día
     ticks = pd.date_range(
         start=fecha_inicial.normalize(),
         end=fecha_final.normalize(),
-        freq='D'
+        freq=freq
     )
+    
+    if "h" in freq:
+        ticks = pd.date_range(
+            start=fecha_inicial,
+            end=fecha_final,
+            freq=freq
+        )
+
     
     # seleccionar n_ticks equiespaciados (Deben ser 5 salvo que sea el caso (entre 3 y 4 días))
     # entre 7 a 3 índices equiespaciados, siempre el primero y el último
