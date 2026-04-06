@@ -24,20 +24,20 @@ general_config = {
     # "seriales_de_sondas": ["4878219","4878190","4878213","4878203","4876177"], # 19 febrero 2026
     # "seriales_de_sondas": ["4878219"], # 19 febrero 2026
     # "seriales_de_sondas": ["4878319","4878152","4876178","4878225","4878504"], # 20 febrero 2026
-    "seriales_de_sondas": ["4876179", "4912197", "4887980", "4866660"], # 26 de marzo
-    # seriales = ["4878319"] # 01 Marzo 2026
+    # "seriales_de_sondas": ["4876179", "4912197", "4887980", "4866660"], # 26 de marzo
+    "seriales_de_sondas": ["4878319"], # 01 Marzo 2026
 
     # 2. Del guardado
     # Ruta a la carpeta para guardar los datos procesados
-    # "carpeta_de_guardado_de_datos_procesados": "C:\\Users\\Atmosfera\\Desktop\\datos_procesados\\doris\\202603\\",
-    "carpeta_de_guardado_de_datos_procesados": "C:\\Users\\Atmosfera\\Desktop\\datos_procesados\\doris\\10.1\\202603\\", # Para pruebas de lab
+    "carpeta_de_guardado_de_datos_procesados": "C:\\Users\\Atmosfera\\Desktop\\datos_procesados\\doris\\10.3\\202603\\",
+    # "carpeta_de_guardado_de_datos_procesados": "C:\\Users\\Atmosfera\\Desktop\\datos_procesados\\doris\\10.1\\202603\\", # Para pruebas de lab
     # Nombre del archivo para guardar los datos procesados (formato pickle)
     "nombre_del_archivo_de_datos_procesados": "datos_procesados_sondas_oceanograficas",
     "nombre_del_archivo_de_datos_previos_a_la_fecha_de_estudio": "datos_previos_al_estudio",
     "nombre_del_excel_de_porcentajes": "porcentajes_de_las_sondas",
     # Ruta a la carpeta para guardar las figuras
-    # "carpeta_de_guardado_de_figuras": "C:\\Users\\Atmosfera\\Desktop\\datos_procesados\\doris\\202603\\",
-    "carpeta_de_guardado_de_figuras": "C:\\Users\\Atmosfera\\Desktop\\datos_procesados\\doris\\10.1\\202603\\", # Para pruebas de lab
+    "carpeta_de_guardado_de_figuras": "C:\\Users\\Atmosfera\\Desktop\\datos_procesados\\doris\\10.3\\202603\\",
+    # "carpeta_de_guardado_de_figuras": "C:\\Users\\Atmosfera\\Desktop\\datos_procesados\\doris\\10.1\\202603\\", # Para pruebas de lab
 
     # 3. De las figuras
     # 3.1. Generales

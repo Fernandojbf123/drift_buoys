@@ -70,17 +70,28 @@ def interpolar_datos_faltantes(diccionario: dict) -> dict:
             tspan_completo = diccionario[serial_de_sonda]["tspan_rounded"] # prueba para evitar error de variable no usada
             tspan_numeric_completo = mdates.date2num(tspan_completo)
 
-            data = diccionario[serial_de_sonda]
-            new_data = data.dropna().reset_index(drop=True)
-            tspan_numeric_real = mdates.date2num(new_data["tspan_rounded"])
+            data = diccionario[serial_de_sonda] # datos de la sonda
+            data_wo_nans = data.dropna().reset_index(drop=True) # datos sin nans
+            tspan_numeric_real = mdates.date2num(data_wo_nans["tspan_rounded"])
 
             for column in data.columns:
                 if pd.api.types.is_numeric_dtype(data[column]) and "tspan" not in column and column != "rap_corriente" and column != "dir_corriente":
                     # obtener función de interpolación
-                    f = interp1d(tspan_numeric_real, new_data[column], kind='linear', fill_value=np.nan, bounds_error=False)
+                    f = interp1d(tspan_numeric_real, data_wo_nans[column], kind='linear', fill_value=np.nan, bounds_error=False)
                     # interpolar en las fechas completas
                     data[column] = f(tspan_numeric_completo)
             
+            
+            # Si los la diferencia entre horas consecutivas es mayor a 4 horas; se eliminan las interpolaciones de esas horas.
+            columnas_de_reemplazo = [col for col in data.columns if col not in ["tspan_rounded", "tspan_de_envio"]]
+            for irow in range(1,len(data_wo_nans)-1):
+                next_date = data_wo_nans["tspan_rounded"].iloc[irow+1]
+                current_date = data_wo_nans["tspan_rounded"].iloc[irow]
+                deltaT = next_date - current_date
+                if deltaT > pd.Timedelta(hours=4):
+                    mask = data[(data["tspan_rounded"] >= current_date) & (data["tspan_rounded"] <= next_date)].index
+                    data.loc[mask, columnas_de_reemplazo] = np.nan
+
             # Ahora se corrige rap_corriente y dir_corriente por separado (La rap y dir se deben calcular apartir de las componentes u y v)
             data["dir_corriente"], data["rap_corriente"] = uv2polar(data["u_corriente"], data["v_corriente"])
 

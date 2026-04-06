@@ -182,7 +182,7 @@ def dar_formato_al_axe(propiedades_del_axe: dict) -> None:
     obj_axes.set_xlabel(xlabel, fontname=tipo_de_letra, fontweight='bold', fontsize=xlabelsize)
 
     # Calcular xlim y xticks
-    xlim, xticks_finales, xticks_format = calcular_xticks(tspan = tspan, n_ticks=10)
+    xlim, xticks_finales, xticks_format = calcular_xticks(tspan = tspan, n_ticks=3)
     # Asignar los xticks calculados
     obj_axes.set_xticks(xticks_finales)
     
@@ -248,65 +248,44 @@ def calcular_xticks(tspan: pd.DatetimeIndex, n_ticks:int =5)-> tuple:
     fecha_final = tspan.max()
     
     diferencia = fecha_final.normalize() - fecha_inicial.normalize() + pd.Timedelta(days=1)
+    real_dif = fecha_final - fecha_inicial
     
-    freq = "D"
-    if diferencia.days-2 >=10 :
-        n_ticks = 5
-        xlim = (fecha_inicial.normalize() - pd.Timedelta(days=1), fecha_final + pd.Timedelta(days=1))
-        formato_ticks = "days"
+    diff_ini = fecha_inicial - fecha_inicial.normalize()
+    diff_final = fecha_final - fecha_final.normalize()
     
-    elif diferencia.days-2 == 9:
-        n_ticks = 9
-        
-    elif diferencia.days-2 == 8 or diferencia.days-2 == 6 or diferencia.days-2 == 4:
-        n_ticks = 4
-        xlim = (fecha_inicial.normalize() - pd.Timedelta(hours=2), fecha_final + pd.Timedelta(hours=12))
-        formato_ticks = "days"
-        
-    elif diferencia.days-2 == 7:
-        n_ticks = 7
-        xlim = (fecha_inicial.normalize() - pd.Timedelta(hours=2), fecha_final + pd.Timedelta(hours=2))
-        formato_ticks = "days"
-    
-    elif diferencia.days-2 == 5:
-        n_ticks = 5
-        xlim = (fecha_inicial.normalize() - pd.Timedelta(hours=2), fecha_final + pd.Timedelta(hours=2))
-        formato_ticks = "days"
-        
-    
-    elif diferencia.days == 3:
-        n_ticks = 3
-        xlim = (fecha_inicial - pd.Timedelta(hours=2), fecha_final + pd.Timedelta(hours=2))
+    if real_dif.days <= 3:
+        freq = "H"
         formato_ticks = "hours"
-        freq = "h"
     
-    elif diferencia.days <= 2:
-        n_ticks = 5
-        xlim = (fecha_inicial - pd.Timedelta(hours=1), fecha_final + pd.Timedelta(hours=1)) 
-        formato_ticks = "hours"
-        freq = "h"
-    
-    # ticks cada día
-    ticks = pd.date_range(
-        start=fecha_inicial.normalize(),
-        end=fecha_final.normalize(),
-        freq=freq
-    )
-    
-    if "h" in freq:
-        ticks = pd.date_range(
-            start=fecha_inicial,
-            end=fecha_final,
-            freq=freq
-        )
+        xlim = [fecha_inicial - pd.Timedelta(hours=2), fecha_final + pd.Timedelta(hours=2)]
+        paso = max(1, len(tspan) // (n_ticks - 1))
+        xticks = tspan[::paso][:n_ticks]
 
-    
-    # seleccionar n_ticks equiespaciados (Deben ser 5 salvo que sea el caso (entre 3 y 4 días))
-    # entre 7 a 3 índices equiespaciados, siempre el primero y el último
-    indices = np.linspace(0, len(ticks)-1, n_ticks, dtype=int)
-    ticks = ticks[indices]
-            
-    return xlim, ticks, formato_ticks
+
+    else:
+        freq = "D"
+        formato_ticks = "days"
+        xlim = [fecha_inicial.normalize(), fecha_final.normalize() + pd.Timedelta(days=1) + diff_ini]
+        if diff_ini < pd.Timedelta(hours = 12):  
+            xlim[0] = fecha_inicial.normalize() - pd.Timedelta(days=1)
+        if diff_final > pd.Timedelta(hours = 12):  
+            xlim[1] = fecha_final.normalize() + pd.Timedelta(days=1) + diff_ini
+        
+        xticks = pd.date_range(start=xlim[0].normalize(), end=tspan[len(tspan)-1], periods=n_ticks).normalize()
+        
+        diff = xticks[1] - xticks[0]
+        fin = 0
+        while fin == 0:
+            for itick in range(1, len(xticks)-1):
+                if xticks[itick+1] - xticks[itick] > diff:
+                    xticks = pd.date_range(start=xlim[0].normalize(), end=tspan[len(tspan)-1], periods=n_ticks).normalize()
+                    diff = xticks[1] - xticks[0]
+                    n_ticks += 1
+                    break
+            else:
+                fin = 1
+
+    return xlim, xticks, formato_ticks
 
 
 #######################
