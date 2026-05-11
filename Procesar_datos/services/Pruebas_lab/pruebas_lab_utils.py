@@ -13,7 +13,7 @@ coordenadas={
 }
 
 ###############################
-def crear_fechas_aleatorias(fecha_inicio: str, fecha_fin: str, periodo: int, variacion: int) -> pd.DatetimeIndex: 
+def crear_fechas(fecha_inicio: str, fecha_fin: str, periodo: int, variacion: int) -> pd.DatetimeIndex: 
     """" 
     Crea una lista de fechas aleatorias entre fecha_inicio y fecha_fin.
     Las fechas se generan con un periodo fijo y una variacion en segundos.
@@ -23,8 +23,12 @@ def crear_fechas_aleatorias(fecha_inicio: str, fecha_fin: str, periodo: int, var
         
     fechas = []
     current_time = fecha_inicio
+    fechas.append(current_time)
     while current_time <= fecha_fin:
-        current_time = current_time + pd.Timedelta(minutes=periodo) + pd.Timedelta(minutes=np.random.randint(0, variacion))
+        if variacion > 0:
+            current_time = current_time + pd.Timedelta(minutes=periodo) + pd.Timedelta(minutes=np.random.randint(0, variacion))
+        else:
+            current_time = current_time + pd.Timedelta(minutes=periodo)
         current_time = current_time.replace(second=0)
         fechas.append(current_time)
     return fechas
@@ -52,10 +56,14 @@ def generar_datos(fecha_inicio: pd.Timestamp,
         "direction": [],
         "direction_gen": [],
         "temp": [],
+        "temp_s": [],
+        "acc_x": [],
+        "acc_y": [],
+        "acc_z": [],
         "volt": []
     }
     
-    fechas = crear_fechas_aleatorias(fecha_inicio, fecha_fin, periodo, variacion)
+    fechas = crear_fechas(fecha_inicio, fecha_fin, periodo, variacion)
     fechas_str = convertir_datetime_a_str(fechas)
     
     lat = coordenadas["lat"]
@@ -63,13 +71,17 @@ def generar_datos(fecha_inicio: pd.Timestamp,
     
     for fecha in fechas_str:
         output_dic["fecha"].append(fecha)
-        output_dic["latitud"].append(round(lat+np.random.random()*0.0004,6))
-        output_dic["logitud"].append(round(lon+np.random.random()*0.0004,6))
+        output_dic["latitud"].append(round(lat+np.random.random()*0.0008,6))
+        output_dic["logitud"].append(round(lon+np.random.random()*0.0008,6))
         output_dic["speed"].append(0)
         output_dic["distance"].append(0)
         output_dic["direction"].append(0)
         output_dic["direction_gen"].append("N")
         output_dic["temp"].append(-99)
+        output_dic["temp_s"].append(-99)
+        output_dic["acc_x"].append(0)
+        output_dic["acc_y"].append(0)
+        output_dic["acc_z"].append(0)
         output_dic["volt"].append(42+np.random.randint(-2,2))
 
     return output_dic

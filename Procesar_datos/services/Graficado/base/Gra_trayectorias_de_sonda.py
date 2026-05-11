@@ -69,7 +69,7 @@ def graficar_trayectorias_de_sonda(df_excel_de_despliegue: pd.DataFrame,
     """
     
     # Eliminar NaNs
-    df_datos_de_la_sonda = df_datos_de_la_sonda.dropna(subset=["tspan_de_envio"]) 
+    df_datos_de_la_sonda = df_datos_de_la_sonda.dropna(subset=["tspan_de_envio","rap_corriente"]) 
     
      # Obtener posiciones iniciales del excel de despliegue
     lat_ini = df_datos_de_la_sonda["latitud"].iloc[0]

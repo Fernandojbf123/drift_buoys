@@ -182,7 +182,7 @@ def dar_formato_al_axe(propiedades_del_axe: dict) -> None:
     obj_axes.set_xlabel(xlabel, fontname=tipo_de_letra, fontweight='bold', fontsize=xlabelsize)
 
     # Calcular xlim y xticks
-    xlim, xticks_finales, xticks_format = calcular_xticks(tspan = tspan, n_ticks=3)
+    xlim, xticks_finales, xticks_format = calcular_xticks(tspan = tspan, n_ticks=5)
     # Asignar los xticks calculados
     obj_axes.set_xticks(xticks_finales)
     
@@ -269,21 +269,33 @@ def calcular_xticks(tspan: pd.DatetimeIndex, n_ticks:int =5)-> tuple:
         if diff_ini < pd.Timedelta(hours = 12):  
             xlim[0] = fecha_inicial.normalize() - pd.Timedelta(days=1)
         if diff_final > pd.Timedelta(hours = 12):  
-            xlim[1] = fecha_final.normalize() + pd.Timedelta(days=1) + diff_ini
+            xlim[1] = fecha_final.normalize() + pd.Timedelta(days=1) + pd.Timedelta(hours=2)
         
+        # Try 3 ticks
         xticks = pd.date_range(start=xlim[0].normalize(), end=tspan[len(tspan)-1], periods=n_ticks).normalize()
         
-        diff = xticks[1] - xticks[0]
-        fin = 0
-        while fin == 0:
-            for itick in range(1, len(xticks)-1):
-                if xticks[itick+1] - xticks[itick] > diff:
-                    xticks = pd.date_range(start=xlim[0].normalize(), end=tspan[len(tspan)-1], periods=n_ticks).normalize()
-                    diff = xticks[1] - xticks[0]
+        fin = False
+        while fin == False:
+            greaterthaneleven = False # Es una bandera, que indica si alguna vez se pasó el límite de 11 ticks, para evitar un loop infinito. 
+            check = np.array([False] * (len(xticks)-2))
+            timedelta = xticks[1] - xticks[0]
+            for itick in range(1,len(xticks)-1):
+                newdt = xticks[itick+1] - xticks[itick]
+                if newdt != timedelta:
                     n_ticks += 1
+                    if n_ticks >= 11 and greaterthaneleven == False: #Si se alcanza el límite de ticks, se resetea a 3 ticks y se vuelven a calcular los ticks; se activa la bandera
+                        n_ticks = 3
+                        greaterthaneleven = True
+                    elif n_ticks >= 11 and greaterthaneleven == True: # Si se vuelve a llegar al límite de ticks y la bandera está activada. Dará un error para que el usuario ajuste manualmente los ticks o aumente el rango de fechas.
+                        raise ValueError("No se pudo calcular un número adecuado de ticks para el eje X sin exceder el límite de 11 ticks. Considere aumentar el rango de fechas o ajustar manualmente los ticks.")                                            
+                    xticks = pd.date_range(start=xlim[0].normalize(), end=tspan[len(tspan)-1], periods=n_ticks).normalize()
+                    timedelta = xticks[1] - xticks[0]
                     break
-            else:
-                fin = 1
+                else:
+                    check[itick-1] = True
+            
+            if check.all() == True:
+                fin = True
 
     return xlim, xticks, formato_ticks
 

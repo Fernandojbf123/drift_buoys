@@ -82,7 +82,7 @@ def interpolar_datos_faltantes(diccionario: dict) -> dict:
                     data[column] = f(tspan_numeric_completo)
             
             
-            # Si los la diferencia entre horas consecutivas es mayor a 4 horas; se eliminan las interpolaciones de esas horas.
+            # Si la diferencia entre horas consecutivas es mayor a 4 horas; se eliminan las interpolaciones de esas horas.
             columnas_de_reemplazo = [col for col in data.columns if col not in ["tspan_rounded", "tspan_de_envio"]]
             for irow in range(1,len(data_wo_nans)-1):
                 next_date = data_wo_nans["tspan_rounded"].iloc[irow+1]

@@ -38,7 +38,10 @@ def graficar_mapa_con_posiciones(mostrar_figura: bool = False) -> None:
     seriales_de_sondas = get_seriales_sondas()
     
     # Cargar datos de despliegue desde Excel
-    df_excel_de_despliegue = leer_excel_de_despliegue_de_sondas_corregido()
+    # df_excel_de_despliegue = leer_excel_de_despliegue_de_sondas_corregido()
+    df_excel_de_despliegue = pd.read_excel(crear_ruta_a_carpeta(get_ruta_al_excel_de_despliegue_de_sondas()), sheet_name=get_nombre_de_la_hoja_con_informacion_de_sondas()) # Para pruebas de lab, usar el corregido. Para el análisis final, usar el original (que ya tiene las correcciones hechas)
+    df_excel_de_despliegue.dropna(subset=['serial_de_sonda'], inplace=True) # elimino ausentes o nulos para que la conversion no de error
+    df_excel_de_despliegue['serial_de_sonda'] = df_excel_de_despliegue['serial_de_sonda'].astype(float).astype(int).astype(str)
     
     # Cargar datos de batimetría desde el archivo NetCDF
     datos_de_batimetria = cargar_datos_de_batimetria()

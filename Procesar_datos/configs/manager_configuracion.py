@@ -24,6 +24,9 @@ def get_delta_tiempo():
 def get_ruta_al_excel_de_despliegue_de_sondas():
     return _get_config_value("ruta_al_excel_de_despliegue_de_sondas")
 
+def get_nombre_de_la_hoja_con_informacion_de_sondas():
+    return _get_config_value("nombre_de_la_hoja_con_informacion_de_sondas")
+
 def get_carpeta_datos_crudos():
     return _get_config_value("carpeta_de_datos_crudos")
 
@@ -94,5 +97,5 @@ def get_graficar_trayectorias_pasadas():
 def get_ruta_a_datos_topografia():
     return _get_config_value("ruta_a_datos_topografia")
 
-def get_puerto_de_salida():
-    return _get_config_value("puerto_de_salida")
+# def get_puerto_de_salida():
+#     return _get_config_value("puerto_de_salida")

@@ -97,10 +97,10 @@ def leer_excel_de_despliegue_de_sondas_corregido() -> pd.DataFrame:
         campania = string
     """
     ruta_al_excel_de_despliegue_de_sondas = crear_ruta_a_carpeta(get_ruta_al_excel_de_despliegue_de_sondas())   
-    ruta_al_excel_de_despliegue_de_sondas = ruta_al_excel_de_despliegue_de_sondas + "_corregido.xlsx"
+
     try:
 
-        df_excel = pd.read_excel(ruta_al_excel_de_despliegue_de_sondas)
+        df_excel = pd.read_excel(ruta_al_excel_de_despliegue_de_sondas, sheet_name=get_nombre_de_la_hoja_con_informacion_de_sondas())
         df_excel.dropna(subset=['serial_de_sonda'], inplace=True) # elimino ausentes o nulos para que la conversion no de error
         df_excel['serial_de_sonda'] = df_excel['serial_de_sonda'].astype(float).astype(int).astype(str)
         
@@ -132,15 +132,15 @@ def seleccionar_rango_de_fechas(diccionario: dict,
     fecha_de_fin_del_analisis = get_fecha_de_fin_del_analisis()
     
     ruta_al_excel_de_despliegue_de_sondas = crear_ruta_a_carpeta(get_ruta_al_excel_de_despliegue_de_sondas())   
-    ruta_al_excel_de_despliegue_de_sondas = ruta_al_excel_de_despliegue_de_sondas + "_corregido.xlsx"
-    df_excel = pd.read_excel(ruta_al_excel_de_despliegue_de_sondas)
+    # ruta_al_excel_de_despliegue_de_sondas = ruta_al_excel_de_despliegue_de_sondas + "_corregido.xlsx"
+    df_excel = pd.read_excel(ruta_al_excel_de_despliegue_de_sondas, sheet_name=get_nombre_de_la_hoja_con_informacion_de_sondas())
     df_excel.dropna(subset=['serial_de_sonda'], inplace=True) # elimino ausentes o nulos para que la conversion no de error
     df_excel['serial_de_sonda'] = df_excel['serial_de_sonda'].astype(float).astype(int).astype(str)
     
     for serial in list(diccionario.keys()):
-        idx = df_excel[df_excel['serial_de_sonda'] == serial].index[0]
+        idx = df_excel[df_excel['serial_de_sonda'] == serial].index[-1] # Siempre se tomará la última ocurrencia como el dato de despliegue
         # Caso general: se usan las fechas definidas en la configuración general
-        fecha_de_primera_medicion = pd.to_datetime(df_excel.loc[idx, "fecha_y_hora_de_despliegue_maniobra"], format="%Y-%m-%d %H:%M:%S")    # del excel de despliegue
+        fecha_de_primera_medicion = pd.to_datetime(df_excel.loc[idx, "fecha_y_hora_de_despliegue_maniobra"], format="%d/%m/%Y %H:%M:%S")    # del excel de despliegue
         fecha_de_la_ultima_medicion = diccionario[serial]["tspan_de_envio"].max() # de los datos cargados
         fecha_de_inicio = max(fecha_de_inicio_del_analisis, fecha_de_primera_medicion) # fecha de inicio es la menor entre la fecha de inicio del análisis y la fecha de la primera medición
         fecha_de_fin = min(fecha_de_fin_del_analisis, fecha_de_la_ultima_medicion) # fecha de fin es la mayor entre la fecha de fin del análisis y la fecha de la última medición
@@ -309,6 +309,10 @@ def merge_df_vacio_con_datos(diccionario_con_datos: dict, diccionario_con_dfs_va
     
     seriales = list(diccionario_con_datos.keys())
     for serial in seriales:
+        if diccionario_con_datos[serial].empty:
+            print(f"El dataframe de la sonda {serial} está vacío. Avanzando a la siguiente sonda")
+            continue
+        
         df_vacio = diccionario_con_dfs_vacios[serial].set_index("tspan") # Buscar el dataframe vacío de la sonda y asignar tspan como índice
         df_sonda = diccionario_con_datos[serial].set_index("tspan_rounded") # Buscar el dataframe con datos de la sonda y asignar tspan_rounded como índice
         df_sonda.rename(columns={"tspan":"tspan_de_envio"}, inplace=True)  # Cambiar el nombre de la columna tspan para evitar conflictos

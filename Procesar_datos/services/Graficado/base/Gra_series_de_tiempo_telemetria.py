@@ -50,7 +50,11 @@ def Gra_series_de_tiempo_telemetria(dataFrame: pd.DataFrame,
     """
 
     ## Paso 1. Crear obj figura y array de objs axes
-    fig, axes = plt.subplots(nrows=len(get_variables_graficar()), figsize=(15, 10))
+    def tamanio_de_figura(cantidad_de_vars = len(get_variables_graficar())):
+        output = cantidad_de_vars * 2
+        return (15,output)
+    
+    fig, axes = plt.subplots(nrows=len(get_variables_graficar()), figsize=tamanio_de_figura(len(get_variables_graficar())))
     axes = np.atleast_1d(axes)  # Asegurar que axes es siempre un array 1D
     
     # Variables a graficar

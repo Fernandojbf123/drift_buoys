@@ -21,11 +21,14 @@ from configs.manager_diccionario_variables import *
 
 def calcular_porcentaje_de_datos_recibidos(diccionario: dict) -> dict:
     """ Calcula el porcentaje de datos recibidos en un DataFrame."""
+    
+    
+    seriales_de_sondas = list(diccionario.keys()) 
+    fecha_de_inicio = []
+    fecha_final = []
     cantidad_de_datos_esperados = []
     cantidad_de_datos_recibidos = []
     porcentajes = []
-
-    seriales_de_sondas = list(diccionario.keys()) 
 
     for iserial, serial in enumerate(seriales_de_sondas):
         data = diccionario[serial]
@@ -33,6 +36,9 @@ def calcular_porcentaje_de_datos_recibidos(diccionario: dict) -> dict:
         cantidad_de_datos_recibidos.append(data.dropna().shape[0])
         porcentaje = 0
 
+        fecha_de_inicio.append(data["tspan_rounded"].iloc[0])
+        fecha_final.append(data["tspan_rounded"].iloc[-1])
+        
         if cantidad_de_datos_esperados != 0:
             porcentaje = round((cantidad_de_datos_recibidos[iserial] / cantidad_de_datos_esperados[iserial]) * 100, 2)
 
@@ -41,6 +47,8 @@ def calcular_porcentaje_de_datos_recibidos(diccionario: dict) -> dict:
 
     dic = {
         "serial_de_sonda": seriales_de_sondas,
+        "fecha_de_inicio": fecha_de_inicio,
+        "fecha_final": fecha_final,
         "cantidad_de_datos_esperados": cantidad_de_datos_esperados,
         "cantidad_de_datos_recibidos": cantidad_de_datos_recibidos,
         "porcentaje_de_datos_recibidos": porcentajes
