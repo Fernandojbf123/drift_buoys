@@ -1,7 +1,8 @@
+from configs.manager_doc_config import *
+from services.manager_variables_excel_datos_doris import *
 
 
-
-def ejecucion_de_la_campania_parrafo1():
+def ejecucion_de_la_campania_parrafo1(dic_datos_doris: dict) -> str:
     
     numero_total_de_sondas = get_numero_total_de_sondas()
     mes_campania = get_mes_campania()

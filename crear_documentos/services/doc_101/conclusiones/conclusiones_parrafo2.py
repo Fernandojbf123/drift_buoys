@@ -1,6 +1,7 @@
+from configs.manager_doc_config import *
+from services.manager_variables_excel_datos_doris import *
 
-
-def conclusiones_parrafo2():
+def conclusiones_parrafo2(dic_datos_doris: dict) -> str:
     
     numero_total_de_sondas = get_numero_total_de_sondas()
     
