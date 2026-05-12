@@ -1,0 +1,9 @@
+
+
+def conclusiones_parrafo2():
+    
+    numero_total_de_sondas = get_numero_total_de_sondas()
+    
+    texto = f"Se desplegaron exitosamente {numero_total_de_sondas} sondas oceanográficas en las localizaciones solicitadas por PEMEX."
+    
+    return texto
