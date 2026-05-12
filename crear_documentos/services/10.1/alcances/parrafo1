@@ -1,0 +1,10 @@
+def parrafo1(orden_servicio):
+    
+    f'Con base en las especificaciones particulares del Contrato No. 658225821,
+    en este documento se reportan las actividades asociadas al concepto “10.1
+    Protocolo de liberación de las sondas oceanográficas y transmisión de datos”,
+    relacionadas con las sondas oceanográficas liberadas en abril de 2026,
+    las cuales se ejecutaron para dar cumplimiento a la orden de servicio
+    PEMEX-ASM-CICESE-658225821-{orden_servicio} e incluyen los siguientes alcances:'
+    
+    return
