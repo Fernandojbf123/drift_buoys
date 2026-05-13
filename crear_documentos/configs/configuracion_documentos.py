@@ -12,6 +12,9 @@ ruta_a_carpeta_de_guardado_del_documento = "C:\\Users\\Atmosfera\\Desktop\\datos
 ruta_al_excel_de_despliegue_de_sondas = "/Med_2025-2026/General/base_de_datos_planes_de_crucero_y_doris.xlsx"
 hoja_del_excel_de_despliegue_de_sondas = "despliegue_doris"
 
+rutal_al_excel_de_campanias = "/Med_2025-2026/General/base_de_datos_planes_de_crucero_y_doris.xlsx"
+hoja_del_excel_de_campanias = "campanias"
+
 usar_NAS = True # Indica si se quiere usar la ruta al NAS (True) o las rutas relativas (False). Si se usa el NAS, las rutas relativas se concatenarán a la ruta al NAS. Si no se usa el NAS, se usarán las rutas relativas tal cual están definidas.
 
 nombre_de_la_plantilla_de_word_101 = "Concepto_10.1_Mediciones_DORIS_plantilla.docx" # CAMBIAR A DISCRECIÓN (EL ARCHIVO VIENE INCLUIDO EN EL PROYECTO)

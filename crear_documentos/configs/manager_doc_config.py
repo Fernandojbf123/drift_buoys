@@ -58,6 +58,20 @@ def get_hoja_del_excel_de_despliegue_de_sondas():
     """Obtiene un valor de la configuración general de forma dinámica"""
     return configs.configuracion_documentos.hoja_del_excel_de_despliegue_de_sondas
 
+def get_ruta_al_excel_de_campanias():
+    """Obtiene un valor de la configuración general de forma dinámica"""
+    ruta_al_NAS = os.getenv("ruta_al_NAS")
+    carpeta = configs.configuracion_documentos.rutal_al_excel_de_campanias
+    if get_usar_NAS() and ruta_al_NAS:
+        ruta_completa = os.path.join(ruta_al_NAS, carpeta)   
+    else:
+        ruta_completa = carpeta  # Si no se encuentra la variable de entorno, usar la ruta relativa     
+    return ruta_completa
+
+def get_hoja_del_excel_de_campanias():
+    """Obtiene un valor de la configuración general de forma dinámica"""
+    return configs.configuracion_documentos.hoja_del_excel_de_campanias
+
 def get_usar_NAS():
     """Obtiene un valor de la configuración general de forma dinámica"""
     return configs.configuracion_documentos.usar_NAS
