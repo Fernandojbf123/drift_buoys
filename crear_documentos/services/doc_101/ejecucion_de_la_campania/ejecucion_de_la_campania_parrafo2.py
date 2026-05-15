@@ -1,5 +1,5 @@
 from configs.manager_doc_config import *
-from crear_documentos.services.manager_variables_excel_datos_despliegue import *
+from services.manager_variables_excel_datos_despliegue import *
 from services.manager_variables_excel_datos_campania import *
 
 

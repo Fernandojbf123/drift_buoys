@@ -6,7 +6,7 @@ from services.leer_excel import leer_excel
 ############################## DEL 10.1 ########################################
 
 def get_df_datos_documento() -> pd.DataFrame:
-    df_datos_documento = leer_excel(get_ruta_al_excel_de_datos_documento(), nombre_de_hoja=get_hoja_del_excel_de_datos_documento(), header=0)
+    df_datos_documento = leer_excel(ruta_al_excel_para_crear_documento(), nombre_de_hoja=hoja_del_excel_para_crear_documento(), header=None)
     return df_datos_documento
 
 def get_variable_documento(df_datos_documento: pd.DataFrame, nombre_variable: str) -> str:
