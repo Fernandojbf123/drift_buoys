@@ -36,3 +36,6 @@ def ejecucion_de_la_campania_parrafo2(dic_datos_doris: dict) -> str:
     return texto
 
 
+
+
+La ejecución de las campañas de despliegue de las sondas oceanográficas; se efectuó de acuerdo con la planeación de la logística y derrotero de la embarcación 
