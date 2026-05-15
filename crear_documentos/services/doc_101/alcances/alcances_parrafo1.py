@@ -1,9 +1,10 @@
 from configs.manager_doc_config import *
-from services.manager_variables_excel_datos_doris import *
+from services.manager_variables_excel_datos_despliegue import *
 
 def alcances_parrafo1(dic_datos_doris: dict) -> str:
     
     orden_de_servicio = get_orden_de_servicio()
+    
     
     texto = f'''Con base en las especificaciones particulares del Contrato No. 658225821,
     en este documento se reportan las actividades asociadas al concepto “10.1

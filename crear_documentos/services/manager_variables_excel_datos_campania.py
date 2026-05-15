@@ -3,8 +3,6 @@ from configs.manager_doc_config import *
 from services.leer_excel import leer_excel
 
 ## DATOS ASOCIADOS A LA HOJA DE CAMPAÑAS
-
-
 def get_df_datos_campanias():
     df_datos_campanias = leer_excel(get_ruta_al_excel_de_campanias(), nombre_de_hoja=get_hoja_del_excel_de_campanias(), header=0)
     return df_datos_campanias
