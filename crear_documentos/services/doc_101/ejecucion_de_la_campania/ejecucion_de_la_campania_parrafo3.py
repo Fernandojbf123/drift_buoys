@@ -1,6 +1,6 @@
 
 from configs.manager_doc_config import *
-from services.manager_variables_excel_datos_doris import *
+from crear_documentos.services.manager_variables_excel_datos_despliegue import *
 
 def ejecucion_de_la_campania_parrafo3(dic_datos_doris: dict) -> str:
     
