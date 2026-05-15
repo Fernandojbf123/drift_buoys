@@ -24,21 +24,21 @@ def hoja_del_excel_para_crear_documento():
     """Obtiene un valor de la configuración general de forma dinámica"""
     return configs.configuracion_documentos.hoja_del_excel_para_crear_documeto
 
-def get_ruta_a_carpeta_de_las_figuras():
+def get_ruta_a_carpeta_de_las_figuras(usar_NAS: bool = False):
     """Obtiene un valor de la configuración general de forma dinámica"""
     ruta_al_NAS = os.getenv("ruta_al_NAS")
     carpeta = configs.configuracion_documentos.ruta_a_carpeta_de_las_figuras
-    if get_usar_NAS() and ruta_al_NAS:
+    if usar_NAS and ruta_al_NAS:
         ruta_completa = os.path.join(ruta_al_NAS, carpeta)   
     else:
         ruta_completa = carpeta  # Si no se encuentra la variable de entorno, usar la ruta relativa     
     return ruta_completa
 
-def get_ruta_a_carpeta_de_guardado_del_documento():
+def get_ruta_a_carpeta_de_guardado_del_documento(usar_NAS: bool = False):
     """Obtiene un valor de la configuración general de forma dinámica"""
     ruta_al_NAS = os.getenv("ruta_al_NAS")
     carpeta = configs.configuracion_documentos.ruta_a_carpeta_de_guardado_del_documento
-    if get_usar_NAS() and ruta_al_NAS:
+    if usar_NAS and ruta_al_NAS:
         ruta_completa = os.path.join(ruta_al_NAS, carpeta)   
     else:
         ruta_completa = carpeta  # Si no se encuentra la variable de entorno, usar la ruta relativa     
@@ -76,8 +76,6 @@ def get_usar_NAS():
     """Obtiene un valor de la configuración general de forma dinámica"""
     return configs.configuracion_documentos.usar_NAS
 
-def nombre_de_la_plantilla_de_word_101():
-    return configs.configuracion_documentos.nombre_de_la_plantilla_de_word_101
-
-def nombre_de_la_plantilla_de_word_103():
-    return configs.configuracion_documentos.nombre_de_la_plantilla_de_word_103
+def get_ruta_a_la_plantilla_de_word():
+    """Obtiene un valor de la configuración general de forma dinámica"""
+    return configs.configuracion_documentos.ruta_a_la_plantilla_de_word
