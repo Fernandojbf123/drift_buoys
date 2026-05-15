@@ -8,7 +8,7 @@ def alcances_parrafo1(dic_datos_doris: dict) -> str:
     texto = f'''Con base en las especificaciones particulares del Contrato No. 658225821,
     en este documento se reportan las actividades asociadas al concepto “10.1
     Protocolo de liberación de las sondas oceanográficas y transmisión de datos”,
-    relacionadas con las sondas oceanográficas liberadas en abril de 2026,
+    relacionadas con las sondas oceanográficas liberadas en {dic_datos_doris['fecha_liberacion']},
     las cuales se ejecutaron para dar cumplimiento a la orden de servicio
     PEMEX-ASM-CICESE-658225821-{orden_de_servicio} e incluyen los siguientes alcances:'''
     

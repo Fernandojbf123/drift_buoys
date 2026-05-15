@@ -1,0 +1,11 @@
+from configs.manager_doc_config import *
+from services.manager_variables_excel_datos_doris import *
+
+
+def descripcion_actividades_previas_parrafo4(dic_datos_doris: dict) -> str:
+    mes_orden_de_servicio = get_mes_orden_de_servicio()
+    numero_total_de_sondas = get_numero_total_de_sondas()
+
+    texto = f"De esta forma, se realizaron las pruebas de funcionamiento en las {numero_total_de_sondas} sondas que se desplegaron, correspondientes a la orden de servicio del mes de {mes_orden_de_servicio}."
+    
+    return texto
