@@ -1,5 +1,5 @@
 import os
-from crear_documentos.configs.manager_doc_config import get_ruta_a_carpeta_de_guardado_del_documento
+from configs.manager_doc_config import get_ruta_a_carpeta_de_guardado_del_documento
 
 
 def guardar_documento(doc, nombre_archivo="ASM-CICESE-10.1.docx"):

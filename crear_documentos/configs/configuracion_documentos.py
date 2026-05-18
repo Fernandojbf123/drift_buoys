@@ -6,8 +6,8 @@ hoja_del_excel_para_crear_documeto = "01" # "01", "02", "03", "04", "05", "06", 
 
 # ruta_al_excel_para_crear_documentos_103 = ""
 
-ruta_a_carpeta_de_las_figuras = "C:\\Users\\Atmosfera\\Desktop\\datos_procesados\\doris\\10.1\\202512\\word"
-ruta_a_carpeta_de_guardado_del_documento = "C:\\Users\\Atmosfera\\Desktop\\datos_procesados\\doris\\10.1\\202512\\word"
+ruta_a_carpeta_de_las_figuras = "C:\\Users\\Atmosfera\\Desktop\\datos_procesados\\doris\\10.1\\202604"
+ruta_a_carpeta_de_guardado_del_documento = "C:\\Users\\Atmosfera\\Desktop\\datos_procesados\\doris\\10.1\\202604"
 
 ruta_al_excel_de_despliegue_de_sondas = "/Med_2025-2026/General/base_de_datos_planes_de_crucero_y_doris.xlsx"
 hoja_del_excel_de_despliegue_de_sondas = "despliegue_doris"
@@ -17,5 +17,5 @@ hoja_del_excel_de_campanias = "campanias"
 
 usar_NAS = True # Indica si se quiere usar la ruta al NAS (True) o las rutas relativas (False). Si se usa el NAS, las rutas relativas se concatenarán a la ruta al NAS. Si no se usa el NAS, se usarán las rutas relativas tal cual están definidas.
 
-nombre_de_la_plantilla_de_word_101 = "Concepto_10.1_Mediciones_DORIS_plantilla.docx" # CAMBIAR A DISCRECIÓN (EL ARCHIVO VIENE INCLUIDO EN EL PROYECTO)
-nombre_de_la_plantilla_de_word_103 = "Concepto_10.1_Mediciones_DORIS_plantilla.docx" # CAMBIAR A DISCRECIÓN (EL ARCHIVO VIENE INCLUIDO EN EL PROYECTO)
+ruta_a_la_plantilla_de_word = "C:\\programacion\\codigos_python\\drift_buoys\\crear_documentos\\services\\doc_101\\demo.docx" # CAMBIAR A DISCRECIÓN (EL ARCHIVO VIENE INCLUIDO EN EL PROYECTO)
+# nombre_de_la_plantilla_de_word_103 = "Concepto_10.1_Mediciones_DORIS_plantilla.docx" # CAMBIAR A DISCRECIÓN (EL ARCHIVO VIENE INCLUIDO EN EL PROYECTO)
