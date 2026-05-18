@@ -3,8 +3,8 @@ from services.manager_variables_excel_datos_despliegue import *
 from services.manager_variables_excel_datos_campania import *
 
 def descripcion_actividades_previas_parrafo2(dic_datos_doris: dict) -> str:
-    df_unicos = get_fecha_y_hora_de_embarque_y_campania_unicos(df_datos_de_campanias)
-    numero_de_sondas = get_numero_de_sondas(df_datos_doris)
+    df_unicos = get_fecha_y_hora_de_embarque_y_campania_unicos(dic_datos_doris)
+    numero_de_sondas = get_numero_de_sondas(dic_datos_doris)
     
     es_una_campania = len(df_unicos) == 1
     articulo = "la" if es_una_campania else "las"
