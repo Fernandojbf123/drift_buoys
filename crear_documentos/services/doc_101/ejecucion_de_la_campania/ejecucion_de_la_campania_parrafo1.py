@@ -19,7 +19,8 @@ def ejecucion_de_la_campania_parrafo1(dic_datos_doris: dict) -> str:
     
     if len(fecha_campania_fin) == 3:
         fecha_campania_fin = datetime.strptime(fecha_campania.iloc[-1], "%Y-%m-%d %H:%M:%S")
-    
+        dia_campania_fin = fecha_campania_fin.day
+         
     texto = f"La logística para la preparación y despliegue de las sondas fue planeada y enviada con antelación a PEMEX para su aprobación. El derrotero o ruta de liberación de las sondas consideró el trayecto desde tierra hasta el lugar de despliegue de las {numero_total_de_sondas} sondas oceanográficas el {instalaciones} de {mes_campania} de {anio_campania}, tomando en cuenta las condiciones ambientales y la posición. De acuerdo a lo anterior, la ejecución de {articulo} {palabra_campania} de liberación siguió un procedimiento seguro en todas las actividades que involucran la travesía y las maniobras del despliegue. "
     
     return texto
