@@ -72,6 +72,11 @@ def crear_pie_de_figura(parent, indice, titulo, bookmark_name=None):
         - Si longitud total < 115 caracteres: usa estilo "Car_centrado" (style_id: 'Carcentrado')
         - Si longitud total >= 115 caracteres: usa estilo "Car_justificado" (style_id: 'Carjustificado')
         - Longitud total = "Figura XXX. " + titulo (estimado ~13 + len(titulo))
+    
+    Bookmark:
+        El bookmark se crea alrededor del NÚMERO únicamente, no incluye "Figura" ni el título.
+        Estructura: "Figura " [bookmark_start] "8" [bookmark_end] ". Título"
+        Esto permite que las referencias cruzadas muestren solo el número.
     """
     cantidad_de_caracteres = 115 # Umbral para decidir entre centrado o justificado (ajustar según necesidades)
     
@@ -102,19 +107,20 @@ def crear_pie_de_figura(parent, indice, titulo, bookmark_name=None):
     
     nuevo_p.append(pPr)
     
-    # Agregar bookmark start al inicio del párrafo
-    bookmark_start = OxmlElement('w:bookmarkStart')
-    bookmark_start.set(qn('w:id'), bookmark_id)
-    bookmark_start.set(qn('w:name'), bookmark_name)
-    nuevo_p.append(bookmark_start)
-    
-    # Run para "Figura "
+    # Run para "Figura " (fuera del bookmark)
     run1 = OxmlElement('w:r')
     text1 = OxmlElement('w:t')
     text1.set(qn('xml:space'), 'preserve')  # Preservar el espacio al final
     text1.text = 'Figura '
     run1.append(text1)
     nuevo_p.append(run1)
+    
+    # IMPORTANTE: Agregar bookmark start AQUÍ (antes del número, después de "Figura ")
+    # Esto hace que el bookmark solo incluya el número "X" y no "Figura X"
+    bookmark_start = OxmlElement('w:bookmarkStart')
+    bookmark_start.set(qn('w:id'), bookmark_id)
+    bookmark_start.set(qn('w:name'), bookmark_name)
+    nuevo_p.append(bookmark_start)
     
     # Campo SEQ para numeración automática
     # Nota: Los campos complejos en Word requieren la siguiente estructura:
@@ -160,18 +166,19 @@ def crear_pie_de_figura(parent, indice, titulo, bookmark_name=None):
     run_end.append(fldChar_end)
     nuevo_p.append(run_end)
     
-    # Run para el texto descriptivo
+    # IMPORTANTE: Agregar bookmark end AQUÍ (después del número, antes del título)
+    # Esto hace que el bookmark solo incluya "Figura X" y no el título completo
+    bookmark_end = OxmlElement('w:bookmarkEnd')
+    bookmark_end.set(qn('w:id'), bookmark_id)
+    nuevo_p.append(bookmark_end)
+    
+    # Run para el texto descriptivo (fuera del bookmark)
     run2 = OxmlElement('w:r')
     text2 = OxmlElement('w:t')
     text2.set(qn('xml:space'), 'preserve')
     text2.text = f'. {titulo}'
     run2.append(text2)
     nuevo_p.append(run2)
-    
-    # Agregar bookmark end al final del párrafo
-    bookmark_end = OxmlElement('w:bookmarkEnd')
-    bookmark_end.set(qn('w:id'), bookmark_id)
-    nuevo_p.append(bookmark_end)
     
     # Insertar en el documento
     parent.insert(indice, nuevo_p)
@@ -443,6 +450,77 @@ def aux_reemplazar_variable_en_parrafo(paragraph, key, value):
                 return paragraph
 
 
+def insertar_referencias_cruzadas_en_plantilla(doc, bookmarks_info):
+    """Reemplaza marcadores <<ref_*>> con referencias cruzadas a figuras.
+    
+    Args:
+        doc: Objeto Document de python-docx
+        bookmarks_info: Diccionario retornado por insertar_figuras_en_plantilla
+                       Formato: {"<<ref_demo>>": ["_Ref_Fig_Mapa1", "_Ref_Fig_Temp"], ...}
+    
+    Comportamiento:
+        - Busca variables que empiecen con "<<ref_" en los párrafos
+        - Si la lista tiene 1 bookmark: inserta "Figura X"
+        - Si la lista tiene 2+ bookmarks: inserta "Figura X a la Y"
+        - X e Y son referencias cruzadas reales (campos REF) que muestran solo el número
+    
+    Nota importante:
+        Los bookmarks creados por crear_pie_de_figura solo incluyen el número de la figura,
+        no el texto "Figura" ni el título. Por eso las referencias muestran solo el número.
+    
+    Ejemplo:
+        Entrada en plantilla: "De la <<ref_demo_con_titulo>> se muestra el poder."
+        Salida: "De la Figura 8 a la 10 se muestra el poder."
+                (donde "8" y "10" son campos REF clickeables que muestran solo el número)
+    """
+    for variable_ref, lista_bookmarks in bookmarks_info.items():
+        # Si no hay bookmarks (figuras sin título), saltar
+        if lista_bookmarks is None or len(lista_bookmarks) == 0:
+            continue
+        
+        # Buscar el marcador en todos los párrafos
+        for parrafo in doc.paragraphs:
+            full_text = "".join(run.text for run in parrafo.runs)
+            
+            if variable_ref not in full_text:
+                continue
+            
+            # Encontrar la posición del marcador
+            pos_inicio = full_text.find(variable_ref)
+            pos_fin = pos_inicio + len(variable_ref)
+            
+            # Dividir el texto en: antes + marcador + después
+            texto_antes = full_text[:pos_inicio]
+            texto_despues = full_text[pos_fin:]
+            
+            # Limpiar todos los runs del párrafo
+            for run in parrafo.runs:
+                run.text = ""
+            
+            # Reconstruir el párrafo con las referencias cruzadas
+            if texto_antes:
+                parrafo.add_run(texto_antes)
+            
+            # Obtener primer y último bookmark
+            primer_bookmark = lista_bookmarks[0]
+            ultimo_bookmark = lista_bookmarks[-1]
+            
+            if len(lista_bookmarks) == 1:
+                # Caso: Solo una figura - "Figura X"
+                insertar_referencia_cruzada(parrafo, primer_bookmark, texto_antes="Figura", mostrar_numero=True)
+            else:
+                # Caso: Múltiples figuras - "Figura X a la Y"
+                insertar_referencia_cruzada(parrafo, primer_bookmark, texto_antes="Figura", mostrar_numero=True)
+                parrafo.add_run(" a la ")
+                insertar_referencia_cruzada(parrafo, ultimo_bookmark, texto_antes="", mostrar_numero=True)
+            
+            if texto_despues:
+                parrafo.add_run(texto_despues)
+            
+            # Ya se procesó este marcador, pasar al siguiente
+            break
+
+
 def insertar_figuras_en_plantilla(doc, diccionario_de_reemplazos):
     """Inserta todas las figuras definidas en el diccionario en la plantilla de Word.
     
@@ -453,7 +531,8 @@ def insertar_figuras_en_plantilla(doc, diccionario_de_reemplazos):
     
     Returns:
         dict: Diccionario con los marcadores procesados y sus bookmarks creados.
-              Formato: {"<<fig_ejecucion>>": ["_Ref_Fig_Mapa1", "_Ref_Fig_Temp1"], ...}
+              Formato: {"<<ref_ejecucion>>": ["_Ref_Fig_Mapa1", "_Ref_Fig_Temp1"], ...}
+              Nota: Las keys cambian de "<<fig_*>>" a "<<ref_*>>" automáticamente.
               Para figuras sin título, el valor es None.
     
     Casos soportados:
@@ -490,11 +569,18 @@ def insertar_figuras_en_plantilla(doc, diccionario_de_reemplazos):
                 {"ruta": "foto1.png", "titulo": "", "tamanio": 4, "bookmark": ""}
             ]
         }
+        
+        # Paso 1: Insertar las figuras
         bookmarks_info = insertar_figuras_en_plantilla(doc, diccionario)
         # Retorna: {
-        #     "<<fig_mapas>>": ["_Ref_Mapa1", "_Ref_Temp"],
-        #     "<<fig_fotos>>": None
+        #     "<<ref_mapas>>": ["_Ref_Mapa1", "_Ref_Temp"],
+        #     "<<ref_fotos>>": None
         # }
+        
+        # Paso 2: Insertar referencias cruzadas (si hay marcadores <<ref_*>> en la plantilla)
+        # Ejemplo: "De la <<ref_mapas>> se observa..." → "De la Figura 1 a la 2 se observa..."
+        insertar_referencias_cruzadas_en_plantilla(doc, bookmarks_info)
+        
         doc.save('documento_con_figuras.docx')
     """
     bookmarks_info = {}
@@ -520,17 +606,19 @@ def insertar_figuras_en_plantilla(doc, diccionario_de_reemplazos):
         for parrafo in doc.paragraphs:
             if variable in parrafo.text:
                 
+                variable_ref_key = variable.replace("fig","ref") # Sirve para crear un key asociado al nombre de la variable para usar la referencia en el word y poder hacer párrafos del tipo "de la Figura X a la Figura Y"
+                
                 if not tiene_titulo:
                     # Caso 1: Figuras SIN título (no Caption, no bookmark)
                     resultado = aux_insertar_figura_sin_titulo(parrafo, variable, datos_figuras)
                     if resultado:
-                        bookmarks_info[variable] = None  # Sin bookmarks para figuras sin título
+                        bookmarks_info[variable_ref_key] = None  # Sin bookmarks para figuras sin título
                         break  # Ya se insertó, pasar a la siguiente variable
                 else:
                     # Caso 2: Figuras CON título (Caption + SEQ + Bookmarks)
                     bookmarks_creados = aux_insertar_figuras_con_titulo(parrafo, variable, datos_figuras)
                     if bookmarks_creados:
-                        bookmarks_info[variable] = bookmarks_creados
+                        bookmarks_info[variable_ref_key] = bookmarks_creados
                         break  # Ya se insertó, pasar a la siguiente variable
     
     return bookmarks_info
