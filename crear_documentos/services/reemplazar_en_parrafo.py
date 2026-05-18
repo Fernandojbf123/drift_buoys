@@ -57,7 +57,7 @@ def insertar_parrafo_despues(paragraph, texto="", centrado=False):
 
 
 def crear_pie_de_figura(parent, indice, titulo, bookmark_name=None):
-    """Crea un párrafo con pie de figura válido para Word con estilo Caption, campo SEQ y bookmark.
+    """Crea un párrafo con pie de figura válido para Word con estilo, campo SEQ y bookmark.
     
     Args:
         parent: El elemento padre XML donde insertar
@@ -67,7 +67,14 @@ def crear_pie_de_figura(parent, indice, titulo, bookmark_name=None):
     
     Returns:
         Tupla (elemento XML del párrafo creado, nombre del bookmark)
+    
+    Estilos aplicados:
+        - Si longitud total < 115 caracteres: usa estilo "Car_centrado" (style_id: 'Carcentrado')
+        - Si longitud total >= 115 caracteres: usa estilo "Car_justificado" (style_id: 'Carjustificado')
+        - Longitud total = "Figura XXX. " + titulo (estimado ~13 + len(titulo))
     """
+    cantidad_de_caracteres = 115 # Umbral para decidir entre centrado o justificado (ajustar según necesidades)
+    
     # Generar nombre de bookmark si no se proporciona
     if bookmark_name is None:
         # Usar los primeros 30 caracteres del título, reemplazando espacios y caracteres especiales
@@ -76,21 +83,22 @@ def crear_pie_de_figura(parent, indice, titulo, bookmark_name=None):
     # Generar ID único para el bookmark basado en el hash del nombre
     bookmark_id = str(abs(hash(bookmark_name)) % 1000000)
     
-    # Crear párrafo con estilo Caption
+    # Crear párrafo con estilo
     nuevo_p = OxmlElement('w:p')
     
-    # Propiedades del párrafo (centrado + estilo Caption)
+    # Determinar qué estilo usar según la longitud del título
+    # Estimamos "Figura XXX. " = ~13 caracteres + titulo
+    longitud_estimada = 13 + len(titulo)
+    # IMPORTANTE: Usar style_id de la plantilla, no el nombre visible
+    estilo_titulo = 'Carcentrado' if longitud_estimada < cantidad_de_caracteres else 'Carjustificado'
+    
+    # Propiedades del párrafo
     pPr = OxmlElement('w:pPr')
     
-    # Aplicar estilo "Caption"
+    # Aplicar estilo según longitud
     pStyle = OxmlElement('w:pStyle')
-    pStyle.set(qn('w:val'), 'Caption')
+    pStyle.set(qn('w:val'), estilo_titulo)
     pPr.append(pStyle)
-    
-    # Centrado
-    jc = OxmlElement('w:jc')
-    jc.set(qn('w:val'), 'center')
-    pPr.append(jc)
     
     nuevo_p.append(pPr)
     
@@ -103,30 +111,54 @@ def crear_pie_de_figura(parent, indice, titulo, bookmark_name=None):
     # Run para "Figura "
     run1 = OxmlElement('w:r')
     text1 = OxmlElement('w:t')
+    text1.set(qn('xml:space'), 'preserve')  # Preservar el espacio al final
     text1.text = 'Figura '
     run1.append(text1)
     nuevo_p.append(run1)
     
     # Campo SEQ para numeración automática
-    run_seq = OxmlElement('w:r')
+    # Nota: Los campos complejos en Word requieren la siguiente estructura:
+    # 1. fldChar begin (en su propio run)
+    # 2. instrText (en su propio run)
+    # 3. fldChar separate (en su propio run)
+    # 4. texto del resultado (en su propio run)
+    # 5. fldChar end (en su propio run)
     
-    # Inicio del campo
+    # Run para inicio del campo
+    run_begin = OxmlElement('w:r')
     fldChar_begin = OxmlElement('w:fldChar')
     fldChar_begin.set(qn('w:fldCharType'), 'begin')
-    run_seq.append(fldChar_begin)
+    run_begin.append(fldChar_begin)
+    nuevo_p.append(run_begin)
     
-    # Instrucción SEQ
+    # Run para la instrucción SEQ
+    run_instr = OxmlElement('w:r')
     instrText = OxmlElement('w:instrText')
     instrText.set(qn('xml:space'), 'preserve')
     instrText.text = ' SEQ Figura \\* ARABIC '
-    run_seq.append(instrText)
+    run_instr.append(instrText)
+    nuevo_p.append(run_instr)
     
-    # Fin del campo
+    # Run para el separador
+    run_separate = OxmlElement('w:r')
+    fldChar_separate = OxmlElement('w:fldChar')
+    fldChar_separate.set(qn('w:fldCharType'), 'separate')
+    run_separate.append(fldChar_separate)
+    nuevo_p.append(run_separate)
+    
+    # Run para el texto del resultado (placeholder que Word actualizará)
+    run_result = OxmlElement('w:r')
+    text_result = OxmlElement('w:t')
+    text_result.text = '1'  # Placeholder que Word actualizará
+    run_result.append(text_result)
+    nuevo_p.append(run_result)
+    
+    # Run para fin del campo
+    run_end = OxmlElement('w:r')
     fldChar_end = OxmlElement('w:fldChar')
     fldChar_end.set(qn('w:fldCharType'), 'end')
-    run_seq.append(fldChar_end)
-    
-    nuevo_p.append(run_seq)
+    run_end.append(fldChar_end)
+    nuevo_p.append(run_end)
     
     # Run para el texto descriptivo
     run2 = OxmlElement('w:r')
@@ -240,13 +272,33 @@ def aux_insertar_figura_sin_titulo(paragraph, key, lista_figuras):
         
         # Si es la primera imagen, usar el párrafo actual
         if offset == 0:
+            # Aplicar estilo "Figura" al párrafo actual
+            p_element = paragraph._element
+            pPr = p_element.find(qn('w:pPr'))
+            if pPr is None:
+                pPr = OxmlElement('w:pPr')
+                p_element.insert(0, pPr)
+            # Aplicar estilo Figura
+            pStyle = pPr.find(qn('w:pStyle'))
+            if pStyle is None:
+                pStyle = OxmlElement('w:pStyle')
+                pPr.insert(0, pStyle)
+            pStyle.set(qn('w:val'), 'Figura')
+            
             run = paragraph.runs[0] if paragraph.runs else paragraph.add_run()
             if exists(ruta):
                 run.add_picture(ruta, width=Inches(ancho))
             offset = 1
         else:
-            # Crear nuevo párrafo para imagen
+            # Crear nuevo párrafo para imagen con estilo "Figura"
             nuevo_p_img = OxmlElement('w:p')
+            # Propiedades del párrafo
+            pPr_img = OxmlElement('w:pPr')
+            pStyle_img = OxmlElement('w:pStyle')
+            pStyle_img.set(qn('w:val'), 'Figura')
+            pPr_img.append(pStyle_img)
+            nuevo_p_img.append(pPr_img)
+            
             parent.insert(indice_base + offset, nuevo_p_img)
             # Convertir a Paragraph para poder agregar imagen
             para_img = Paragraph(nuevo_p_img, paragraph._parent)
@@ -255,9 +307,9 @@ def aux_insertar_figura_sin_titulo(paragraph, key, lista_figuras):
             offset += 1
         
         # Salto de línea después de cada imagen
-        nuevo_p_salto = OxmlElement('w:p')
-        parent.insert(indice_base + offset, nuevo_p_salto)
-        offset += 1
+        # nuevo_p_salto = OxmlElement('w:p')
+        # parent.insert(indice_base + offset, nuevo_p_salto)
+        # offset += 1
     
     return True
 
@@ -306,13 +358,33 @@ def aux_insertar_figuras_con_titulo(paragraph, key, lista_figuras):
         
         # Si es la primera imagen, usar el párrafo actual
         if offset == 0:
+            # Aplicar estilo "Figura" al párrafo actual
+            p_element = paragraph._element
+            pPr = p_element.find(qn('w:pPr'))
+            if pPr is None:
+                pPr = OxmlElement('w:pPr')
+                p_element.insert(0, pPr)
+            # Aplicar estilo Figura
+            pStyle = pPr.find(qn('w:pStyle'))
+            if pStyle is None:
+                pStyle = OxmlElement('w:pStyle')
+                pPr.insert(0, pStyle)
+            pStyle.set(qn('w:val'), 'Figura')
+            
             run = paragraph.runs[0] if paragraph.runs else paragraph.add_run()
             if exists(ruta):
                 run.add_picture(ruta, width=Inches(ancho))
             offset = 1
         else:
-            # Crear nuevo párrafo para imagen
+            # Crear nuevo párrafo para imagen con estilo "Figura"
             nuevo_p_img = OxmlElement('w:p')
+            # Propiedades del párrafo
+            pPr_img = OxmlElement('w:pPr')
+            pStyle_img = OxmlElement('w:pStyle')
+            pStyle_img.set(qn('w:val'), 'Figura')
+            pPr_img.append(pStyle_img)
+            nuevo_p_img.append(pPr_img)
+            
             parent.insert(indice_base + offset, nuevo_p_img)
             # Convertir a Paragraph para poder agregar imagen
             para_img = Paragraph(nuevo_p_img, paragraph._parent)
