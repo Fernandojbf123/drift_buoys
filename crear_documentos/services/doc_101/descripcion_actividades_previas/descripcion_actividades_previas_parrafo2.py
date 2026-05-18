@@ -1,20 +1,15 @@
 from configs.manager_doc_config import *
 from services.manager_variables_excel_datos_despliegue import *
-
+from services.manager_variables_excel_datos_campania import *
 
 def descripcion_actividades_previas_parrafo2(dic_datos_doris: dict) -> str:
+    df_unicos = get_fecha_y_hora_de_embarque_y_campania_unicos(dic_datos_doris)
+    numero_de_sondas = get_numero_de_sondas(dic_datos_doris)
     
+    es_una_campania = len(df_unicos) == 1
+    articulo = "la" if es_una_campania else "las"
+    palabra_campania = "campaña" if es_una_campania else "campañas"
     
-    orden_de_servicio = get_orden_de_servicio()
-    numero_total_de_sondas = get_numero_total_de_sondas()
-    numero_de_sondas_campania1 = get_numero_de_sondas_campana1()
-    numero_de_sondas_campania2 = get_numero_de_sondas_campana2()
-    fecha_campania_1 = get_fecha_campania_1()
-    fecha_campania_2 = get_fecha_campania_2()
-    
-    if fecha_campania_2 == "N/A":   
-        texto = f"Posteriormente, para cada campaña, se planeó la logística de las embarcaciones en la cuales se transportaron las sondas al lugar del despliegue. La liberación de las {numero_total_de_sondas} se llevo a cabo el {fecha_campania_1}. La ruta de liberación de las sondas en ambas campañas, obedeció el trayecto óptimo considerando la distancia desde tierra hasta el lugar de liberación acordado con PEMEX, teniendo en cuenta las condiciones atmosféricas y las posiciones en las cuales se hicieron las liberaciones. El derrotero consideró el sitio donde se dispuso del equipo que se utilizó para la liberación de las sondas y los implementos adicionales que se utilizaron para las maniobras costa afuera. Es importante mencionar que el derrotero de las embarcaciones está sujeto a cambios de acuerdo a las condiciones atmosféricas el día del zarpe, y a las decisiones que el encargado de la embarcación considere mejor para salvaguardar la seguridad de toda la tripulación. Una vez realizado el plan de crucero de cada campaña (ver ANEXO 3: PLAN DE CRUCERO), estos fueron enviados a PEMEX para su autorización, previo a la ejecución de las campañas, y de acuerdo con lo acordado en el Contrato No. 658225821. "
-    else:
-        texto = f"Posteriormente, para cada campaña, se planeó la logística de las embarcaciones en la cuales se transportaron las sondas al lugar del despliegue. Cabe mencionar que la liberación de las {numero_total_de_sondas} sondas se dividió en dos campañas; {numero_de_sondas_campania_1} sondas se liberaron el {fecha_campania_1}, y {numero_de_sondas_campania_2} más el {fecha_campania_2}. La ruta de liberación de las sondas en ambas campañas, obedeció el trayecto óptimo considerando la distancia desde tierra hasta el lugar de liberación acordado con PEMEX, teniendo en cuenta las condiciones atmosféricas y las posiciones en las cuales se hicieron las liberaciones. El derrotero consideró el sitio donde se dispuso del equipo que se utilizó para la liberación de las sondas y los implementos adicionales que se utilizaron para las maniobras costa afuera. Es importante mencionar que el derrotero de las embarcaciones está sujeto a cambios de acuerdo a las condiciones atmosféricas el día del zarpe, y a las decisiones que el encargado de la embarcación considere mejor para salvaguardar la seguridad de toda la tripulación. Una vez realizado el plan de crucero de cada campaña (ver ANEXO 3: PLAN DE CRUCERO), estos fueron enviados a PEMEX para su autorización, previo a la ejecución de las campañas, y de acuerdo con lo acordado en el Contrato No. 658225821."
+    texto = f"Las actividades previas a {articulo} {palabra_campania} de liberación, comenzaron una vez que PEMEX proporcionó al personal de ASM-CICESE las coordenadas para el despliegue de las {numero_de_sondas} sondas oceanográficas, diseñadas conforme a las necesidades específicas de PEMEX. Previo al despliegue de las sondas se realizaron las actividades determinadas de acuerdo al plan de trabajo del personal y, en la medida de lo posible, se consideraron los tiempos programados en el Plan de Campaña de cada despliegue. "
     
     return texto
