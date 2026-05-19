@@ -56,3 +56,4 @@ def get_lon_plan(df_datos_campanias: pd.DataFrame) -> list[float]:
 def get_fecha_y_hora_de_embarque_y_campania_unicos(df_datos_campanias: pd.DataFrame) -> pd.DataFrame:
     df_output = df_datos_campanias[["fecha_hora_de_embarque", "campania"]].drop_duplicates()
     return df_output
+
