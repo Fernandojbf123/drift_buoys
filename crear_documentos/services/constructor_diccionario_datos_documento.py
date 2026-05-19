@@ -24,7 +24,9 @@ class Dictfiguras():
         self.bookmark = bookmark.strip()
         
     def set_titulo(self, varvalue: str):
-        self.titulo = varvalue.strip()
+        titulo = varvalue.strip() 
+        titulo = titulo if titulo.endswith(".") else titulo + "."
+        self.titulo = titulo
         
     def return_dict(self) -> dict:
         return {
@@ -70,7 +72,11 @@ def construir_diccionario_agregar_figuras(df_datos_documento: pd.DataFrame) -> d
                 elif varname.lower() == "fig_pruebas_baterias".lower():
                     titulo = f"Datos transmitidos del estado de las baterias durante las 24 horas de las pruebas de funcionamiento"
                     dict_temporal.set_titulo(titulo)    
-                                
+                
+                elif varname.lower() == "fig_ubicacion_durante_pruebas".lower():
+                    titulo = f"Mapa con la información con las primeras 24 horas de transmisión de las sondas"
+                    dict_temporal.set_titulo(titulo)
+
                 array.append(dict_temporal.return_dict())
                 
             dict_documento["<<"+varname+">>"] = array
