@@ -417,7 +417,7 @@ def aux_insertar_figuras_con_titulo(paragraph, key, lista_figuras):
     return bookmarks_creados
 
 
-def aux_reemplazar_variable_en_parrafo(paragraph, key, value):
+def aux_reemplazar_texto_en_parrafo(paragraph, key, value):
     """Reemplaza un marcador de posición en un párrafo de Word PRESERVANDO el formato.
     
     Args:
@@ -448,6 +448,9 @@ def aux_reemplazar_variable_en_parrafo(paragraph, key, value):
                 paragraph.runs[irun+1].text = ""
                 paragraph.runs[irun+2].text = ""
                 return paragraph
+
+
+##
 
 
 def insertar_referencias_cruzadas_en_plantilla(doc, bookmarks_info):
@@ -624,37 +627,25 @@ def insertar_figuras_en_plantilla(doc, diccionario_de_reemplazos):
     return bookmarks_info
 
 
-# def reemplazar_en_word(doc, diccionario_de_reemplazos):
-#     """Reemplaza los marcadores de posición en un documento de Word utilizando un diccionario de reemplazos.
-#     doc es el documento de Word (objeto Document).
-#     diccionario_de_reemplazos es un diccionario donde las claves son los marcadores de posición a buscar
-#     (por ejemplo, "<<orden_de_servicio>>") y los valores son los textos que los reemplazarán (i.e., 100).
+def reemplazar_texto_en_word(doc, diccionario_de_reemplazos):
+    """Reemplaza los marcadores de posición en un documento de Word utilizando un diccionario de reemplazos.
+    doc es el documento de Word (objeto Document).
+    diccionario_de_reemplazos es un diccionario donde las claves son los marcadores de posición a buscar
+    (por ejemplo, "<<orden_de_servicio>>") y los valores son los textos que los reemplazarán (i.e., 100).
     
-#     Para las figuras, el valor debe ser una lista de diccionarios:
-#     - Lista con un solo elemento: inserta la figura SIN título
-#     - Lista con varios elementos: inserta las figuras CON sus títulos
+    Para las figuras, el valor debe ser una lista de diccionarios:
+    - Lista con un solo elemento: inserta la figura SIN título
+    - Lista con varios elementos: inserta las figuras CON sus títulos
     
-#     Cada diccionario debe tener las keys: "ruta", "titulo", "tamanio", "bookmark" (opcional)
-#     """
-#     # Para cada párrafo en el documento, reemplaza los marcadores de posición utilizando el diccionario
-#     for variable, dato in diccionario_de_reemplazos.items():
-#         for parrafo in doc.paragraphs:
-#             if variable in parrafo.text:
+    Cada diccionario debe tener las keys: "ruta", "titulo", "tamanio", "bookmark" (opcional)
+    """
+    # Para cada párrafo en el documento, reemplaza los marcadores de posición utilizando el diccionario
+    for variable, dato in diccionario_de_reemplazos.items():
+        for parrafo in doc.paragraphs:
+            if variable in parrafo.text:
                 
-#                 if "fig" not in variable: # Si el marcador no es de figura, reemplazo normal
-#                     aux_reemplazar_variable_en_parrafo(parrafo, variable, dato)
-                
-#                 # if "fig" in variable: # Si el marcador es de figura
-#                 #     if isinstance(dato, list):
-#                 #         if len(dato) == 1: # Una sola figura SIN título
-#                 #             item = dato[0]
-#                 #             ruta = item.get("ruta", "")
-#                 #             ancho = item.get("tamanio", 6)
-#                 #             aux_insertar_figura_sin_titulo(parrafo, variable, ruta, ancho)
-#                 #         else: # Varias figuras CON títulos
-#                 #             aux_insertar_figuras_con_titulo(parrafo, variable, dato)
-#                 # else: # No es un marcador de figura, reemplazo normal
-#                 #     aux_reemplazar_en_parrafo(parrafo, variable, dato)
-    
-#     # Retornar el documento modificado
-#     return doc
+                if "fig" not in variable: # Si el marcador no es de figura, reemplazo normal
+                    aux_reemplazar_texto_en_parrafo(parrafo, variable, dato)
+            
+    # Retornar el documento modificado
+    return doc

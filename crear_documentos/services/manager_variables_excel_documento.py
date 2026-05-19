@@ -10,6 +10,10 @@ def get_df_datos_documento() -> pd.DataFrame:
     df_datos_documento = leer_excel(ruta_al_excel_para_crear_documento(), nombre_de_hoja=hoja_del_excel_para_crear_documento(), header=None)
     return df_datos_documento
 
+def get_varnames_documento(df_datos_documento: pd.DataFrame) -> list:
+    varnames = df_datos_documento.iloc[:,0].tolist()
+    return varnames
+
 def get_variable_documento(df_datos_documento: pd.DataFrame, nombre_variable: str) -> None | np.ndarray:
     varvalue = None
     for row in df_datos_documento.iterrows():

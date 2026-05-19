@@ -13,7 +13,7 @@ def guardar_documento(doc, nombre_archivo="ASM-CICESE-10.1.docx"):
         str: La ruta completa donde se guardó el documento.
     """
     # Obtener la ruta de la carpeta de guardado
-    carpeta_guardado = get_ruta_a_carpeta_de_guardado_del_documento()
+    carpeta_guardado = get_ruta_a_carpeta_de_guardado_del_documento(usar_NAS=True)
     
     # Crear la carpeta si no existe
     os.makedirs(carpeta_guardado, exist_ok=True)
