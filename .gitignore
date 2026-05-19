@@ -38,3 +38,6 @@ Thumbs.db
 
 demo.docx
 ~$*
+~*.tmp
+~*.docx
+~*.xlsx
