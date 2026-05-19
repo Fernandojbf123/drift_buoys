@@ -466,6 +466,7 @@ def insertar_referencias_cruzadas_en_plantilla(doc, bookmarks_info):
         - Si la lista tiene 1 bookmark: inserta "Figura X"
         - Si la lista tiene 2+ bookmarks: inserta "Figura X a la Y"
         - X e Y son referencias cruzadas reales (campos REF) que muestran solo el número
+        - Procesa TODOS los marcadores de un párrafo en una sola pasada
     
     Nota importante:
         Los bookmarks creados por crear_pie_de_figura solo incluyen el número de la figura,
@@ -476,37 +477,50 @@ def insertar_referencias_cruzadas_en_plantilla(doc, bookmarks_info):
         Salida: "De la Figura 8 a la 10 se muestra el poder."
                 (donde "8" y "10" son campos REF clickeables que muestran solo el número)
     """
-    for variable_ref, lista_bookmarks in bookmarks_info.items():
-        # Si no hay bookmarks (figuras sin título), saltar
-        if lista_bookmarks is None or len(lista_bookmarks) == 0:
+    # Filtrar solo variables con bookmarks válidos
+    variables_validas = {k: v for k, v in bookmarks_info.items() 
+                        if v is not None and len(v) > 0 and k.startswith("<<ref_")}
+    
+    # Para cada párrafo
+    for parrafo in doc.paragraphs:
+        full_text = "".join(run.text for run in parrafo.runs)
+        
+        # Encontrar TODOS los marcadores <<ref_*>> en este párrafo
+        marcadores_en_parrafo = []
+        for variable_ref, lista_bookmarks in variables_validas.items():
+            if variable_ref in full_text:
+                # Encontrar todas las ocurrencias del marcador en el párrafo
+                pos = full_text.find(variable_ref)
+                if pos != -1:
+                    marcadores_en_parrafo.append((pos, variable_ref, lista_bookmarks))
+        
+        # Si no hay marcadores en este párrafo, continuar al siguiente
+        if not marcadores_en_parrafo:
             continue
         
-        # Buscar el marcador en todos los párrafos
-        for parrafo in doc.paragraphs:
-            full_text = "".join(run.text for run in parrafo.runs)
-            
-            if variable_ref not in full_text:
-                continue
-            
-            # Encontrar la posición del marcador
-            pos_inicio = full_text.find(variable_ref)
-            pos_fin = pos_inicio + len(variable_ref)
-            
-            # Dividir el texto en: antes + marcador + después
-            texto_antes = full_text[:pos_inicio]
-            texto_despues = full_text[pos_fin:]
-            
-            # Limpiar todos los runs del párrafo
-            for run in parrafo.runs:
-                run.text = ""
-            
-            # Reconstruir el párrafo con las referencias cruzadas
-            if texto_antes:
+        # Ordenar marcadores por posición (de izquierda a derecha)
+        marcadores_en_parrafo.sort(key=lambda x: x[0])
+        
+        # print(f"Párrafo con {len(marcadores_en_parrafo)} marcadores: {[m[1] for m in marcadores_en_parrafo]}")
+        
+        # Limpiar todos los runs del párrafo
+        for run in parrafo.runs:
+            run.text = ""
+        
+        # Reconstruir el párrafo procesando todos los marcadores
+        pos_actual = 0
+        
+        for pos_marcador, variable_ref, lista_bookmarks in marcadores_en_parrafo:
+            # Agregar texto antes del marcador
+            if pos_marcador > pos_actual:
+                texto_antes = full_text[pos_actual:pos_marcador]
                 parrafo.add_run(texto_antes)
             
-            # Obtener primer y último bookmark
+            # Insertar la referencia cruzada
             primer_bookmark = lista_bookmarks[0]
             ultimo_bookmark = lista_bookmarks[-1]
+            
+            # print(f"  Procesando: {variable_ref} con bookmarks: {lista_bookmarks}")
             
             if len(lista_bookmarks) == 1:
                 # Caso: Solo una figura - "Figura X"
@@ -517,11 +531,13 @@ def insertar_referencias_cruzadas_en_plantilla(doc, bookmarks_info):
                 parrafo.add_run(" a la ")
                 insertar_referencia_cruzada(parrafo, ultimo_bookmark, texto_antes="", mostrar_numero=True)
             
-            if texto_despues:
-                parrafo.add_run(texto_despues)
-            
-            # Ya se procesó este marcador, pasar al siguiente
-            break
+            # Avanzar posición actual
+            pos_actual = pos_marcador + len(variable_ref)
+        
+        # Agregar texto después del último marcador
+        if pos_actual < len(full_text):
+            texto_despues = full_text[pos_actual:]
+            parrafo.add_run(texto_despues)
 
 
 def insertar_figuras_en_plantilla(doc, diccionario_de_reemplazos):

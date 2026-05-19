@@ -25,7 +25,8 @@ class Dictfiguras():
         
     def set_titulo(self, varvalue: str):
         titulo = varvalue.strip() 
-        titulo = titulo if titulo.endswith(".") else titulo + "."
+        if titulo != "":
+            titulo = titulo if titulo.endswith(".") else titulo + "."
         self.titulo = titulo
         
     def return_dict(self) -> dict:
@@ -59,56 +60,36 @@ def construir_diccionario_agregar_figuras(df_datos_documento: pd.DataFrame) -> d
                     pie_value = get_variable_documento(df_datos_documento = df_datos_documento, nombre_variable = next_varname)
                     dict_temporal.set_titulo(pie_value[ivarvalue])
                 
-                elif varname.lower() == "fig_esquemas_sondas".lower():
+                if varname.lower() == "fig_mapa_de_despliegue".lower():
+                    dict_temporal.set_tamanio(6)  
+
+                if varname.lower() == "fig_esquema_de_sonda".lower():
                     numero_de_serie = varvalue.split("_")[-1]
                     titulo = f"Despliegue de sonda oceanográfica {numero_de_serie}"
                     dict_temporal.set_titulo(titulo)
+                    dict_temporal.set_tamanio(6)  
                     
-                elif varname.lower() == "fig_pruebas_transmision".lower():
+                elif varname.lower() == "fig_pruebas_de_transmision".lower():
                     numero_de_serie = varvalue.split("_")[-1]
                     titulo = f"Datos enviados durante las pruebas de laboratorio para la sonda {numero_de_serie}"
                     dict_temporal.set_titulo(titulo)
+                    dict_temporal.set_tamanio(6)
                     
                 elif varname.lower() == "fig_pruebas_baterias".lower():
                     titulo = f"Datos transmitidos del estado de las baterias durante las 24 horas de las pruebas de funcionamiento"
-                    dict_temporal.set_titulo(titulo)    
+                    dict_temporal.set_titulo(titulo)
+                    dict_temporal.set_tamanio(6)  
                 
                 elif varname.lower() == "fig_ubicacion_durante_pruebas".lower():
                     titulo = f"Mapa con la información con las primeras 24 horas de transmisión de las sondas"
                     dict_temporal.set_titulo(titulo)
+                    dict_temporal.set_tamanio(6)  
+                    
+                elif varname.lower() == "fig_pruebas_de_funcionamiento".lower():
+                    dict_temporal.set_tamanio(6)
 
                 array.append(dict_temporal.return_dict())
                 
             dict_documento["<<"+varname+">>"] = array
             
     return dict_documento
-
-            
-            
-
-# # dict_demo = {
-# #     get_variable_documento(df_datos_documento = df_documento, nombre_variable = "anio_de_vigencia"),
-# #     "<<mes_de_vigencia>>": get_variable_documento(df_datos_documento = df_documento, nombre_variable = "mes_de_vigencia"),
-# #     "<<fig_descripcion_arquitectura>>": get_variable_documento(df_datos_documento = df_documento, nombre_variable = "fig_descripcion_arquitectura"),
-# #     "<<pie_descripcion_arquitectura>>": get_variable_documento(df_datos_documento   = df_documento, nombre_variable = "pie_descripcion_arquitectura"),
-# #     "<<fig_actividades_previas>>": get_variable_documento(df_datos_documento = df_documento, nombre_variable = "fig_actividades_previas"),
-# #     "<<pie_actividades_previas>>": get_variable_documento(df_datos_documento = df_documento, nombre_variable = "pie_actividades_previas"),
-# #     "<<anio_de_vigencia>>": get_variable_documento(df_datos_documento = df_documento, nombre_variable = "anio_de_vigencia"),
-# #     "<<mes_de_vigencia>>": get_variable_documento(df_datos_documento = df_documento, nombre_variable = "mes_de_vigencia"),
-# #     "<<fig_descripcion_arquitectura>>": get_variable_documento(df_datos_documento = df_documento, nombre_variable = "fig_descripcion_arquitectura"),
-# #     "<<pie_descripcion_arquitectura>>": get_variable_documento(df_datos_documento = df_documento, nombre_variable = "pie_descripcion_arquitectura"),
-# #     "<<fig_actividades_previas>>": get_variable_documento(df_datos_documento = df_documento, nombre_variable = "fig_actividades_previas"),
-# #     "<<pie_actividades_previas>>": get_variable_documento(df_datos_documento = df_documento, nombre_variable = "pie_actividades_previas"),
-# #     "<<fig_mapa_de_despliegue>>": get_variable_documento(df_datos_documento = df_documento, nombre_variable = "fig_mapa_de_despliegue"),
-# #     "<<pie_mapa_de_despliegue>>": get_variable_documento(df_datos_documento = df_documento, nombre_variable = "pie_mapa_de_despliegue"),
-# #     "<<fig_ejecucion_campania>>": get_variable_documento(df_datos_documento = df_documento, nombre_variable = "fig_ejecucion_campania"),
-# #     "<<pie_ejecucion_campania>>": get_variable_documento(df_datos_documento = df_documento, nombre_variable = "pie_ejecucion_campania"),
-# #     "<<fig_esquemas_sondas>>": get_variable_documento(df_datos_documento = df_documento, nombre_variable = "fig_esquemas_sondas"),
-# #     "<<fig_pruebas_baterias>>": get_variable_documento(df_datos_documento = df_documento, nombre_variable = "fig_pruebas_baterias"),
-# #     "<<fig_ubicacion_durante_pruebas>>": get_variable_documento(df_datos_documento = df_documento, nombre_variable = "fig_ubicacion_durante_pruebas"),
-# #     "<<fig_pruebas_de_funcionamiento>>": get_variable_documento(df_datos_documento = df_documento, nombre_variable = "fig_pruebas_de_funcionamiento"),
-# #     "<<fig_pruebas_transmision>>": get_variable_documento(df_datos_documento = df_documento, nombre_variable = "fig_pruebas_transmision"),
-# #     "<<ruta_plan_de_crucero>>": get_variable_documento(df_datos_documento = df_documento, nombre_variable = "ruta_plan_de_crucero"),
-# #     "<<fig_anexo_fotografico>>": get_variable_documento(df_datos_documento = df_documento, nombre_variable = "fig_anexo_fotografico"),
-# #     "<<descripcion_anexo_fotografico>>": get_variable_documento(df_datos_documento = df_documento, nombre_variable = "descripcion_anexo_fotografico")
-# # }
