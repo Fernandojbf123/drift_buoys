@@ -66,7 +66,11 @@ def construir_diccionario_agregar_figuras(df_datos_documento: pd.DataFrame) -> d
                     numero_de_serie = varvalue.split("_")[-1]
                     titulo = f"Datos enviados durante las pruebas de laboratorio para la sonda {numero_de_serie}"
                     dict_temporal.set_titulo(titulo)
-            
+                    
+                elif varname.lower() == "fig_pruebas_baterias".lower():
+                    titulo = f"Datos transmitidos del estado de las baterias durante las 24 horas de las pruebas de funcionamiento"
+                    dict_temporal.set_titulo(titulo)    
+                                
                 array.append(dict_temporal.return_dict())
                 
             dict_documento["<<"+varname+">>"] = array
