@@ -22,5 +22,25 @@ def get_numero_de_sondas(df_datos_despliegue: pd.DataFrame) -> int:
     numero_de_sondas = len(df_datos_despliegue)
     return numero_de_sondas
 
+def get_fecha_inicio_de_vigencia(df_datos_despliegue: pd.DataFrame) -> str:
+    fecha_inicio_de_vigencia = df_datos_despliegue["fecha_inicio_de_vigencia"].iloc[0]
+    fecha_inicio_de_vigencia = pd.to_datetime(fecha_inicio_de_vigencia, format= "%d/%m/%Y", errors='coerce')
+    fecha_inicio_de_vigencia = fecha_inicio_de_vigencia.strftime("%d de %B de %Y")
+    return fecha_inicio_de_vigencia
+
+def get_fecha_final_de_vigencia(df_datos_despliegue: pd.DataFrame) -> str:
+    fecha_inicio_de_vigencia = df_datos_despliegue["fecha_inicio_de_vigencia"].iloc[0]
+    fecha_inicio_de_vigencia = pd.to_datetime(fecha_inicio_de_vigencia, format= "%d/%m/%Y", errors='coerce')
+    fecha_final_de_vigencia = fecha_inicio_de_vigencia + pd.offsets.MonthEnd(0)
+    fecha_final_de_vigencia = fecha_final_de_vigencia.strftime("%d de %B de %Y")
+    return fecha_final_de_vigencia
+
+def get_fecha_de_entrega(df_datos_despliegue: pd.DataFrame) -> str:
+    fecha_de_inicio_de_vigencia = df_datos_despliegue["fecha_inicio_de_vigencia"].iloc[0]
+    fecha_inicio_de_vigencia = pd.to_datetime(fecha_de_inicio_de_vigencia, format= "%d/%m/%Y", errors='coerce')
+    fecha_de_entrega = fecha_inicio_de_vigencia + pd.DateOffset(months=1)
+    fecha_de_entrega = fecha_de_entrega.strftime("%d de %B de %Y")
+    return fecha_de_entrega
+
 
 

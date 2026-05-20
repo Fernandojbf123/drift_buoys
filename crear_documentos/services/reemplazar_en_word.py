@@ -453,13 +453,13 @@ def aux_reemplazar_texto_en_parrafo(paragraph, key, value):
 ##
 
 
-def insertar_referencias_cruzadas_en_plantilla(doc, bookmarks_info):
+def insertar_referencias_cruzadas_en_plantilla(doc, diccionario_de_reemplazos: dict):
     """Reemplaza marcadores <<ref_*>> con referencias cruzadas a figuras.
     
     Args:
         doc: Objeto Document de python-docx
-        bookmarks_info: Diccionario retornado por insertar_figuras_en_plantilla
-                       Formato: {"<<ref_demo>>": ["_Ref_Fig_Mapa1", "_Ref_Fig_Temp"], ...}
+        diccionario_de_reemplazos: Diccionario retornado por insertar_figuras_en_plantilla
+                                  Formato: {"<<ref_demo>>": ["_Ref_Fig_Mapa1", "_Ref_Fig_Temp"], ...}
     
     Comportamiento:
         - Busca variables que empiecen con "<<ref_" en los párrafos
@@ -478,7 +478,7 @@ def insertar_referencias_cruzadas_en_plantilla(doc, bookmarks_info):
                 (donde "8" y "10" son campos REF clickeables que muestran solo el número)
     """
     # Filtrar solo variables con bookmarks válidos
-    variables_validas = {k: v for k, v in bookmarks_info.items() 
+    variables_validas = {k: v for k, v in diccionario_de_reemplazos.items() 
                         if v is not None and len(v) > 0 and k.startswith("<<ref_")}
     
     # Para cada párrafo
@@ -539,10 +539,15 @@ def insertar_referencias_cruzadas_en_plantilla(doc, bookmarks_info):
             texto_despues = full_text[pos_actual:]
             parrafo.add_run(texto_despues)
 
+    msg = "Referencias cruzadas insertadas."
+    print(msg)
 
-def insertar_figuras_en_plantilla(doc, diccionario_de_reemplazos):
+
+def insertar_figuras_en_plantilla(doc, diccionario_de_reemplazos: dict):
     """Inserta todas las figuras definidas en el diccionario en la plantilla de Word.
-    
+        y muta el diccionario de entrada al unirlo con la información de los bookmarks 
+        creados para referencias cruzadas.
+        
     Args:
         doc: Objeto Document de python-docx
         diccionario_de_reemplazos: Diccionario donde las claves que comienzan con "<<fig_" 
@@ -604,6 +609,9 @@ def insertar_figuras_en_plantilla(doc, diccionario_de_reemplazos):
     """
     bookmarks_info = {}
     
+    if diccionario_de_reemplazos is None:
+        raise ValueError("El diccionario de reemplazos no puede ser None.")
+    
     # Filtrar solo las variables que son figuras (comienzan con "<<fig_")
     variables_figuras = {k: v for k, v in diccionario_de_reemplazos.items() if k.startswith("<<fig_")}
     
@@ -640,7 +648,9 @@ def insertar_figuras_en_plantilla(doc, diccionario_de_reemplazos):
                         bookmarks_info[variable_ref_key] = bookmarks_creados
                         break  # Ya se insertó, pasar a la siguiente variable
     
-    return bookmarks_info
+    diccionario_de_reemplazos = diccionario_de_reemplazos.update(bookmarks_info)
+    msg = f"Figuras insertadas y bookmarks creados para referencias cruzadas"
+    print(msg)
 
 
 def reemplazar_texto_en_word(doc, diccionario_de_reemplazos):

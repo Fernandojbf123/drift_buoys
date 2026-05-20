@@ -57,3 +57,9 @@ def get_fecha_y_hora_de_embarque_y_campania_unicos(df_datos_campanias: pd.DataFr
     df_output = df_datos_campanias[["fecha_hora_de_embarque", "campania"]].drop_duplicates()
     return df_output
 
+def get_mes_y_anio_de_liberacion(df_datos_campanias: pd.DataFrame) -> str:
+    df = get_fecha_y_hora_de_embarque_y_campania_unicos(df_datos_campanias)
+    df["fecha_hora_de_embarque"] = pd.to_datetime(df["fecha_hora_de_embarque"], format= "%d/%m/%Y %H:%M", errors='coerce')
+    mes_y_anio_de_liberacion = df["fecha_hora_de_embarque"].iloc[0].strftime("%B de %Y")
+    return mes_y_anio_de_liberacion
+
