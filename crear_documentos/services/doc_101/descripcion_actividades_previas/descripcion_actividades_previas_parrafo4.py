@@ -1,7 +1,8 @@
 from configs.manager_doc_config import *
 from services.manager_variables_excel_datos_despliegue import *
+from services.manager_variables_excel_datos_campania import *
 
-from crear_documentos.services.manager_variables_excel_datos_campania import *
+from services.manager_variables_excel_datos_campania import *
 
 def descripcion_actividades_previas_parrafo4(dic_datos_doris: dict) -> str:
     

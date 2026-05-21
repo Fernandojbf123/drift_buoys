@@ -426,9 +426,10 @@ def aux_reemplazar_texto_en_parrafo(paragraph, key, value):
         value: El texto que lo reemplazará (i.e., 100).
     
     Esta función preserva el formato del run donde EMPIEZA el marcador.
-    Maneja tanto marcadores dentro de un solo run como divididos entre múltiples runs.
+    Maneja correctamente marcadores divididos entre múltiples runs de forma robusta.
+    Soporta múltiples variables en el mismo párrafo.
     """
-    # Unir todo el texto del párrafo para verificar si este tiene al marcador
+    # Unir todo el texto del párrafo para verificar si contiene el marcador
     full_text = "".join(run.text for run in paragraph.runs)
     if key not in full_text:
         return paragraph
@@ -436,18 +437,55 @@ def aux_reemplazar_texto_en_parrafo(paragraph, key, value):
     # Convertir value a string
     new_value = str(value[0]) if isinstance(value, list) else str(value)
     
-    # CASO 1: Intentar el caso simple primero (todo en un run)
+    # Estrategia robusta: reconstruir el texto acumulado mientras iteramos
+    texto_acumulado = ""
+    inicio_marcador_en_run = None
+    runs_involucrados = []
+    
     for irun, run in enumerate(paragraph.runs):
-        if key in run.text:
-            run.text = run.text.replace(key, new_value)
+        texto_previo = texto_acumulado
+        texto_acumulado += run.text
+        runs_involucrados.append(irun)
         
-        elif "<<" in run.text: # Si el marcador está dividido
-            variable_word = "".join([paragraph.runs[irun].text, paragraph.runs[irun+1].text, paragraph.runs[irun+2].text])
-            if key in variable_word:
-                paragraph.runs[irun].text = variable_word.replace(key, new_value)
-                paragraph.runs[irun+1].text = ""
-                paragraph.runs[irun+2].text = ""
-                return paragraph
+        # Verificar si ahora tenemos el marcador completo
+        if key in texto_acumulado:
+            # Encontramos el marcador
+            posicion_inicio = texto_acumulado.index(key)
+            posicion_fin = posicion_inicio + len(key)
+            
+            # Determinar en qué run empieza el marcador
+            longitud_acumulada = 0
+            run_inicio = None
+            for idx in runs_involucrados:
+                if longitud_acumulada <= posicion_inicio < longitud_acumulada + len(paragraph.runs[idx].text):
+                    run_inicio = idx
+                    break
+                longitud_acumulada += len(paragraph.runs[idx].text)
+            
+            # Reemplazar el marcador en el texto acumulado
+            texto_reemplazado = texto_acumulado.replace(key, new_value, 1)  # Solo reemplazar la primera ocurrencia
+            
+            # Redistribuir el texto: poner todo en el run donde EMPIEZA el marcador
+            if run_inicio is not None:
+                paragraph.runs[run_inicio].text = texto_reemplazado
+                # Limpiar los demás runs involucrados
+                for idx in runs_involucrados:
+                    if idx != run_inicio:
+                        paragraph.runs[idx].text = ""
+            
+            # Reiniciar para buscar más ocurrencias del mismo marcador en el párrafo
+            texto_acumulado = ""
+            runs_involucrados = []
+        
+        # Si el texto acumulado ya es más largo que el marcador y no lo contiene,
+        # podemos descartar los runs más antiguos
+        if len(texto_acumulado) > len(key) and key not in texto_acumulado:
+            # Remover el primer run de la lista y su texto del acumulado
+            if runs_involucrados:
+                primer_run = runs_involucrados.pop(0)
+                texto_acumulado = texto_acumulado[len(paragraph.runs[primer_run].text):]
+    
+    return paragraph
 
 
 ##
@@ -648,7 +686,7 @@ def insertar_figuras_en_plantilla(doc, diccionario_de_reemplazos: dict):
                         bookmarks_info[variable_ref_key] = bookmarks_creados
                         break  # Ya se insertó, pasar a la siguiente variable
     
-    diccionario_de_reemplazos = diccionario_de_reemplazos.update(bookmarks_info)
+    diccionario_de_reemplazos.update(bookmarks_info)
     msg = f"Figuras insertadas y bookmarks creados para referencias cruzadas"
     print(msg)
 
@@ -669,9 +707,13 @@ def reemplazar_texto_en_word(doc, diccionario_de_reemplazos):
     for variable, dato in diccionario_de_reemplazos.items():
         for parrafo in doc.paragraphs:
             if variable in parrafo.text:
-                
+                                
                 if "fig" not in variable: # Si el marcador no es de figura, reemplazo normal
                     aux_reemplazar_texto_en_parrafo(parrafo, variable, dato)
-            
+                    
+                    if variable == "<<mes_y_anio_de_liberacion>>":
+                        if "<<mes_y_anio_de_liberacion>>" in parrafo.text: # Si el marcador es el único texto del párrafo, reemplazo directo
+                            print("HOLA")
+                
     # Retornar el documento modificado
     return doc

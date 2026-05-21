@@ -2,9 +2,10 @@ from configs.manager_doc_config import *
 from services.manager_variables_excel_datos_despliegue import *
 from services.manager_variables_excel_datos_campania import *
 
-def descripcion_actividades_previas_parrafo2(dic_datos_doris: dict) -> str:
-    df_unicos = get_fecha_y_hora_de_embarque_y_campania_unicos(dic_datos_doris)
-    numero_de_sondas = get_numero_de_sondas(dic_datos_doris)
+def descripcion_actividades_previas_parrafo2(df_datos_campanias: dict, df_datos_despliegue: dict) -> str:
+    
+    df_unicos = get_fecha_y_hora_de_embarque_y_campania_unicos(df_datos_campanias = df_datos_campanias)
+    numero_de_sondas = get_numero_de_sondas(df_datos_despliegue = df_datos_despliegue)
     
     es_una_campania = len(df_unicos) == 1
     articulo = "la" if es_una_campania else "las"

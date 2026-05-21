@@ -1,6 +1,6 @@
 import pandas as pd
 
-def timestamp_a_texto_espanol(fecha: pd.Timestamp) -> str:
+def timestamp_a_texto_espanol(fecha: pd.Timestamp, mes_y_anio: bool) -> str:
     meses = {
         1: 'enero', 2: 'febrero', 3: 'marzo', 4: 'abril',
         5: 'mayo', 6: 'junio', 7: 'julio', 8: 'agosto',
@@ -11,9 +11,8 @@ def timestamp_a_texto_espanol(fecha: pd.Timestamp) -> str:
     mes = meses[fecha.month]
     anio = fecha.year
     
+    if mes_y_anio:
+        return f"{mes} de {anio}"
+    
     return f"{dia:02d} de {mes} de {anio}"
 
-# Uso:
-fecha = pd.Timestamp('2026-01-15')
-resultado = timestamp_a_texto_espanol(fecha)
-# Resultado: "15 de enero de 2026"

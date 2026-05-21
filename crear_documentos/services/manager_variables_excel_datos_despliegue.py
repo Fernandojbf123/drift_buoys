@@ -1,6 +1,7 @@
 import pandas as pd
 from configs.manager_doc_config import *
 from services.leer_excel import leer_excel
+from services.timestamp_a_texto_espanol import *
 
 
 ## Datos asociados a la hoja de datos de DORIS
@@ -22,25 +23,25 @@ def get_numero_de_sondas(df_datos_despliegue: pd.DataFrame) -> int:
     numero_de_sondas = len(df_datos_despliegue)
     return numero_de_sondas
 
-def get_fecha_inicio_de_vigencia(df_datos_despliegue: pd.DataFrame) -> str:
-    fecha_inicio_de_vigencia = df_datos_despliegue["fecha_inicio_de_vigencia"].iloc[0]
-    fecha_inicio_de_vigencia = pd.to_datetime(fecha_inicio_de_vigencia, format= "%d/%m/%Y", errors='coerce')
-    fecha_inicio_de_vigencia = fecha_inicio_de_vigencia.strftime("%d de %B de %Y")
-    return fecha_inicio_de_vigencia
+def get_fecha_inicio_vigencia(df_datos_despliegue: pd.DataFrame) -> str:
+    fecha_inicio_vigencia = df_datos_despliegue["fecha_inicio_vigencia"].iloc[0]
+    fecha_inicio_vigencia = pd.to_datetime(fecha_inicio_vigencia, format= "%d/%m/%Y", errors='coerce')
+    fecha_inicio_vigencia = timestamp_a_texto_espanol(fecha = fecha_inicio_vigencia, mes_y_anio=False)
+    return fecha_inicio_vigencia
 
-def get_fecha_final_de_vigencia(df_datos_despliegue: pd.DataFrame) -> str:
-    fecha_inicio_de_vigencia = df_datos_despliegue["fecha_inicio_de_vigencia"].iloc[0]
-    fecha_inicio_de_vigencia = pd.to_datetime(fecha_inicio_de_vigencia, format= "%d/%m/%Y", errors='coerce')
-    fecha_final_de_vigencia = fecha_inicio_de_vigencia + pd.offsets.MonthEnd(0)
-    fecha_final_de_vigencia = fecha_final_de_vigencia.strftime("%d de %B de %Y")
-    return fecha_final_de_vigencia
+def get_fecha_final_vigencia(df_datos_despliegue: pd.DataFrame) -> str:
+    fecha_inicio_vigencia = df_datos_despliegue["fecha_inicio_vigencia"].iloc[0]
+    fecha_inicio_vigencia = pd.to_datetime(fecha_inicio_vigencia, format= "%d/%m/%Y", errors='coerce')
+    fecha_final_vigencia = fecha_inicio_vigencia + pd.offsets.MonthEnd(0)
+    fecha_final_vigencia = timestamp_a_texto_espanol(fecha = fecha_final_vigencia, mes_y_anio=False)
+    return fecha_final_vigencia
 
-def get_fecha_de_entrega(df_datos_despliegue: pd.DataFrame) -> str:
-    fecha_de_inicio_de_vigencia = df_datos_despliegue["fecha_inicio_de_vigencia"].iloc[0]
-    fecha_inicio_de_vigencia = pd.to_datetime(fecha_de_inicio_de_vigencia, format= "%d/%m/%Y", errors='coerce')
-    fecha_de_entrega = fecha_inicio_de_vigencia + pd.DateOffset(months=1)
-    fecha_de_entrega = fecha_de_entrega.strftime("%d de %B de %Y")
-    return fecha_de_entrega
+def get_fecha_entrega(df_datos_despliegue: pd.DataFrame) -> str:
+    fecha_inicio_vigencia = df_datos_despliegue["fecha_inicio_vigencia"].iloc[0]
+    fecha_inicio_vigencia = pd.to_datetime(fecha_inicio_vigencia, format= "%d/%m/%Y", errors='coerce')
+    fecha_entrega = fecha_inicio_vigencia + pd.DateOffset(months=1)
+    fecha_entrega = timestamp_a_texto_espanol(fecha = fecha_entrega, mes_y_anio=False)
+    return fecha_entrega
 
 
 
