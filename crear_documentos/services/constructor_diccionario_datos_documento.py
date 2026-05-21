@@ -11,13 +11,20 @@ from services.manager_variables_excel_documento import *
 from services.doc_101.descripcion_actividades_previas.descripcion_actividades_previas_parrafo1 import *
 from services.doc_101.descripcion_actividades_previas.descripcion_actividades_previas_parrafo2 import *
 from services.doc_101.descripcion_actividades_previas.descripcion_actividades_previas_parrafo3 import *
-# from services.doc_101.descripcion_actividades_previas.descripcion_actividades_previas_parrafo4 import *
+
+from services.doc_101.ejecucion_de_la_campania.ejecucion_de_la_campania_parrafo1 import *
+from services.doc_101.ejecucion_de_la_campania.ejecucion_de_la_campania_parrafo2 import *
+from services.doc_101.ejecucion_de_la_campania.ejecucion_de_la_campania_parrafo3 import *
+from services.doc_101.ejecucion_de_la_campania.ejecucion_de_la_campania_parrafo4 import *
 
 
 
 
 
-####################### ESQUEMA DE DICCIONARIO PARA FIGURAS #######################
+  
+############################ DICCIONARIO DE REEMPLAZOS PARA FIGURAS ############################
+
+# ESQUEMA DEL DICCIONARIO DE FIGURAS
 class Dictfiguras():
     def __init__(self):
         self.ruta = ""
@@ -50,9 +57,6 @@ class Dictfiguras():
             "tamanio": self.tamanio,
             "bookmark": self.bookmark
         }
-  
-#######################################
-
 
 def construir_diccionario_agregar_figuras(df_datos_documento: pd.DataFrame) -> dict:
     dict_documento = {}
@@ -109,7 +113,7 @@ def construir_diccionario_agregar_figuras(df_datos_documento: pd.DataFrame) -> d
     return dict_documento
 
 
-################################ 
+############################ DICCIONARIO DE REEMPLAZOS PARA TEXTO ############################
 def construir_diccionario_de_datos_documento(df_datos_despliegue: pd.DataFrame, 
                                             df_datos_campanias: pd.DataFrame,
                                             df_datos_documento: pd.DataFrame,
@@ -132,27 +136,46 @@ def construir_diccionario_de_datos_documento(df_datos_despliegue: pd.DataFrame,
     ## mes y_año de liberacion
     diccionario_de_reemplazos["<<mes_y_anio_de_liberacion>>"] = get_mes_y_anio_de_liberacion(df_datos_campanias = df_datos_campanias)
     
-    print("FERCHO")
-    diccionario_de_reemplazos["<<descripción_actividades_previas_parrafo1>>"] = descripcion_actividades_previas_parrafo1(df_datos_campanias = df_datos_campanias, 
-                                                                                                                         df_datos_despliegue= df_datos_despliegue)
+    diccionario_de_reemplazos["<<descripcion_actividades_previas_parrafo1>>"] = descripcion_actividades_previas_parrafo1(df_datos_campanias = df_datos_campanias, 
+                                                                                                                        df_datos_despliegue= df_datos_despliegue)
     
-    diccionario_de_reemplazos["<<descripción_actividades_previas_parrafo2>>"] = descripcion_actividades_previas_parrafo2(df_datos_campanias = df_datos_campanias, 
-                                                                                                                         df_datos_despliegue= df_datos_despliegue)
+    diccionario_de_reemplazos["<<descripcion_actividades_previas_parrafo2>>"] = descripcion_actividades_previas_parrafo2(df_datos_campanias = df_datos_campanias, 
+                                                                                                                        df_datos_despliegue= df_datos_despliegue)
     
-    diccionario_de_reemplazos["<<descripción_actividades_previas_parrafo3>>"] = descripcion_actividades_previas_parrafo3(df_datos_campanias = df_datos_campanias, 
-                                                                                                                         df_datos_despliegue= df_datos_despliegue)
+    diccionario_de_reemplazos["<<descrpcion_actividades_previas_parrafo3>>"] = descripcion_actividades_previas_parrafo3(df_datos_campanias = df_datos_campanias, 
+                                                                                                                        df_datos_despliegue= df_datos_despliegue)
     
-    # diccionario_de_reemplazos["<<descripción_actividades_previas_parrafo4>>"] = descripcion_actividades_previas_parrafo4(df_datos_campanias = df_datos_campanias,
-    #                                                                                                                     df_datos_despliegue= df_datos_despliegue)   
+    diccionario_de_reemplazos["<<ejecucion_de_la_campania_parrafo1>>"] = ejecucion_de_la_campania_parrafo1(df_datos_campanias = df_datos_campanias, 
+                                                                                                            df_datos_despliegue= df_datos_despliegue)
     
+    diccionario_de_reemplazos["<<ejecucion_de_la_campania_parrafo2>>"] = ejecucion_de_la_campania_parrafo2(df_datos_campanias = df_datos_campanias, 
+                                                                                                            df_datos_despliegue= df_datos_despliegue)
     
-    # <<ejecucion_de_la_campania_parrafo1>>
-    # <<ejecucion_de_la_campania_parrafo2>>
-    # <<ejecucion_de_la_campania_parrafo3>> 
-    # <<ejecucion_de_la_campania_parrafo4>>
-    # <<ejecucion_de_la_campania_parrafo5>>
+    diccionario_de_reemplazos["<<ejecucion_de_la_campania_parrafo3>>"] = ejecucion_de_la_campania_parrafo3(df_datos_campanias = df_datos_campanias, 
+                                                                                                            df_datos_despliegue= df_datos_despliegue)
     
-    # <<conclusiones_parrafo1>>
+    diccionario_de_reemplazos["<<ejecucion_de_la_campania_parrafo4>>"] = ejecucion_de_la_campania_parrafo4(df_datos_campanias = df_datos_campanias, 
+                                                                                                            df_datos_despliegue= df_datos_despliegue)
     
-    # <<ruta_plan_de_crucero>>
- 
+
+
+############################ DICCIONARIO DE REEMPLAZOS PARA PLANES DE CRUCEROS ############################
+def construir_diccionario_de_reemplazos_para_plan_de_cruceros(df_datos_despliegue: pd.DataFrame, 
+                                                            df_datos_campanias: pd.DataFrame,
+                                                            df_datos_documento: pd.DataFrame,
+                                                            diccionario_de_reemplazos: dict):
+
+    df_unicos= get_fecha_y_hora_de_embarque_y_campania_unicos(df_datos_campanias = df_datos_campanias)
+    campanias_unicas = df_unicos["campania"].unique()
+    rutas = []
+    for campania in campanias_unicas:
+        archivo = campania + ".docx"
+        ruta = os.path.join(get_ruta_a_carpeta_de_planes_de_crucero(usar_NAS=True), archivo)
+        rutas.append(ruta)
+    diccionario_de_reemplazos["<<ruta_plan_de_crucero>>"] = rutas
+
+    
+############################# DICCIONARIO DE REEMPLAZOS PARA TABLAS ############################
+# Es probable que acá necesite varios esquemas, dependiendo de la tabla.
+
+

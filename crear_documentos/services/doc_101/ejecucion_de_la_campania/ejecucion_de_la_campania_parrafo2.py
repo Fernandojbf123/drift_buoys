@@ -1,16 +1,20 @@
 from configs.manager_doc_config import *
+
 from services.manager_variables_excel_datos_despliegue import *
-from crear_documentos.services.manager_variables_excel_datos_campania import *
+from services.manager_variables_excel_datos_campania import *
+
+from services.timestamp_a_texto_espanol import *
+from services.obtener_palabras_singulares_plurales import *
 
 
-def ejecucion_de_la_campania_parrafo2(dic_datos_doris: dict) -> str:
+def ejecucion_de_la_campania_parrafo2(df_datos_campanias: pd.DataFrame, df_datos_despliegue: pd.DataFrame) -> str:
     
-    df_unicos= get_fecha_y_hora_de_embarque_y_campania_unicos(dic_datos_doris)
+    df_unicos= get_fecha_y_hora_de_embarque_y_campania_unicos(df_datos_campanias = df_datos_campanias)
+    es_una_campania = True if len(df_unicos) == 1 else False
     
-    texto = "Dado que las actividades asociadas a la ejecución de "
-    articulo = "la" if len(df_unicos) == 1 else "las"
-    palabra_campania = "campaña" if len(df_unicos) == 1 else "campañas"
-    texto = f"La ejecución de {articulo} {palabra_campania} de instalación de las sondas, se efectuó de acuerdo con la planeación de la logística y derrotero de la embarcación."
+    p = obtener_palabras_singulares_plurales(es_singular = es_una_campania)
+    
+    texto = f"La ejecución de {p['la_las']} {p['campania_campanias']} de instalación de las sondas"
         
     return texto
 

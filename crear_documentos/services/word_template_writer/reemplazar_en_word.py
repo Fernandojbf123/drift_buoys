@@ -5,6 +5,8 @@ from docx.oxml import OxmlElement
 from docx.oxml.ns import qn
 from docx.text.paragraph import Paragraph
 
+from services.insertar_documentos_externos import insertar_documentos_externos
+
 
 """
 Este módulo contiene funciones para reemplazar marcadores de posición en párrafos de Word, incluyendo la inserción de imágenes con o sin títulos.
@@ -417,6 +419,44 @@ def aux_insertar_figuras_con_titulo(paragraph, key, lista_figuras):
     return bookmarks_creados
 
 
+def aux_reemplazar_multiples_variables_en_parrafo(paragraph, lista_variables):
+    """Reemplaza múltiples marcadores de posición en un párrafo de Word de una sola vez.
+    
+    Args:
+        paragraph: El párrafo donde buscar los marcadores.
+        lista_variables: Lista de tuplas (key, value) con los marcadores y sus valores.
+                        Ejemplo: [("<<orden_de_servicio>>", "202"), ("<<numero_de_sondas>>", 5)]
+    
+    Esta función reemplaza todas las variables en un solo paso, evitando problemas
+    de estado cuando hay múltiples variables en el mismo párrafo.
+    """
+    # Obtener el texto completo del párrafo
+    full_text = "".join(run.text for run in paragraph.runs)
+    
+    # Reemplazar todas las variables en el texto completo
+    texto_reemplazado = full_text
+    for key, value in lista_variables:
+        if key in texto_reemplazado:
+            # Convertir value a string
+            new_value = str(value[0]) if isinstance(value, list) else str(value)
+            # Reemplazar todas las ocurrencias de esta variable
+            texto_reemplazado = texto_reemplazado.replace(key, new_value)
+    
+    # Si no hubo cambios, retornar
+    if texto_reemplazado == full_text:
+        return paragraph
+    
+    # Limpiar todos los runs excepto el primero
+    primer_run = paragraph.runs[0] if paragraph.runs else paragraph.add_run()
+    primer_run.text = texto_reemplazado
+    
+    # Limpiar el resto de runs
+    for i in range(1, len(paragraph.runs)):
+        paragraph.runs[i].text = ""
+    
+    return paragraph
+
+
 def aux_reemplazar_texto_en_parrafo(paragraph, key, value):
     """Reemplaza un marcador de posición en un párrafo de Word PRESERVANDO el formato.
     
@@ -425,72 +465,15 @@ def aux_reemplazar_texto_en_parrafo(paragraph, key, value):
         key: El marcador de posición a buscar (por ejemplo, "<<orden_de_servicio>>").
         value: El texto que lo reemplazará (i.e., 100).
     
-    Esta función preserva el formato del run donde EMPIEZA el marcador.
-    Maneja correctamente marcadores divididos entre múltiples runs de forma robusta.
-    Soporta múltiples variables en el mismo párrafo.
+    NOTA: Esta función es mantenida por compatibilidad, pero se recomienda usar
+    aux_reemplazar_multiples_variables_en_parrafo para mejor manejo de múltiples variables.
     """
-    # Unir todo el texto del párrafo para verificar si contiene el marcador
-    full_text = "".join(run.text for run in paragraph.runs)
-    if key not in full_text:
-        return paragraph
-    
-    # Convertir value a string
-    new_value = str(value[0]) if isinstance(value, list) else str(value)
-    
-    # Estrategia robusta: reconstruir el texto acumulado mientras iteramos
-    texto_acumulado = ""
-    inicio_marcador_en_run = None
-    runs_involucrados = []
-    
-    for irun, run in enumerate(paragraph.runs):
-        texto_previo = texto_acumulado
-        texto_acumulado += run.text
-        runs_involucrados.append(irun)
-        
-        # Verificar si ahora tenemos el marcador completo
-        if key in texto_acumulado:
-            # Encontramos el marcador
-            posicion_inicio = texto_acumulado.index(key)
-            posicion_fin = posicion_inicio + len(key)
-            
-            # Determinar en qué run empieza el marcador
-            longitud_acumulada = 0
-            run_inicio = None
-            for idx in runs_involucrados:
-                if longitud_acumulada <= posicion_inicio < longitud_acumulada + len(paragraph.runs[idx].text):
-                    run_inicio = idx
-                    break
-                longitud_acumulada += len(paragraph.runs[idx].text)
-            
-            # Reemplazar el marcador en el texto acumulado
-            texto_reemplazado = texto_acumulado.replace(key, new_value, 1)  # Solo reemplazar la primera ocurrencia
-            
-            # Redistribuir el texto: poner todo en el run donde EMPIEZA el marcador
-            if run_inicio is not None:
-                paragraph.runs[run_inicio].text = texto_reemplazado
-                # Limpiar los demás runs involucrados
-                for idx in runs_involucrados:
-                    if idx != run_inicio:
-                        paragraph.runs[idx].text = ""
-            
-            # Reiniciar para buscar más ocurrencias del mismo marcador en el párrafo
-            texto_acumulado = ""
-            runs_involucrados = []
-        
-        # Si el texto acumulado ya es más largo que el marcador y no lo contiene,
-        # podemos descartar los runs más antiguos
-        if len(texto_acumulado) > len(key) and key not in texto_acumulado:
-            # Remover el primer run de la lista y su texto del acumulado
-            if runs_involucrados:
-                primer_run = runs_involucrados.pop(0)
-                texto_acumulado = texto_acumulado[len(paragraph.runs[primer_run].text):]
-    
+    # Usar la nueva función con una sola variable
+    aux_reemplazar_multiples_variables_en_parrafo(paragraph, [(key, value)])
     return paragraph
 
 
-##
-
-
+############### SOLO INSERTAR REFERENCIAS CRUZADAS A FIGURAS ANTES SE DEBIÓ EJECUTAR LA INSERSIÓN DE FIGURAS ########################
 def insertar_referencias_cruzadas_en_plantilla(doc, diccionario_de_reemplazos: dict):
     """Reemplaza marcadores <<ref_*>> con referencias cruzadas a figuras.
     
@@ -581,6 +564,8 @@ def insertar_referencias_cruzadas_en_plantilla(doc, diccionario_de_reemplazos: d
     print(msg)
 
 
+
+############## SOLO INSERTAR FIGURAS ########################
 def insertar_figuras_en_plantilla(doc, diccionario_de_reemplazos: dict):
     """Inserta todas las figuras definidas en el diccionario en la plantilla de Word.
         y muta el diccionario de entrada al unirlo con la información de los bookmarks 
@@ -691,6 +676,8 @@ def insertar_figuras_en_plantilla(doc, diccionario_de_reemplazos: dict):
     print(msg)
 
 
+
+################ SOLO REEMPLAZAR TEXTOS #########################
 def reemplazar_texto_en_word(doc, diccionario_de_reemplazos):
     """Reemplaza los marcadores de posición en un documento de Word utilizando un diccionario de reemplazos.
     doc es el documento de Word (objeto Document).
@@ -703,17 +690,48 @@ def reemplazar_texto_en_word(doc, diccionario_de_reemplazos):
     
     Cada diccionario debe tener las keys: "ruta", "titulo", "tamanio", "bookmark" (opcional)
     """
-    # Para cada párrafo en el documento, reemplaza los marcadores de posición utilizando el diccionario
-    for variable, dato in diccionario_de_reemplazos.items():
-        for parrafo in doc.paragraphs:
+    # Filtrar solo variables que NO son figuras
+    variables_texto = {k: v for k, v in diccionario_de_reemplazos.items() 
+                      if "fig" not in k and "ref" not in k and "ruta_plan_de_crucero" not in k}
+    
+    # Para cada párrafo, procesar TODAS las variables de texto de una sola vez
+    for parrafo in doc.paragraphs:
+        # Encontrar todas las variables que están en este párrafo
+        variables_en_parrafo = []
+        for variable, dato in variables_texto.items():
             if variable in parrafo.text:
-                                
-                if "fig" not in variable: # Si el marcador no es de figura, reemplazo normal
-                    aux_reemplazar_texto_en_parrafo(parrafo, variable, dato)
-                    
-                    if variable == "<<mes_y_anio_de_liberacion>>":
-                        if "<<mes_y_anio_de_liberacion>>" in parrafo.text: # Si el marcador es el único texto del párrafo, reemplazo directo
-                            print("HOLA")
-                
-    # Retornar el documento modificado
-    return doc
+                variables_en_parrafo.append((variable, dato))
+        
+        # Si hay variables en este párrafo, reemplazarlas todas de una vez
+        if variables_en_parrafo:
+            aux_reemplazar_multiples_variables_en_parrafo(parrafo, variables_en_parrafo)
+    
+    msg = f"Se agregaron los textos al documento."
+    print(msg)
+
+
+
+################## INSERTA EL(LOS) PLAN(ES) DE CRUCERO(S) #########################
+def insertar_plan_de_crucero_en_word(doc, diccionario_de_reemplazos):
+    """Reemplaza los marcadores de posición en un documento de Word utilizando un diccionario de reemplazos.
+    doc es el documento de Word (objeto Document).
+    diccionario_de_reemplazos es un diccionario donde las claves son los marcadores de posición a buscar
+    (por ejemplo, "<<orden_de_servicio>>") y los valores son los textos que los reemplazarán (i.e., 100).
+    
+    Para las figuras, el valor debe ser una lista de diccionarios:
+    - Lista con un solo elemento: inserta la figura SIN título
+    - Lista con varios elementos: inserta las figuras CON sus títulos
+    
+    Cada diccionario debe tener las keys: "ruta", "titulo", "tamanio", "bookmark" (opcional)
+    """
+    # Para cada párrafo en el documento, reemplaza los marcadores de posición utilizando el diccionario
+    dato = diccionario_de_reemplazos["<<ruta_plan_de_crucero>>"]
+    for parrafo in doc.paragraphs:
+        if "<<ruta_plan_de_crucero>>" in parrafo.text:
+            insertar_documentos_externos(parrafo, "<<ruta_plan_de_crucero>>", dato, doc)
+            msg = f"Plan de crucero insertado"
+            if len(dato) > 1:
+                msg = f"Planes de crucero insertados"
+                print(msg)
+                break
+            # return doc

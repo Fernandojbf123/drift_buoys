@@ -1,7 +1,5 @@
 from copy import deepcopy
-
 from genericpath import exists
-
 from docx import Document
 from docx.shared import Inches
 from docx.oxml import OxmlElement
@@ -9,7 +7,7 @@ from docx.oxml.ns import qn
 from docx.text.paragraph import Paragraph
 
 
-def insertar_documentos_externos(paragraph, key, lista_rutas_documentos, doc_destino):
+def insert_external_document(paragraph, key, lista_rutas_documentos, doc_destino):
     """Inserta el contenido de uno o varios documentos Word externos.
     
     Args:
@@ -74,13 +72,13 @@ def insertar_documentos_externos(paragraph, key, lista_rutas_documentos, doc_des
             # Solo copiar párrafos y tablas, ignorar el resto
             if tag == qn('w:p') or tag == qn('w:tbl'):
                 # Verificar que no sea un párrafo con marca de agua
-                if tag == qn('w:p') and _es_marca_de_agua(elemento):
+                if tag == qn('w:p') and _is_watermark(elemento):
                     continue
                 
                 elemento_copiado = deepcopy(elemento)
                 
                 # Actualizar los IDs de relación de imágenes en el elemento copiado
-                _actualizar_rids_en_elemento(elemento_copiado, mapeo_rids)
+                _update_rids_in_element(elemento_copiado, mapeo_rids)
                 
                 parent.insert(indice_insercion + offset + 1, elemento_copiado)
                 offset += 1
@@ -102,7 +100,7 @@ def insertar_documentos_externos(paragraph, key, lista_rutas_documentos, doc_des
     return True
 
 
-def _es_marca_de_agua(elemento_p):
+def _is_watermark(elemento_p):
     """Detecta si un párrafo es parte de una marca de agua.
     
     Args:
@@ -190,7 +188,7 @@ def _copiar_relaciones_imagenes(doc_origen, doc_destino):
     return mapeo_rids
 
 
-def _actualizar_rids_en_elemento(elemento, mapeo_rids):
+def _update_rids_in_element(elemento, mapeo_rids):
     """Actualiza los IDs de relación (rId) en un elemento XML con el mapeo proporcionado.
     
     Args:

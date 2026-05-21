@@ -1,0 +1,367 @@
+"""
+Public API for Word Template Writer Module
+==========================================
+
+This module provides high-level orchestrator functions (in Spanish) for manipulating
+Word templates. These are the main functions users should call.
+
+Functions:
+    - insertar_figuras_en_plantilla: Insert figures with/without captions
+    - insertar_referencias_cruzadas_en_plantilla: Create cross-references to figures
+    - reemplazar_texto_en_plantilla: Replace text variables in template
+    - insertar_documento_externo_en_plantilla: Insert external Word documents
+    - rellenar_tablas_en_plantilla: Fill tables with DataFrame data
+"""
+
+# Import helper functions from private modules
+from ._figure_helpers import (
+    aux_insertar_figura_sin_titulo,
+    aux_insertar_figuras_con_titulo,
+    aux_insertar_referencia_cruzada,
+)
+from ._text_helpers import replace_text_variables_in_paragraph
+from ._document_helpers import insert_external_document
+from ._table_helpers import rellenar_tabla
+
+
+def insertar_figuras_en_plantilla(doc, diccionario_de_reemplazos: dict):
+    """Inserta todas las figuras definidas en el diccionario en la plantilla de Word.
+    
+    Muta el diccionario de entrada al unirlo con la información de los bookmarks 
+    creados para referencias cruzadas.
+        
+    Args:
+        doc: Objeto Document de python-docx
+        diccionario_de_reemplazos: Diccionario donde las claves que comienzan con "<<fig_" 
+                                   contienen listas de figuras a insertar.
+    
+    Returns:
+        None (el diccionario se muta in-place agregando keys "<<ref_*>>")
+    
+    Casos soportados:
+        - Caso 1: Figuras SIN título - titulo="" y bookmark=""
+                 Se insertan imágenes sin Caption, numeración ni bookmarks
+        - Caso 2: Figuras CON título - titulo y bookmark con contenido
+                 Se crean pies de figura con estilo Caption, campo SEQ y bookmarks
+    
+    Estructura esperada del diccionario:
+        {
+            # Caso 1: Figuras SIN título
+            "<<fig_fotos>>": [
+                {"ruta": "foto1.png", "titulo": "", "tamanio": 6, "bookmark": ""},
+                {"ruta": "foto2.png", "titulo": "", "tamanio": 5, "bookmark": ""}
+            ],
+            
+            # Caso 2: Figuras CON título
+            "<<fig_mapas>>": [
+                {"ruta": "mapa1.png", "titulo": "Mapa de ubicación", "tamanio": 6, "bookmark": "_Ref_Mapa1"},
+                {"ruta": "mapa2.png", "titulo": "Temperatura del agua", "tamanio": 5, "bookmark": "_Ref_Temp"}
+            ],
+            
+            "<<orden_servicio>>": "12345",  # Variables no-figura se ignoran aquí
+        }
+    
+    Ejemplo de uso:
+        from docx import Document
+        from word_template_writer import insertar_figuras_en_plantilla, insertar_referencias_cruzadas_en_plantilla
+        
+        doc = Document('plantilla.docx')
+        diccionario = {
+            "<<fig_mapas>>": [
+                {"ruta": "mapa1.png", "titulo": "Ubicación sondas", "tamanio": 6, "bookmark": "_Ref_Mapa1"},
+                {"ruta": "mapa2.png", "titulo": "Temperatura", "tamanio": 5, "bookmark": "_Ref_Temp"}
+            ],
+            "<<fig_fotos>>": [
+                {"ruta": "foto1.png", "titulo": "", "tamanio": 4, "bookmark": ""}
+            ]
+        }
+        
+        # Paso 1: Insertar las figuras (agrega keys <<ref_*>> al diccionario)
+        insertar_figuras_en_plantilla(doc, diccionario)
+        # El diccionario ahora contiene:
+        # {
+        #     "<<ref_mapas>>": ["_Ref_Mapa1", "_Ref_Temp"],
+        #     "<<ref_fotos>>": None,
+        #     ... (keys originales se mantienen)
+        # }
+        
+        # Paso 2: Insertar referencias cruzadas (si hay marcadores <<ref_*>> en la plantilla)
+        # Ejemplo: "De la <<ref_mapas>> se observa..." → "De la Figura 1 a la 2 se observa..."
+        insertar_referencias_cruzadas_en_plantilla(doc, diccionario)
+        
+        doc.save('documento_con_figuras.docx')
+    """
+    bookmarks_info = {}
+    
+    if diccionario_de_reemplazos is None:
+        raise ValueError("El diccionario de reemplazos no puede ser None.")
+    
+    # Filtrar solo las variables que son figuras (comienzan con "<<fig_")
+    variables_figuras = {k: v for k, v in diccionario_de_reemplazos.items() if k.startswith("<<fig_")}
+    
+    # Procesar cada variable de figura
+    for variable, datos_figuras in variables_figuras.items():
+        if not isinstance(datos_figuras, list):
+            print(f"Advertencia: La variable '{variable}' no contiene una lista. Se omite.")
+            continue
+        
+        if len(datos_figuras) == 0:
+            print(f"Advertencia: La variable '{variable}' contiene una lista vacía. Se omite.")
+            continue
+        
+        # Determinar si son figuras CON o SIN título
+        # Caso 1: Figuras SIN título - todos los títulos están vacíos
+        tiene_titulo = any(item.get("titulo", "") != "" for item in datos_figuras)
+        
+        # Buscar el marcador en todos los párrafos del documento
+        for parrafo in doc.paragraphs:
+            if variable in parrafo.text:
+                
+                # Crear key de referencia: "<<fig_mapas>>" -> "<<ref_mapas>>"
+                variable_ref_key = variable.replace("fig", "ref")
+                
+                if not tiene_titulo:
+                    # Caso 1: Figuras SIN título (no Caption, no bookmark)
+                    resultado = aux_insertar_figura_sin_titulo(parrafo, variable, datos_figuras)
+                    if resultado:
+                        bookmarks_info[variable_ref_key] = None  # Sin bookmarks para figuras sin título
+                        break  # Ya se insertó, pasar a la siguiente variable
+                else:
+                    # Caso 2: Figuras CON título (Caption + SEQ + Bookmarks)
+                    bookmarks_creados = aux_insertar_figuras_con_titulo(parrafo, variable, datos_figuras)
+                    if bookmarks_creados:
+                        bookmarks_info[variable_ref_key] = bookmarks_creados
+                        break  # Ya se insertó, pasar a la siguiente variable
+    
+    # Mutar el diccionario agregando información de bookmarks
+    diccionario_de_reemplazos.update(bookmarks_info)
+    
+    msg = "Figuras insertadas y bookmarks creados para referencias cruzadas"
+    print(msg)
+
+
+def insertar_referencias_cruzadas_en_plantilla(doc, diccionario_de_reemplazos: dict):
+    """Reemplaza marcadores <<ref_*>> con referencias cruzadas a figuras.
+    
+    Args:
+        doc: Objeto Document de python-docx
+        diccionario_de_reemplazos: Diccionario retornado/mutado por insertar_figuras_en_plantilla
+                                  Formato: {"<<ref_demo>>": ["_Ref_Fig_Mapa1", "_Ref_Fig_Temp"], ...}
+    
+    Comportamiento:
+        - Busca variables que empiecen con "<<ref_" en los párrafos
+        - Si la lista tiene 1 bookmark: inserta "Figura X"
+        - Si la lista tiene 2+ bookmarks: inserta "Figura X a la Y"
+        - X e Y son referencias cruzadas reales (campos REF) que muestran solo el número
+        - Procesa TODOS los marcadores de un párrafo en una sola pasada
+    
+    Nota importante:
+        Los bookmarks creados por crear_pie_de_figura solo incluyen el número de la figura,
+        no el texto "Figura" ni el título. Por eso las referencias muestran solo el número.
+    
+    Ejemplo:
+        Entrada en plantilla: "De la <<ref_demo_con_titulo>> se muestra el poder."
+        Salida: "De la Figura 8 a la 10 se muestra el poder."
+                (donde "8" y "10" son campos REF clickeables que muestran solo el número)
+    """
+    # Filtrar solo variables con bookmarks válidos
+    variables_validas = {k: v for k, v in diccionario_de_reemplazos.items() 
+                        if v is not None and len(v) > 0 and k.startswith("<<ref_")}
+    
+    # Para cada párrafo
+    for parrafo in doc.paragraphs:
+        full_text = "".join(run.text for run in parrafo.runs)
+        
+        # Encontrar TODOS los marcadores <<ref_*>> en este párrafo
+        marcadores_en_parrafo = []
+        for variable_ref, lista_bookmarks in variables_validas.items():
+            if variable_ref in full_text:
+                # Encontrar todas las ocurrencias del marcador en el párrafo
+                pos = full_text.find(variable_ref)
+                if pos != -1:
+                    marcadores_en_parrafo.append((pos, variable_ref, lista_bookmarks))
+        
+        # Si no hay marcadores en este párrafo, continuar al siguiente
+        if not marcadores_en_parrafo:
+            continue
+        
+        # Ordenar marcadores por posición (de izquierda a derecha)
+        marcadores_en_parrafo.sort(key=lambda x: x[0])
+        
+        # Limpiar todos los runs del párrafo
+        for run in parrafo.runs:
+            run.text = ""
+        
+        # Reconstruir el párrafo procesando todos los marcadores
+        pos_actual = 0
+        
+        for pos_marcador, variable_ref, lista_bookmarks in marcadores_en_parrafo:
+            # Agregar texto antes del marcador
+            if pos_marcador > pos_actual:
+                texto_antes = full_text[pos_actual:pos_marcador]
+                parrafo.add_run(texto_antes)
+            
+            # Insertar la referencia cruzada
+            primer_bookmark = lista_bookmarks[0]
+            ultimo_bookmark = lista_bookmarks[-1]
+            
+            if len(lista_bookmarks) == 1:
+                # Caso: Solo una figura - "Figura X"
+                aux_insertar_referencia_cruzada(parrafo, primer_bookmark, texto_antes="Figura", mostrar_numero=True)
+            else:
+                # Caso: Múltiples figuras - "Figura X a la Y"
+                aux_insertar_referencia_cruzada(parrafo, primer_bookmark, texto_antes="Figura", mostrar_numero=True)
+                parrafo.add_run(" a la ")
+                aux_insertar_referencia_cruzada(parrafo, ultimo_bookmark, texto_antes="", mostrar_numero=True)
+            
+            # Avanzar posición actual
+            pos_actual = pos_marcador + len(variable_ref)
+        
+        # Agregar texto después del último marcador
+        if pos_actual < len(full_text):
+            texto_despues = full_text[pos_actual:]
+            parrafo.add_run(texto_despues)
+
+    msg = "Referencias cruzadas insertadas."
+    print(msg)
+
+
+def reemplazar_texto_en_plantilla(doc, diccionario_de_reemplazos):
+    """Reemplaza los marcadores de posición de texto en un documento de Word.
+    
+    Args:
+        doc: El documento de Word (objeto Document de python-docx).
+        diccionario_de_reemplazos: Diccionario donde las claves son los marcadores de posición 
+                                  a buscar (por ejemplo, "<<orden_de_servicio>>") y los valores 
+                                  son los textos que los reemplazarán (ej: "12345").
+    
+    Comportamiento:
+        - Ignora marcadores de figuras ("<<fig_*>>"), referencias ("<<ref_*>>") y 
+          documentos externos ("<<ruta_plan_de_crucero>>")
+        - Procesa todas las variables de texto en cada párrafo de una sola vez
+        - Preserva el formato del primer run del párrafo
+    
+    Ejemplo de uso:
+        from docx import Document
+        from word_template_writer import reemplazar_texto_en_plantilla
+        
+        doc = Document('plantilla.docx')
+        diccionario = {
+            "<<orden_servicio>>": "12345",
+            "<<cliente>>": "ACME Corporation",
+            "<<fecha>>": "21/05/2026",
+            "<<fig_mapa>>": [...],  # Se ignora aquí
+        }
+        
+        reemplazar_texto_en_plantilla(doc, diccionario)
+        doc.save('documento_con_texto.docx')
+    """
+    # Filtrar solo variables que NO son figuras, referencias o documentos externos
+    variables_texto = {k: v for k, v in diccionario_de_reemplazos.items() 
+                      if "fig" not in k and "ref" not in k and "ruta_plan_de_crucero" not in k}
+    
+    # Para cada párrafo, procesar TODAS las variables de texto de una sola vez
+    for parrafo in doc.paragraphs:
+        # Encontrar todas las variables que están en este párrafo
+        variables_en_parrafo = []
+        for variable, dato in variables_texto.items():
+            if variable in parrafo.text:
+                variables_en_parrafo.append((variable, dato))
+        
+        # Si hay variables en este párrafo, reemplazarlas todas de una vez
+        if variables_en_parrafo:
+            replace_text_variables_in_paragraph(parrafo, variables_en_parrafo)
+    
+    msg = "Se agregaron los textos al documento."
+    print(msg)
+
+
+def insertar_documento_externo_en_plantilla(doc, diccionario_de_reemplazos):
+    """Inserta uno o más documentos Word externos en la plantilla.
+    
+    Args:
+        doc: El documento de Word (objeto Document de python-docx).
+        diccionario_de_reemplazos: Diccionario que debe contener la key "<<ruta_plan_de_crucero>>"
+                                  con el valor siendo una ruta (string) o lista de rutas a 
+                                  documentos Word externos.
+    
+    Comportamiento:
+        - Busca el marcador "<<ruta_plan_de_crucero>>" en los párrafos
+        - Inserta el contenido completo de cada documento externo (párrafos y tablas)
+        - Copia imágenes y mantiene relaciones correctas
+        - Excluye headers, footers, marcas de agua y configuraciones de sección
+        - Agrega saltos de página entre múltiples documentos
+    
+    Ejemplo de uso:
+        from docx import Document
+        from word_template_writer import insertar_documento_externo_en_plantilla
+        
+        doc = Document('plantilla.docx')
+        diccionario = {
+            "<<ruta_plan_de_crucero>>": "plan_crucero.docx",
+            # O múltiples documentos:
+            # "<<ruta_plan_de_crucero>>": ["plan1.docx", "plan2.docx"],
+        }
+        
+        insertar_documento_externo_en_plantilla(doc, diccionario)
+        doc.save('documento_con_plan.docx')
+    """
+    # Obtener la ruta o lista de rutas del documento externo
+    dato = diccionario_de_reemplazos.get("<<ruta_plan_de_crucero>>")
+    
+    if dato is None:
+        print("Advertencia: No se encontró la key '<<ruta_plan_de_crucero>>' en el diccionario.")
+        return
+    
+    # Para cada párrafo en el documento, buscar el marcador
+    for parrafo in doc.paragraphs:
+        if "<<ruta_plan_de_crucero>>" in parrafo.text:
+            # Insertar el o los documentos externos
+            insert_external_document(parrafo, "<<ruta_plan_de_crucero>>", dato, doc)
+            
+            msg = "Plan de crucero insertado"
+            if isinstance(dato, list) and len(dato) > 1:
+                msg = "Planes de crucero insertados"
+            print(msg)
+            break
+
+
+def rellenar_tablas_en_plantilla(doc, nombre_marcador, diccionario_de_datos):
+    """Rellena una tabla en la plantilla con datos de un diccionario/DataFrame.
+    
+    Args:
+        doc: El documento de Word (objeto Document de python-docx).
+        nombre_marcador: El nombre del marcador a buscar en la tabla (ej: "<<tabla1>>").
+        diccionario_de_datos: Diccionario con los datos a insertar (se convertirá a DataFrame).
+                             Formato: {"columna1": [val1, val2, ...], "columna2": [...], ...}
+    
+    Comportamiento:
+        - Busca el marcador en la primera celda de las tablas del documento
+        - Inserta los datos del DataFrame fila por fila
+        - Aplica estilos predefinidos ('texto_tablas_centrado', 'texto_tablas_justificado')
+        - Ajusta altura de filas y alineación vertical
+        - Agrega filas automáticamente según sea necesario
+    
+    Ejemplo de uso:
+        from docx import Document
+        from word_template_writer import rellenar_tablas_en_plantilla
+        
+        doc = Document('plantilla.docx')
+        datos = {
+            'secuencia': [0, 1, 2],
+            'localizacion': ['BOT-01', 'BOT-02', 'BOT-03'],
+            'lat_plan': [18.5, 18.6, 18.7],
+            'lon_plan': [-70.1, -70.2, -70.3]
+        }
+        
+        rellenar_tablas_en_plantilla(doc, "<<tabla1>>", datos)
+        doc.save('documento_con_tabla.docx')
+    
+    Nota:
+        Esta función utiliza pandas internamente para convertir el diccionario a DataFrame.
+        Asegúrate de tener pandas instalado.
+    """
+    rellenar_tabla(doc, nombre_marcador, diccionario_de_datos)
+    
+    msg = f"Tabla '{nombre_marcador}' rellenada correctamente."
+    print(msg)
