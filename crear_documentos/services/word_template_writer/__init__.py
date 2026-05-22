@@ -12,10 +12,16 @@ API Pública (en español):
     - insertar_documento_externo_en_plantilla: Inserta documentos Word externos
     - rellenar_tablas_en_plantilla: Rellena tablas con datos de DataFrames
     
+Clases de Configuración:
+    - EstilosTabla: Configuración de estilos para tablas (colores, alineación, estilos)
+    - OpcionesTabla: Opciones de comportamiento para tablas (merge, MultiIndex)
+    - FiguraConfig: Configuración individual de figuras
+    
 Utilidades:
     - insert_line_feed: Inserta nuevos párrafos usando XML
+    - get_estilos_disponibles: Extrae estilos de párrafo disponibles en un documento
 
-Uso típico:
+Uso típico básico:
     from word_template_writer import insertar_figuras_en_plantilla, reemplazar_texto_en_plantilla
     from docx import Document
     
@@ -29,6 +35,33 @@ Uso típico:
     
     reemplazar_texto_en_plantilla(doc, diccionario)
     insertar_figuras_en_plantilla(doc, diccionario)
+    doc.save('resultado.docx')
+
+Uso avanzado con estilos de tabla:
+    from word_template_writer import rellenar_tablas_en_plantilla, EstilosTabla, OpcionesTabla
+    from docx import Document
+    import pandas as pd
+    
+    doc = Document('plantilla.docx')
+    
+    # Configurar estilos
+    estilos = EstilosTabla(doc)
+    estilos.set_color_de_columna(0, (230, 230, 250))  # Lavanda
+    estilos.set_estilo_de_columna(1, 'texto_tablas_justificado')
+    
+    # Configurar opciones
+    opciones = OpcionesTabla()
+    opciones.set_detectar_merge(True)
+    opciones.set_columnas_para_merge([0, 1])
+    
+    # Datos
+    df = pd.DataFrame({
+        'Tipo': ['A', 'A', 'B'],
+        'Valor': [10, 20, 30]
+    })
+    
+    # Rellenar tabla
+    rellenar_tablas_en_plantilla(doc, "<<table_datos>>", df, estilos, opciones)
     doc.save('resultado.docx')
 
 Dependencias:
@@ -45,6 +78,14 @@ from .api import (
     rellenar_tablas_en_plantilla,
 )
 
+# Clases de configuración
+from .schemas_helpers import (
+    EstilosTabla,
+    OpcionesTabla,
+    FiguraConfig,
+    get_estilos_disponibles,
+)
+
 # Utilidades genéricas públicas
 from .utils import insert_line_feed
 
@@ -55,9 +96,14 @@ __all__ = [
     'reemplazar_texto_en_plantilla',
     'insertar_documento_externo_en_plantilla',
     'rellenar_tablas_en_plantilla',
+    # Clases de configuración
+    'EstilosTabla',
+    'OpcionesTabla',
+    'FiguraConfig',
     # Utilidades
     'insert_line_feed',
+    'get_estilos_disponibles',
 ]
 
-__version__ = '1.0.0'
+__version__ = '2.0.0'
 __author__ = 'Drift Buoys Team'

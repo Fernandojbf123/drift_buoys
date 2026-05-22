@@ -21,7 +21,7 @@ from ._figure_helpers import (
 )
 from ._text_helpers import replace_text_variables_in_paragraph
 from ._document_helpers import insert_external_document
-from ._table_helpers import rellenar_tabla
+from ._table_helpers import fill_table
 
 
 def insertar_figuras_en_plantilla(doc, diccionario_de_reemplazos: dict):
@@ -166,7 +166,7 @@ def insertar_referencias_cruzadas_en_plantilla(doc, diccionario_de_reemplazos: d
     """
     # Filtrar solo variables con bookmarks válidos
     variables_validas = {k: v for k, v in diccionario_de_reemplazos.items() 
-                        if v is not None and len(v) > 0 and k.startswith("<<ref_")}
+                        if v is not None and k.startswith("<<ref_")}
     
     # Para cada párrafo
     for parrafo in doc.paragraphs:
@@ -258,7 +258,7 @@ def reemplazar_texto_en_plantilla(doc, diccionario_de_reemplazos):
     """
     # Filtrar solo variables que NO son figuras, referencias o documentos externos
     variables_texto = {k: v for k, v in diccionario_de_reemplazos.items() 
-                      if "fig" not in k and "ref" not in k and "ruta_plan_de_crucero" not in k}
+                      if "fig" not in k and "ref" not in k and "external_doc" not in k}
     
     # Para cada párrafo, procesar TODAS las variables de texto de una sola vez
     for parrafo in doc.paragraphs:
@@ -306,62 +306,120 @@ def insertar_documento_externo_en_plantilla(doc, diccionario_de_reemplazos):
         insertar_documento_externo_en_plantilla(doc, diccionario)
         doc.save('documento_con_plan.docx')
     """
-    # Obtener la ruta o lista de rutas del documento externo
-    dato = diccionario_de_reemplazos.get("<<ruta_plan_de_crucero>>")
+     # Filtrar solo variables que NO son figuras, referencias o documentos externos
+    variables_texto = {k: v for k, v in diccionario_de_reemplazos.items() if k.startswith("<<external_doc_")}
     
-    if dato is None:
-        print("Advertencia: No se encontró la key '<<ruta_plan_de_crucero>>' en el diccionario.")
-        return
-    
-    # Para cada párrafo en el documento, buscar el marcador
+    # Para cada párrafo, procesar TODAS las variables de texto de una sola vez
     for parrafo in doc.paragraphs:
-        if "<<ruta_plan_de_crucero>>" in parrafo.text:
-            # Insertar el o los documentos externos
-            insert_external_document(parrafo, "<<ruta_plan_de_crucero>>", dato, doc)
+        # Encontrar todas las variables que están en este párrafo
+        variables_en_parrafo = []
+        for variable, dato in variables_texto.items():
+            if variable in parrafo.text:
+                variables_en_parrafo.append((variable, dato))        
+                insert_external_document(parrafo, variable, dato, doc)
             
-            msg = "Plan de crucero insertado"
-            if isinstance(dato, list) and len(dato) > 1:
-                msg = "Planes de crucero insertados"
-            print(msg)
-            break
+                msg = f"Documento insertado {variable}"
+                if isinstance(dato, list) and len(dato) > 1:
+                    msg = "Planes de crucero insertados"
+                print(msg)
 
 
-def rellenar_tablas_en_plantilla(doc, nombre_marcador, diccionario_de_datos):
-    """Rellena una tabla en la plantilla con datos de un diccionario/DataFrame.
+def rellenar_tablas_en_plantilla(doc, diccionario_de_reemplazos: dict):      
+    """Rellena una tabla en la plantilla con datos de un DataFrame o diccionario.
+    
+    Soporta estilos configurables, colores de fondo, MultiIndex, y merge de celdas.
     
     Args:
-        doc: El documento de Word (objeto Document de python-docx).
-        nombre_marcador: El nombre del marcador a buscar en la tabla (ej: "<<tabla1>>").
-        diccionario_de_datos: Diccionario con los datos a insertar (se convertirá a DataFrame).
-                             Formato: {"columna1": [val1, val2, ...], "columna2": [...], ...}
+        doc: Objeto Document de python-docx
+        nombre_marcador: Marcador a buscar en la tabla (ej: "<<table_sondas>>")
+        datos: DataFrame o diccionario con los datos a insertar
+              Formato dict: {"col1": [val1, val2, ...], "col2": [...], ...}
+        config_estilos: Configuración de estilos (EstilosTabla, dict, o None)
+                       Si None, usa estilos por defecto razonables
+        opciones_tabla: Opciones de tabla (OpcionesTabla, dict, o None)
+                       Si None, usa opciones por defecto
     
     Comportamiento:
-        - Busca el marcador en la primera celda de las tablas del documento
-        - Inserta los datos del DataFrame fila por fila
-        - Aplica estilos predefinidos ('texto_tablas_centrado', 'texto_tablas_justificado')
-        - Ajusta altura de filas y alineación vertical
-        - Agrega filas automáticamente según sea necesario
+        - Busca el marcador en cualquier celda de las tablas del documento
+        - Inserta datos del DataFrame fila por fila, respetando orden de columnas
+        - Aplica estilos según jerarquía: celda > fila > columna > defecto
+        - Soporta colores de fondo RGB y estilos de párrafo del documento
+        - Aplana MultiIndex automáticamente si está activado en opciones
+        - Detecta y combina celdas verticales con valores repetidos (si está activado)
+        - Elimina fila marcador automáticamente (si está activado)
     
-    Ejemplo de uso:
-        from docx import Document
-        from word_template_writer import rellenar_tablas_en_plantilla
-        
-        doc = Document('plantilla.docx')
-        datos = {
-            'secuencia': [0, 1, 2],
-            'localizacion': ['BOT-01', 'BOT-02', 'BOT-03'],
-            'lat_plan': [18.5, 18.6, 18.7],
-            'lon_plan': [-70.1, -70.2, -70.3]
-        }
-        
-        rellenar_tablas_en_plantilla(doc, "<<tabla1>>", datos)
-        doc.save('documento_con_tabla.docx')
+    Ejemplo de uso básico (sin estilos personalizados):
+        >>> from docx import Document
+        >>> doc = Document('plantilla.docx')
+        >>> datos = {
+        ...     'Secuencia': [0, 1, 2],
+        ...     'Localización': ['BOT-01', 'BOT-02', 'BOT-03'],
+        ...     'Latitud': [18.5, 18.6, 18.7]
+        ... }
+        >>> rellenar_tablas_en_plantilla(doc, "<<table_posiciones>>", datos)
+        >>> doc.save('documento_con_tabla.docx')
+    
+    Ejemplo avanzado (con estilos personalizados):
+        >>> from docx import Document
+        >>> from crear_documentos.services.word_template_writer import EstilosTabla, OpcionesTabla
+        >>> 
+        >>> doc = Document('plantilla.docx')
+        >>> 
+        >>> # Configurar estilos
+        >>> estilos = EstilosTabla(doc)
+        >>> estilos.set_color_de_columna(0, (230, 230, 250))  # Lavanda para primera columna
+        >>> estilos.set_estilo_de_columna(1, 'texto_tablas_justificado')
+        >>> estilos.set_color_de_fila(0, (255, 240, 245))  # Rosado para primera fila
+        >>> 
+        >>> # Configurar opciones
+        >>> opciones = OpcionesTabla()
+        >>> opciones.set_detectar_merge(True)
+        >>> opciones.set_columnas_para_merge([0, 1])  # Solo merge en columnas 0 y 1
+        >>> 
+        >>> # DataFrame con datos
+        >>> import pandas as pd
+        >>> df = pd.DataFrame({
+        ...     'Tipo': ['A', 'A', 'B', 'B'],
+        ...     'Subtipo': ['A1', 'A1', 'B1', 'B2'],
+        ...     'Valor': [10, 20, 30, 40]
+        ... })
+        >>> 
+        >>> rellenar_tablas_en_plantilla(doc, "<<table_datos>>", df, estilos, opciones)
+        >>> doc.save('documento_avanzado.docx')
+    
+    Ejemplo con diccionario de configuración (backward compatibility):
+        >>> config_dict = {
+        ...     "por_defecto": {"estilo_parrafo": "Normal", "altura_fila": 288290},
+        ...     "por_columna": {0: {"color_fondo": (230, 230, 250)}},
+        ...     "por_fila": {},
+        ...     "por_celda": {}
+        ... }
+        >>> opciones_dict = {
+        ...     "aplanar_multiindex": True,
+        ...     "detectar_merge": False,
+        ...     "columnas_para_merge": None,
+        ...     "eliminar_fila_marcador": True
+        ... }
+        >>> rellenar_tablas_en_plantilla(doc, "<<table_datos>>", datos, config_dict, opciones_dict)
+    
+    Raises:
+        ValueError: Si el marcador no se encuentra, si hay errores en la configuración,
+                   o si los datos están vacíos
     
     Nota:
-        Esta función utiliza pandas internamente para convertir el diccionario a DataFrame.
-        Asegúrate de tener pandas instalado.
+        - La plantilla debe tener un marcador <<nombre>> en alguna celda de la tabla
+        - El marcador se coloca típicamente en la primera fila de datos (no encabezado)
+        - Los datos se insertan por ORDEN de columna, no por nombre
+        - Columna 0 del DataFrame → Columna 0 de la tabla
     """
-    rellenar_tabla(doc, nombre_marcador, diccionario_de_datos)
     
-    msg = f"Tabla '{nombre_marcador}' rellenada correctamente."
-    print(msg)
+    variables_texto = {k: v for k, v in diccionario_de_reemplazos.items() if k.startswith("<<tabla_")}
+    
+    for variable in variables_texto.keys():
+        df_tabla = diccionario_de_reemplazos[variable]["tabla"]
+        config_estilos = diccionario_de_reemplazos[variable]["estilos_de_tabla"]
+        opciones_tabla = diccionario_de_reemplazos[variable]["opciones_de_tabla"]
+        fill_table(doc, variable, df_tabla, config_estilos, opciones_tabla)
+    
+        msg = f"Tabla '{variable}' rellenada correctamente."
+        print(msg)

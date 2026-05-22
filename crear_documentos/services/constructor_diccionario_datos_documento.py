@@ -2,6 +2,10 @@ import os
 import pandas as pd
 from configs.manager_doc_config import *
 
+# modulo de construccion de diccionarios para templates de word de ezsnake by BelloDev
+from services.word_template_writer import *
+
+
 # Managers de variables de excel
 from services.manager_variables_excel_datos_campania import *
 from services.manager_variables_excel_datos_despliegue import *
@@ -18,10 +22,6 @@ from services.doc_101.ejecucion_de_la_campania.ejecucion_de_la_campania_parrafo3
 from services.doc_101.ejecucion_de_la_campania.ejecucion_de_la_campania_parrafo4 import *
 
 
-
-
-
-  
 ############################ DICCIONARIO DE REEMPLAZOS PARA FIGURAS ############################
 
 # ESQUEMA DEL DICCIONARIO DE FIGURAS
@@ -172,10 +172,100 @@ def construir_diccionario_de_reemplazos_para_plan_de_cruceros(df_datos_despliegu
         archivo = campania + ".docx"
         ruta = os.path.join(get_ruta_a_carpeta_de_planes_de_crucero(usar_NAS=True), archivo)
         rutas.append(ruta)
-    diccionario_de_reemplazos["<<ruta_plan_de_crucero>>"] = rutas
+    diccionario_de_reemplazos["<<external_doc_plan_de_crucero>>"] = rutas
 
     
 ############################# DICCIONARIO DE REEMPLAZOS PARA TABLAS ############################
 # Es probable que acá necesite varios esquemas, dependiendo de la tabla.
+def construir_diccionario_de_reemplazos_para_tablas(df_datos_despliegue: pd.DataFrame, 
+                                                    df_datos_campanias: pd.DataFrame,
+                                                    df_datos_documento: pd.DataFrame,
+                                                    diccionario_de_reemplazos: dict,
+                                                    doc: object):
+    
+    
+    opciones_de_tabla = OpcionesTabla()
+    estilos_de_tabla = EstilosTabla(doc)
+    estilos_de_tabla.set_estilo_por_defecto("texto_tablas_centrado")
+    tabla2 = df_datos_despliegue[["serial_de_sonda","latitud_maniobra","longitud_maniobra"]]
+    tabla2.insert(0,"secuencia", range(1, len(tabla2) + 1))
+    tabla2["secuencia"] = tabla2["secuencia"].astype(int).astype(str)
+    tabla2["serial_de_sonda"] = tabla2["serial_de_sonda"].astype(int).astype(str)
+    tabla2["latitud_maniobra"] = tabla2["latitud_maniobra"].astype(str)
+    tabla2["longitud_maniobra"] = tabla2["longitud_maniobra"].astype(str)
+    diccionario_de_reemplazos["<<tabla_plan>>"] = {
+        "tabla": tabla2,
+        "estilos_de_tabla": estilos_de_tabla,
+        "opciones_de_tabla": opciones_de_tabla
+    }
+    
+    
+    tabla3 = df_datos_despliegue[["serial_de_sonda","latitud_plan","longitud_plan","fecha_y_hora_de_despliegue_maniobra","estado_despliegue"]]
+    tabla3.insert(0,"secuencia", range(1, len(tabla3) + 1))
+    tabla3["secuencia"] = tabla3["secuencia"].astype(int).astype(str)
+    tabla3["serial_de_sonda"] = tabla3["serial_de_sonda"].astype(int).astype(str)
+    tabla3["latitud_plan"] = tabla3["latitud_plan"].astype(str)
+    tabla3["longitud_plan"] = tabla3["longitud_plan"].astype(str)
+    tabla3["fecha_y_hora_de_despliegue_maniobra"] = pd.to_datetime(tabla3["fecha_y_hora_de_despliegue_maniobra"], format = "%d/%m/%Y %H:%M:%S").dt.strftime("%d/%m/%Y %H:%M")
+    diccionario_de_reemplazos["<<tabla_maniobra>>"] = {
+        "tabla": tabla3,
+        "estilos_de_tabla": estilos_de_tabla,
+        "opciones_de_tabla": opciones_de_tabla
+    }
 
 
+
+    
+    df_datos_despliegue["serial_de_sonda"] = df_datos_despliegue["serial_de_sonda"].astype(int).astype(str)
+    
+    equipos = ["GPS primario",
+                "GPS secundario", 
+                "Sistema de telemetría primario",
+                "Sistema de telemetría secundario", 
+                "Sensor de temperatura primario",
+                "Sensor de temperatura secundario", 
+                "Acelerómetro"]    
+
+    seriales = get_seriales_de_sondas(df_datos_despliegue = df_datos_despliegue)
+    
+    array_secuencia_tabla4 = []
+    array_seriales_tabla4 = []
+    array_equipos_tabla4 = []
+    array_numero_de_serie_de_equipo_tabla4 = []
+    
+    for secuencia, serial in enumerate(seriales) :
+        array_seriales_tabla4.append([serial]*len(equipos))
+        array_equipos_tabla4.append(equipos)
+        gps_primario = df_datos_despliegue[df_datos_despliegue["serial_de_sonda"] == serial]["gps_primario"].iloc[0]
+        gps_secundario = df_datos_despliegue[df_datos_despliegue["serial_de_sonda"] == serial]["gps_secundario"].iloc[0]
+        telemetria_primario = df_datos_despliegue[df_datos_despliegue["serial_de_sonda"] == serial]["telemetria_primario"].iloc[0]
+        telemetria_secundario = df_datos_despliegue[df_datos_despliegue["serial_de_sonda"] == serial]["telemetria_secundario"].iloc[0]
+        temperatura_primario = df_datos_despliegue[df_datos_despliegue["serial_de_sonda"] == serial]["temperatura_primario"].iloc[0]
+        temperatura_secundario = df_datos_despliegue[df_datos_despliegue["serial_de_sonda"] == serial]["temperatura_secundario"].iloc[0]
+        acelerometro = df_datos_despliegue[df_datos_despliegue["serial_de_sonda"] == serial]["acelerometro"].iloc[0]    
+        array_numero_de_serie_de_equipo_tabla4.append([gps_primario, gps_secundario, telemetria_primario, telemetria_secundario, temperatura_primario, temperatura_secundario, acelerometro])
+        array_secuencia_tabla4.append([secuencia+1]*len(equipos))
+    
+    array_secuencia_tabla4 = np.array(array_secuencia_tabla4).flatten()
+    array_seriales_tabla4 = np.array(array_seriales_tabla4).flatten()
+    array_equipos_tabla4 = np.array(array_equipos_tabla4).flatten()
+    array_numero_de_serie_de_equipo_tabla4 = np.array(array_numero_de_serie_de_equipo_tabla4).flatten()
+    
+    tabla4_dict = {
+        "secuencia": array_secuencia_tabla4,
+        "serial_de_sonda": array_seriales_tabla4,
+        "equipo": array_equipos_tabla4,
+        "numero_de_serie_de_equipo": array_numero_de_serie_de_equipo_tabla4
+    }
+    tabla4 = pd.DataFrame(tabla4_dict)
+        
+    opciones_de_tabla.set_detectar_merge(True)
+    opciones_de_tabla.set_columnas_para_merge([0,1])
+    estilos_de_tabla.set_estilo_de_columna(2, "texto_tablas_justificado")
+    estilos_de_tabla.set_estilo_de_columna(3, "texto_tablas_justificado")   
+    
+    diccionario_de_reemplazos["<<tabla_equipos>>"] = {
+        "tabla": tabla4,
+        "estilos_de_tabla": estilos_de_tabla,
+        "opciones_de_tabla": opciones_de_tabla
+    }
