@@ -17,6 +17,7 @@ from word_template_writer import (
     insertar_figuras_en_plantilla,
     insertar_referencias_cruzadas_en_plantilla,
     reemplazar_texto_en_plantilla,
+    reemplazar_variables_en_tablas,
     insertar_documento_externo_en_plantilla,
     rellenar_tablas_en_plantilla,
 )
@@ -33,6 +34,7 @@ diccionario = {
 
 # Aplicar transformaciones en orden
 reemplazar_texto_en_plantilla(doc, diccionario)
+reemplazar_variables_en_tablas(doc, diccionario)
 insertar_figuras_en_plantilla(doc, diccionario)
 insertar_referencias_cruzadas_en_plantilla(doc, diccionario)
 insertar_documento_externo_en_plantilla(doc, diccionario)
@@ -66,7 +68,7 @@ diccionario = {
 ```
 
 **Restricciones:**
-- ❌ NO usar prefijos reservados: `fig_`, `ref_`, `external_doc_`
+- ❌ NO usar prefijos reservados: `fig_`, `ref_`, `tabla_`, `external_doc`
 - ✅ Cualquier otro nombre es válido
 
 ---
@@ -569,6 +571,81 @@ rellenar_tablas_en_plantilla(doc, "<<table_datos>>", df, config_dict, opciones_d
 
 ---
 
+#### 🔄 **Tablas Semi-estáticas (Reemplazo de Variables)**
+
+Para tablas donde **NO** necesitas llenar con un DataFrame completo, sino solo **reemplazar variables individuales** en celdas específicas:
+
+**Función:** `reemplazar_variables_en_tablas(doc, diccionario_de_reemplazos)`
+
+**Caso de uso típico:**
+- Columna 0: Textos fijos ("Serial", "Profundidad máxima", "Precisión")
+- Columna 1: Variables individuales (`<<serial>>`, `<<profundidad>>`, `<<precision>>`)
+- Encabezado: Variable (`<<nombre_equipo>>`)
+
+**Ejemplo:**
+
+```python
+from docx import Document
+from word_template_writer import reemplazar_variables_en_tablas
+
+doc = Document('plantilla.docx')
+
+diccionario = {
+    "<<nombre_equipo>>": "Sonda CTD #1",
+    "<<serial>>": "4878505",
+    "<<profundidad>>": "200 m",
+    "<<precision>>": "±0.01°C",
+    "<<fecha_calibracion>>": "15/05/2026"
+}
+
+# Busca y reemplaza variables en TODAS las tablas del documento
+reemplazar_variables_en_tablas(doc, diccionario)
+
+doc.save('resultado.docx')
+```
+
+**Plantilla Word (antes):**
+
+```
+┌──────────────────────────────┬─────────────────────┐
+│        <<nombre_equipo>>                           │  ← Encabezado mergeado
+├──────────────────────────────┼─────────────────────┤
+│ Serial                       │ <<serial>>          │
+│ Profundidad máxima           │ <<profundidad>>     │
+│ Precisión                    │ <<precision>>       │
+│ Fecha calibración            │ <<fecha_calibracion>>│
+└──────────────────────────────┴─────────────────────┘
+```
+
+**Resultado Word (después):**
+
+```
+┌──────────────────────────────┬─────────────────────┐
+│        Sonda CTD #1                                │
+├──────────────────────────────┼─────────────────────┤
+│ Serial                       │ 4878505             │
+│ Profundidad máxima           │ 200 m               │
+│ Precisión                    │ ±0.01°C             │
+│ Fecha calibración            │ 15/05/2026          │
+└──────────────────────────────┴─────────────────────┘
+```
+
+**Comportamiento:**
+- ✅ Busca en **todas las tablas** del documento automáticamente
+- ✅ Preserva formato original del texto
+- ✅ Ignora variables con prefijos: `<<fig_`, `<<ref_`, `<<tabla_`, `<<external_doc`
+- ✅ Reutiliza la misma lógica de `reemplazar_texto_en_plantilla()`
+
+**¿Cuándo usar cada función?**
+
+| Función | Uso |
+|---------|-----|
+| `reemplazar_texto_en_plantilla()` | Variables en **párrafos** del documento |
+| `reemplazar_variables_en_tablas()` | Variables en **celdas de tablas** (semi-estáticas) |
+| `rellenar_tablas_en_plantilla()` | Llenar tabla completa con **DataFrame** (dinámicas) |
+
+---
+
 ## 🔄 Orden de Ejecución Recomendado
 
 ```python
@@ -578,21 +655,25 @@ from word_template_writer import *
 doc = Document('plantilla.docx')
 diccionario = {...}
 
-# 1. PRIMERO: Reemplazar texto (más rápido, sin mutaciones)
+# 1. PRIMERO: Reemplazar texto en párrafos (más rápido, sin mutaciones)
 reemplazar_texto_en_plantilla(doc, diccionario)
 
-# 2. SEGUNDO: Insertar figuras (muta el diccionario agregando <<ref_*>>)
+# 2. SEGUNDO: Reemplazar variables en tablas semi-estáticas
+reemplazar_variables_en_tablas(doc, diccionario)
+
+# 3. TERCERO: Insertar figuras (muta el diccionario agregando <<ref_*>>)
 insertar_figuras_en_plantilla(doc, diccionario)
 
-# 3. TERCERO: Insertar referencias cruzadas (usa los bookmarks del paso 2)
+# 4. CUARTO: Insertar referencias cruzadas (usa los bookmarks del paso 3)
 insertar_referencias_cruzadas_en_plantilla(doc, diccionario)
 
-# 4. CUARTO: Insertar documentos externos (puede alterar numeración)
-if "<<ruta_plan_de_crucero>>" in diccionario:
+# 5. QUINTO: Insertar documentos externos (puede alterar numeración)
+if "<<external_doc_plan>>" in diccionario:
     insertar_documento_externo_en_plantilla(doc, diccionario)
 
-# 5. QUINTO: Rellenar tablas (si aplica)
-# rellenar_tablas_en_plantilla(doc, "<<tabla1>>", datos_tabla)
+# 6. SEXTO: Rellenar tablas dinámicas con DataFrames (si aplica)
+if "<<tabla_datos>>" in diccionario:
+    rellenar_tablas_en_plantilla(doc, diccionario)
 
 doc.save('resultado.docx')
 ```

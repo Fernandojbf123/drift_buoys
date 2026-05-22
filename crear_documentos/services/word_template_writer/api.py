@@ -19,7 +19,7 @@ from ._figure_helpers import (
     aux_insertar_figuras_con_titulo,
     aux_insertar_referencia_cruzada,
 )
-from ._text_helpers import replace_text_variables_in_paragraph
+from ._text_helpers import replace_text_variables_in_paragraph, replace_text_variables_in_tables
 from ._document_helpers import insert_external_document
 from ._table_helpers import fill_table
 
@@ -256,9 +256,9 @@ def reemplazar_texto_en_plantilla(doc, diccionario_de_reemplazos):
         reemplazar_texto_en_plantilla(doc, diccionario)
         doc.save('documento_con_texto.docx')
     """
-    # Filtrar solo variables que NO son figuras, referencias o documentos externos
+    # Filtrar solo variables que NO son figuras, referencias, tablas o documentos externos
     variables_texto = {k: v for k, v in diccionario_de_reemplazos.items() 
-                      if "fig" not in k and "ref" not in k and "external_doc" not in k}
+                      if "fig" not in k and "ref" not in k and "tabla" not in k and "external_doc" not in k}
     
     # Para cada párrafo, procesar TODAS las variables de texto de una sola vez
     for parrafo in doc.paragraphs:
@@ -423,3 +423,49 @@ def rellenar_tablas_en_plantilla(doc, diccionario_de_reemplazos: dict):
     
         msg = f"Tabla '{variable}' rellenada correctamente."
         print(msg)
+
+
+def reemplazar_variables_en_tablas(doc, diccionario_de_reemplazos):
+    """Reemplaza marcadores de posición en celdas de tablas del documento.
+    
+    Complementa a reemplazar_texto_en_plantilla() para tablas semi-estáticas
+    donde solo se necesita reemplazar variables individuales, NO llenar
+    toda la tabla con un DataFrame.
+    
+    Args:
+        doc: Objeto Document de python-docx
+        diccionario_de_reemplazos: Dict donde keys son marcadores (ej: "<<serial>>")
+                                  y values son los textos de reemplazo
+    
+    Comportamiento:
+        - Busca en TODAS las tablas del documento automáticamente
+        - Ignora variables que inician con: <<fig_, <<ref_, <<tabla_, <<external_doc
+        - Preserva el formato del texto original
+        - Reutiliza la misma lógica de replace_text_variables_in_paragraph()
+    
+    Caso de uso típico:
+        Tabla con:
+        - Textos fijos en columna 0: "Serial", "Profundidad máxima", "Precisión"
+        - Variables en columna 1: <<serial>>, <<profundidad>>, <<precision>>
+        - Encabezado con variable: <<nombre_equipo>>
+    
+    Ejemplo:
+        from docx import Document
+        from word_template_writer import reemplazar_variables_en_tablas
+        
+        doc = Document('plantilla.docx')
+        diccionario = {
+            "<<nombre_equipo>>": "Sonda CTD #1",
+            "<<serial>>": "4878505",
+            "<<profundidad>>": "200 m",
+            "<<precision>>": "±0.01°C"
+        }
+        
+        reemplazar_variables_en_tablas(doc, diccionario)
+        doc.save('resultado.docx')
+    
+    Ver también:
+        - reemplazar_texto_en_plantilla(): para párrafos del documento (NO tablas)
+        - rellenar_tablas_en_plantilla(): para tablas dinámicas con DataFrames
+    """
+    replace_text_variables_in_tables(doc, diccionario_de_reemplazos)

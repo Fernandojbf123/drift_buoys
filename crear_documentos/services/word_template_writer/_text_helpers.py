@@ -44,3 +44,60 @@ def replace_text_variables_in_paragraph(paragraph, lista_variables):
         paragraph.runs[i].text = ""
     
     return paragraph
+
+
+def replace_text_variables_in_tables(doc, diccionario_de_reemplazos):
+    """Reemplaza marcadores de posición en todas las celdas de todas las tablas del documento.
+    
+    Args:
+        doc: Objeto Document de python-docx
+        diccionario_de_reemplazos: Dict con {<<variable>>: valor}
+    
+    Comportamiento:
+        - Itera todas las tablas del documento
+        - Busca en todos los párrafos de cada celda
+        - Ignora marcadores que inician con: <<fig_, <<ref_, <<tabla_, <<external_doc
+        - Reutiliza replace_text_variables_in_paragraph() para preservar formato
+    
+    Caso de uso típico:
+        Tablas semi-estáticas con textos fijos + variables individuales.
+        
+        Ejemplo en plantilla Word:
+        ┌──────────────────────────────┬─────────────────────┐
+        │        <<nombre_equipo>>                           │ ← Encabezado
+        ├──────────────────────────────┼─────────────────────┤
+        │ Serial                       │ <<serial>>          │ ← Fijos + variables
+        │ Profundidad máxima           │ <<profundidad>>     │
+        └──────────────────────────────┴─────────────────────┘
+    
+    Nota:
+        Complementa a reemplazar_texto_en_plantilla() que solo busca en doc.paragraphs.
+        Para tablas dinámicas (llenar con DataFrame completo), usar rellenar_tablas_en_plantilla().
+    """
+    # Filtrar variables de texto (ignorar fig, ref, tabla, external_doc)
+    # Verificar que INICIE con estos prefijos, no solo que los contenga
+    prefijos_excluidos = ["<<fig_", "<<ref_", "<<tabla_", "<<external_doc"]
+    variables_texto = {
+        k: v for k, v in diccionario_de_reemplazos.items() 
+        if not any(k.startswith(prefix) for prefix in prefijos_excluidos)
+    }
+    
+    # Iterar todas las tablas del documento
+    for table in doc.tables:
+        # Iterar todas las celdas de la tabla
+        for row in table.rows:
+            for cell in row.cells:
+                # Cada celda puede tener múltiples párrafos
+                for parrafo in cell.paragraphs:
+                    # Encontrar variables en este párrafo
+                    variables_en_parrafo = []
+                    for variable, dato in variables_texto.items():
+                        if variable in parrafo.text:
+                            variables_en_parrafo.append((variable, dato))
+                    
+                    # Si hay variables, reemplazarlas (reutiliza función existente)
+                    if variables_en_parrafo:
+                        replace_text_variables_in_paragraph(parrafo, variables_en_parrafo)
+    
+    msg = "Se reemplazaron las variables en las tablas del documento."
+    print(msg)
