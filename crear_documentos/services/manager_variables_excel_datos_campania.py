@@ -1,6 +1,7 @@
 import pandas as pd
 from configs.manager_doc_config import *
 from services.leer_excel import leer_excel
+from services.timestamp_a_texto_espanol import *
 
 ## DATOS ASOCIADOS A LA HOJA DE CAMPAÑAS
 def get_df_datos_campanias():
@@ -56,4 +57,11 @@ def get_lon_plan(df_datos_campanias: pd.DataFrame) -> list[float]:
 def get_fecha_y_hora_de_embarque_y_campania_unicos(df_datos_campanias: pd.DataFrame) -> pd.DataFrame:
     df_output = df_datos_campanias[["fecha_hora_de_embarque", "campania"]].drop_duplicates()
     return df_output
+
+def get_mes_y_anio_de_liberacion(df_datos_campanias: pd.DataFrame) -> str:
+    df = get_fecha_y_hora_de_embarque_y_campania_unicos(df_datos_campanias)
+    df["fecha_hora_de_embarque"] = pd.to_datetime(df["fecha_hora_de_embarque"], format= "%d/%m/%Y %H:%M", errors='coerce')
+    mes_y_anio_de_liberacion = df["fecha_hora_de_embarque"].iloc[0]
+    mes_y_anio_de_liberacion = timestamp_a_texto_espanol(mes_y_anio_de_liberacion, mes_y_anio=True) 
+    return mes_y_anio_de_liberacion
 

@@ -8,6 +8,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from docx import Document
 from crear_documentos.configs.manager_doc_config import get_ruta_a_la_plantilla_de_word
+from crear_documentos.services.word_template_writer.schemas_helpers import get_estilos_disponibles
 
 # Abrir la plantilla
 ruta_plantilla = get_ruta_a_la_plantilla_de_word()
@@ -17,28 +18,30 @@ print("=" * 60)
 print("ESTILOS DISPONIBLES EN LA PLANTILLA")
 print("=" * 60)
 
+# Usar la función refactorizada para obtener estilos
+estilos_disponibles = get_estilos_disponibles(doc)
+
 # Listar todos los estilos de párrafo
-print("\n--- ESTILOS DE PÁRRAFO ---")
-for style in doc.styles:
-    if style.type == 1:  # 1 = PARAGRAPH
-        print(f"  Nombre interno: '{style.name}'")
-        # Verificar si tiene style_id diferente
-        if hasattr(style, 'style_id'):
-            print(f"    style_id: '{style.style_id}'")
-        print()
+print(f"\n--- ESTILOS DE PÁRRAFO (Total: {len(estilos_disponibles)}) ---")
+for style_name in estilos_disponibles:
+    print(f"  '{style_name}'")
 
 print("\n" + "=" * 60)
 print("BUSCANDO ESTILOS ESPECÍFICOS")
 print("=" * 60)
 
 # Buscar los estilos que necesitamos
-estilos_buscar = ["Car_centrado", "Car_justificado", "Figura"]
+estilos_buscar = ["Car_centrado", "Car_justificado", "Figura", "texto_tablas_centrado", "texto_tablas_justificado"]
 for estilo_nombre in estilos_buscar:
-    try:
-        estilo = doc.styles[estilo_nombre]
+    if estilo_nombre in estilos_disponibles:
         print(f"✓ '{estilo_nombre}' - ENCONTRADO")
-        if hasattr(estilo, 'style_id'):
-            print(f"  style_id: '{estilo.style_id}'")
-    except KeyError:
+        # Obtener detalles adicionales del estilo
+        try:
+            estilo = doc.styles[estilo_nombre]
+            if hasattr(estilo, 'style_id'):
+                print(f"    style_id: '{estilo.style_id}'")
+        except KeyError:
+            pass
+    else:
         print(f"✗ '{estilo_nombre}' - NO ENCONTRADO")
     print()
