@@ -130,7 +130,8 @@ def construir_diccionario_de_datos_documento(df_datos_despliegue: pd.DataFrame,
     diccionario_de_reemplazos["<<fecha_de_entrega>>"] = get_fecha_entrega(df_datos_despliegue = df_datos_despliegue)
     
     # seriales de sondas
-    diccionario_de_reemplazos["<<seriales_de_sondas>>"] = get_seriales_de_sondas(df_datos_despliegue = df_datos_despliegue)
+    seriales_de_sondas = get_seriales_de_sondas(df_datos_despliegue = df_datos_despliegue)
+    diccionario_de_reemplazos["<<seriales_de_sondas>>"] = ", ".join([str(serial) for serial in seriales_de_sondas])  # Convierte a string con formato "12345, 67890"
     diccionario_de_reemplazos["<<numero_de_sondas>>"] = get_numero_de_sondas(df_datos_despliegue = df_datos_despliegue) 
     
     ## mes y_año de liberacion
