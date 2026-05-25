@@ -12,14 +12,8 @@ from services.manager_variables_excel_datos_despliegue import *
 from services.manager_variables_excel_documento import *
 
 # Constructores individuales
-from services.doc_101.descripcion_actividades_previas.descripcion_actividades_previas_parrafo1 import *
-from services.doc_101.descripcion_actividades_previas.descripcion_actividades_previas_parrafo2 import *
-from services.doc_101.descripcion_actividades_previas.descripcion_actividades_previas_parrafo3 import *
-
-from services.doc_101.ejecucion_de_la_campania.ejecucion_de_la_campania_parrafo1 import *
-from services.doc_101.ejecucion_de_la_campania.ejecucion_de_la_campania_parrafo2 import *
-from services.doc_101.ejecucion_de_la_campania.ejecucion_de_la_campania_parrafo3 import *
-from services.doc_101.ejecucion_de_la_campania.ejecucion_de_la_campania_parrafo4 import *
+from services.doc_103.introduccion_parrafo1 import *
+from services.doc_103.bitacora_electronica_parrafo2 import *
 
 
 ############################ DICCIONARIO DE REEMPLAZOS PARA FIGURAS ############################
@@ -79,33 +73,30 @@ def construir_diccionario_agregar_figuras(df_datos_documento: pd.DataFrame) -> d
                     dict_temporal.set_titulo(pie_value[ivarvalue])
                 
                 if varname.lower() == "fig_mapa_de_despliegue".lower():
+                    titulo = f"Mapa con los puntos de despliegue de las sondas oceanográficas"
+                    dict_temporal.set_titulo(titulo)
                     dict_temporal.set_tamanio(6)  
 
-                if varname.lower() == "fig_esquema_de_sonda".lower():
+                if varname.lower() == "fig_esquema_componentes_de_sonda".lower():
                     numero_de_serie = varvalue.split("_")[-1]
-                    titulo = f"Despliegue de sonda oceanográfica {numero_de_serie}"
+                    titulo = f"Figura esquemática con los componentes de las sondas oceanográficas"
                     dict_temporal.set_titulo(titulo)
                     dict_temporal.set_tamanio(6)  
                     
-                elif varname.lower() == "fig_pruebas_de_transmision".lower():
+                elif varname.lower() == "fig_mapa_trayectoria".lower():
                     numero_de_serie = varvalue.split("_")[-1]
-                    titulo = f"Datos enviados durante las pruebas de laboratorio para la sonda {numero_de_serie}"
+                    titulo = f"Mapa de trayectoria de la sonda oceanográfica {numero_de_serie} desde su despliegue (punto en color amarillo) hasta el último dato transmitido dentro de la vigencia de la orden de servicio (punto en color rojo)"
                     dict_temporal.set_titulo(titulo)
                     dict_temporal.set_tamanio(6)
                     
-                elif varname.lower() == "fig_pruebas_baterias".lower():
-                    titulo = f"Datos transmitidos del estado de las baterias durante las 24 horas de las pruebas de funcionamiento"
+                elif varname.lower() == "fig_transmision".lower():
+                    
+                    fecha_inicio = get_fecha_y_hora_de_embarque_y_campania_unicos(df_datos_documento = df_datos_documento)[0]
+                    fecha_final = get_fecha_final_vigencia(df_datos_documento = df_datos_documento)
+                    titulo = f"Series de tiempo de temperatura, las componentes u (Oeste-Este) y v (Sur-Norte), y de la rapidez y dirección de la corriente superficial de la sonda oceanográfica {numero_de_serie}. La dirección es oceanográfica (hacia dónde va la corriente y medida hacia la derecha a partir del Norte). El periodo va del {fecha_inicio} al {fecha_final}."
                     dict_temporal.set_titulo(titulo)
                     dict_temporal.set_tamanio(6)  
                 
-                elif varname.lower() == "fig_ubicacion_durante_pruebas".lower():
-                    titulo = f"Mapa con la información con las primeras 24 horas de transmisión de las sondas"
-                    dict_temporal.set_titulo(titulo)
-                    dict_temporal.set_tamanio(6)  
-                    
-                elif varname.lower() == "fig_pruebas_de_funcionamiento".lower():
-                    dict_temporal.set_tamanio(6)
-
                 array.append(dict_temporal.return_dict())
                 
             dict_documento["<<"+varname+">>"] = array
@@ -136,45 +127,13 @@ def construir_diccionario_de_datos_documento(df_datos_despliegue: pd.DataFrame,
     ## mes y_año de liberacion
     diccionario_de_reemplazos["<<mes_y_anio_de_liberacion>>"] = get_mes_y_anio_de_liberacion(df_datos_campanias = df_datos_campanias)
     
-    diccionario_de_reemplazos["<<descripcion_actividades_previas_parrafo1>>"] = descripcion_actividades_previas_parrafo1(df_datos_campanias = df_datos_campanias, 
+    diccionario_de_reemplazos["<<introduccion_parrafo1>>"] = introduccion_parrafo1(df_datos_campanias = df_datos_campanias, 
                                                                                                                         df_datos_despliegue= df_datos_despliegue)
     
-    diccionario_de_reemplazos["<<descripcion_actividades_previas_parrafo2>>"] = descripcion_actividades_previas_parrafo2(df_datos_campanias = df_datos_campanias, 
+    diccionario_de_reemplazos["<<bitacora_electronica_parrafo2>>"] = bitacora_electronica_parrafo2(df_datos_campanias = df_datos_campanias, 
                                                                                                                         df_datos_despliegue= df_datos_despliegue)
     
-    diccionario_de_reemplazos["<<descrpcion_actividades_previas_parrafo3>>"] = descripcion_actividades_previas_parrafo3(df_datos_campanias = df_datos_campanias, 
-                                                                                                                        df_datos_despliegue= df_datos_despliegue)
-    
-    diccionario_de_reemplazos["<<ejecucion_de_la_campania_parrafo1>>"] = ejecucion_de_la_campania_parrafo1(df_datos_campanias = df_datos_campanias, 
-                                                                                                            df_datos_despliegue= df_datos_despliegue)
-    
-    diccionario_de_reemplazos["<<ejecucion_de_la_campania_parrafo2>>"] = ejecucion_de_la_campania_parrafo2(df_datos_campanias = df_datos_campanias, 
-                                                                                                            df_datos_despliegue= df_datos_despliegue)
-    
-    diccionario_de_reemplazos["<<ejecucion_de_la_campania_parrafo3>>"] = ejecucion_de_la_campania_parrafo3(df_datos_campanias = df_datos_campanias, 
-                                                                                                            df_datos_despliegue= df_datos_despliegue)
-    
-    diccionario_de_reemplazos["<<ejecucion_de_la_campania_parrafo4>>"] = ejecucion_de_la_campania_parrafo4(df_datos_campanias = df_datos_campanias, 
-                                                                                                            df_datos_despliegue= df_datos_despliegue)
-    
-
-
-############################ DICCIONARIO DE REEMPLAZOS PARA PLANES DE CRUCEROS ############################
-def construir_diccionario_de_reemplazos_para_plan_de_cruceros(df_datos_despliegue: pd.DataFrame, 
-                                                            df_datos_campanias: pd.DataFrame,
-                                                            df_datos_documento: pd.DataFrame,
-                                                            diccionario_de_reemplazos: dict):
-
-    df_unicos= get_fecha_y_hora_de_embarque_y_campania_unicos(df_datos_campanias = df_datos_campanias)
-    campanias_unicas = df_unicos["campania"].unique()
-    rutas = []
-    for campania in campanias_unicas:
-        archivo = campania + ".docx"
-        ruta = os.path.join(get_ruta_a_carpeta_de_planes_de_crucero(usar_NAS=True), archivo)
-        rutas.append(ruta)
-    diccionario_de_reemplazos["<<external_doc_plan_de_crucero>>"] = rutas
-
-    
+   
 ############################# DICCIONARIO DE REEMPLAZOS PARA TABLAS ############################
 # Es probable que acá necesite varios esquemas, dependiendo de la tabla.
 def construir_diccionario_de_reemplazos_para_tablas(df_datos_despliegue: pd.DataFrame, 
