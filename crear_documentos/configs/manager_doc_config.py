@@ -89,3 +89,13 @@ def get_ruta_a_carpeta_de_planes_de_crucero(usar_NAS: bool = False):
     else:
         ruta_completa = carpeta  # Si no se encuentra la variable de entorno, usar la ruta relativa     
     return ruta_completa
+
+def get_ruta_al_excel_de_porcentajes():
+    """Obtiene un valor de la configuración general de forma dinámica"""
+    ruta_al_NAS = os.getenv("ruta_al_NAS")
+    carpeta = configs.configuracion_documentos.ruta_al_excel_de_porcentajes
+    if get_usar_NAS() and ruta_al_NAS:
+        ruta_completa = os.path.join(ruta_al_NAS, carpeta)   
+    else:
+        ruta_completa = carpeta  # Si no se encuentra la variable de entorno, usar la ruta relativa     
+    return ruta_completa

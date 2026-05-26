@@ -42,6 +42,3 @@ def get_fecha_entrega(df_datos_despliegue: pd.DataFrame) -> str:
     fecha_entrega = fecha_inicio_vigencia + pd.DateOffset(months=1)
     fecha_entrega = timestamp_a_texto_espanol(fecha = fecha_entrega, mes_y_anio=False)
     return fecha_entrega
-
-
-

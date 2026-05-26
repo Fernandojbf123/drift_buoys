@@ -93,7 +93,10 @@ def construir_diccionario_agregar_figuras(df_datos_documento: pd.DataFrame) -> d
                     
                     fecha_inicio = get_fecha_y_hora_de_embarque_y_campania_unicos(df_datos_documento = df_datos_documento)[0]
                     fecha_final = get_fecha_final_vigencia(df_datos_documento = df_datos_documento)
-                    titulo = f"Series de tiempo de temperatura, las componentes u (Oeste-Este) y v (Sur-Norte), y de la rapidez y dirección de la corriente superficial de la sonda oceanográfica {numero_de_serie}. La dirección es oceanográfica (hacia dónde va la corriente y medida hacia la derecha a partir del Norte). El periodo va del {fecha_inicio} al {fecha_final}."
+                    titulo  = f"Series de tiempo de temperatura, las componentes u (Oeste-Este) y v (Sur-Norte), y de la rapidez y dirección"
+                    titulo += f"de la corriente superficial de la sonda oceanográfica {numero_de_serie}."
+                    titulo += f"La dirección es oceanográfica (hacia dónde va la corriente y medida hacia la derecha a partir del Norte)." 
+                    titulo+= f"El periodo va del {fecha_inicio} al {fecha_final}."
                     dict_temporal.set_titulo(titulo)
                     dict_temporal.set_tamanio(6)  
                 
@@ -139,6 +142,7 @@ def construir_diccionario_de_datos_documento(df_datos_despliegue: pd.DataFrame,
 def construir_diccionario_de_reemplazos_para_tablas(df_datos_despliegue: pd.DataFrame, 
                                                     df_datos_campanias: pd.DataFrame,
                                                     df_datos_documento: pd.DataFrame,
+                                                    df_datos_porcentajes: pd.DataFrame,
                                                     diccionario_de_reemplazos: dict,
                                                     doc: object):
     
@@ -146,34 +150,6 @@ def construir_diccionario_de_reemplazos_para_tablas(df_datos_despliegue: pd.Data
     opciones_de_tabla = OpcionesTabla()
     estilos_de_tabla = EstilosTabla(doc)
     estilos_de_tabla.set_estilo_por_defecto("texto_tablas_centrado")
-    tabla2 = df_datos_despliegue[["serial_de_sonda","latitud_maniobra","longitud_maniobra"]]
-    tabla2.insert(0,"secuencia", range(1, len(tabla2) + 1))
-    tabla2["secuencia"] = tabla2["secuencia"].astype(int).astype(str)
-    tabla2["serial_de_sonda"] = tabla2["serial_de_sonda"].astype(int).astype(str)
-    tabla2["latitud_maniobra"] = tabla2["latitud_maniobra"].astype(str)
-    tabla2["longitud_maniobra"] = tabla2["longitud_maniobra"].astype(str)
-    diccionario_de_reemplazos["<<tabla_plan>>"] = {
-        "tabla": tabla2,
-        "estilos_de_tabla": estilos_de_tabla,
-        "opciones_de_tabla": opciones_de_tabla
-    }
-    
-    
-    tabla3 = df_datos_despliegue[["serial_de_sonda","latitud_plan","longitud_plan","fecha_y_hora_de_despliegue_maniobra","estado_despliegue"]]
-    tabla3.insert(0,"secuencia", range(1, len(tabla3) + 1))
-    tabla3["secuencia"] = tabla3["secuencia"].astype(int).astype(str)
-    tabla3["serial_de_sonda"] = tabla3["serial_de_sonda"].astype(int).astype(str)
-    tabla3["latitud_plan"] = tabla3["latitud_plan"].astype(str)
-    tabla3["longitud_plan"] = tabla3["longitud_plan"].astype(str)
-    tabla3["fecha_y_hora_de_despliegue_maniobra"] = pd.to_datetime(tabla3["fecha_y_hora_de_despliegue_maniobra"], format = "%d/%m/%Y %H:%M:%S").dt.strftime("%d/%m/%Y %H:%M")
-    diccionario_de_reemplazos["<<tabla_maniobra>>"] = {
-        "tabla": tabla3,
-        "estilos_de_tabla": estilos_de_tabla,
-        "opciones_de_tabla": opciones_de_tabla
-    }
-
-
-
     
     df_datos_despliegue["serial_de_sonda"] = df_datos_despliegue["serial_de_sonda"].astype(int).astype(str)
     
@@ -187,14 +163,14 @@ def construir_diccionario_de_reemplazos_para_tablas(df_datos_despliegue: pd.Data
 
     seriales = get_seriales_de_sondas(df_datos_despliegue = df_datos_despliegue)
     
-    array_secuencia_tabla4 = []
-    array_seriales_tabla4 = []
-    array_equipos_tabla4 = []
-    array_numero_de_serie_de_equipo_tabla4 = []
+    array_secuencia_tabla1 = []
+    array_seriales_tabla1 = []
+    array_equipos_tabla1 = []
+    array_numero_de_serie_de_equipo_tabla1 = []
     
     for secuencia, serial in enumerate(seriales) :
-        array_seriales_tabla4.append([serial]*len(equipos))
-        array_equipos_tabla4.append(equipos)
+        array_seriales_tabla1.append([serial]*len(equipos))
+        array_equipos_tabla1.append(equipos)
         gps_primario = df_datos_despliegue[df_datos_despliegue["serial_de_sonda"] == serial]["gps_primario"].iloc[0]
         gps_secundario = df_datos_despliegue[df_datos_despliegue["serial_de_sonda"] == serial]["gps_secundario"].iloc[0]
         telemetria_primario = df_datos_despliegue[df_datos_despliegue["serial_de_sonda"] == serial]["telemetria_primario"].iloc[0]
@@ -202,21 +178,21 @@ def construir_diccionario_de_reemplazos_para_tablas(df_datos_despliegue: pd.Data
         temperatura_primario = df_datos_despliegue[df_datos_despliegue["serial_de_sonda"] == serial]["temperatura_primario"].iloc[0]
         temperatura_secundario = df_datos_despliegue[df_datos_despliegue["serial_de_sonda"] == serial]["temperatura_secundario"].iloc[0]
         acelerometro = df_datos_despliegue[df_datos_despliegue["serial_de_sonda"] == serial]["acelerometro"].iloc[0]    
-        array_numero_de_serie_de_equipo_tabla4.append([gps_primario, gps_secundario, telemetria_primario, telemetria_secundario, temperatura_primario, temperatura_secundario, acelerometro])
-        array_secuencia_tabla4.append([secuencia+1]*len(equipos))
+        array_numero_de_serie_de_equipo_tabla1.append([gps_primario, gps_secundario, telemetria_primario, telemetria_secundario, temperatura_primario, temperatura_secundario, acelerometro])
+        array_secuencia_tabla1.append([secuencia+1]*len(equipos))
     
-    array_secuencia_tabla4 = np.array(array_secuencia_tabla4).flatten()
-    array_seriales_tabla4 = np.array(array_seriales_tabla4).flatten()
-    array_equipos_tabla4 = np.array(array_equipos_tabla4).flatten()
-    array_numero_de_serie_de_equipo_tabla4 = np.array(array_numero_de_serie_de_equipo_tabla4).flatten()
+    array_secuencia_tabla1 = np.array(array_secuencia_tabla1).flatten()
+    array_seriales_tabla1 = np.array(array_seriales_tabla1).flatten()
+    array_equipos_tabla1 = np.array(array_equipos_tabla1).flatten()
+    array_numero_de_serie_de_equipo_tabla1 = np.array(array_numero_de_serie_de_equipo_tabla1).flatten()
     
-    tabla4_dict = {
-        "secuencia": array_secuencia_tabla4,
-        "serial_de_sonda": array_seriales_tabla4,
-        "equipo": array_equipos_tabla4,
-        "numero_de_serie_de_equipo": array_numero_de_serie_de_equipo_tabla4
+    tabla1_dict = {
+        "secuencia": array_secuencia_tabla1,
+        "serial_de_sonda": array_seriales_tabla1,
+        "equipo": array_equipos_tabla1,
+        "numero_de_serie_de_equipo": array_numero_de_serie_de_equipo_tabla1
     }
-    tabla4 = pd.DataFrame(tabla4_dict)
+    tabla1 = pd.DataFrame(tabla1_dict)
         
     opciones_de_tabla.set_detectar_merge(True)
     opciones_de_tabla.set_columnas_para_merge([0,1])
@@ -224,6 +200,118 @@ def construir_diccionario_de_reemplazos_para_tablas(df_datos_despliegue: pd.Data
     estilos_de_tabla.set_estilo_de_columna(3, "texto_tablas_justificado")   
     
     diccionario_de_reemplazos["<<tabla_equipos>>"] = {
+        "tabla": tabla1,
+        "estilos_de_tabla": estilos_de_tabla,
+        "opciones_de_tabla": opciones_de_tabla
+    }
+    
+    
+    #####################Tabla 3. porcentajes de transmision ##########################
+    df_datos_porcentajes["serial_de_sonda"] = df_datos_porcentajes["serial_de_sonda"].astype(int).astype(str)
+   
+    variables = ["Tempertaura del agua de mar",
+                "Posición geográfica", 
+                "Rapidez",
+                "Dirección"]   
+    
+    array_seriales_tabla3 = []
+    array_fecha_inicio_tabla3 = []
+    array_fecha_fin_tabla3 = []
+    array_variables_tabla3 = []
+    array_cantidad_de_datos_esperados_tabla3 = []
+    array_cantidad_de_datos_recibidos_tabla3 = []
+    array_porcentaje_de_datos_recibidos_mas_interpolados_tabla3 = []
+    
+    for serial in enumerate(seriales):
+        array_seriales_tabla3.append([serial]*len(variables))
+        array_variables_tabla3.append(variables)
+        temp = df_datos_porcentajes[df_datos_porcentajes["serial_de_sonda"] == serial]["temp"].iloc[0]
+        posicion_geografica = df_datos_porcentajes[df_datos_porcentajes["serial_de_sonda"] == serial]["posicion_geografica"].iloc[0]
+        rapidez = df_datos_porcentajes[df_datos_porcentajes["serial_de_sonda"] == serial]["rapidez"].iloc[0]
+        direccion = df_datos_porcentajes[df_datos_porcentajes["serial_de_sonda"] == serial]["direccion"].iloc[0]
+        array_variables_tabla3.append([temp, posicion_geografica, rapidez, direccion])
+       
+        array_fecha_inicio_tabla3.append([df_datos_porcentajes[df_datos_porcentajes["serial_de_sonda"] == serial]["fecha_de_inicio"].iloc[0]]*len(variables))
+        array_fecha_fin_tabla3.append([df_datos_porcentajes[df_datos_porcentajes["serial_de_sonda"] == serial]["fecha_final"].iloc[0]]*len(variables))
+        array_cantidad_de_datos_esperados_tabla3.append([df_datos_porcentajes[df_datos_porcentajes["serial_de_sonda"] == serial]["cantidad_de_datos_esperados"].iloc[0]]*len(variables))
+        array_cantidad_de_datos_recibidos_tabla3.append([df_datos_porcentajes[df_datos_porcentajes["serial_de_sonda"] == serial]["cantidad_de_datos_recibidos"].iloc[0]]*len(variables))
+        array_porcentaje_de_datos_recibidos_mas_interpolados_tabla3.append([df_datos_porcentajes[df_datos_porcentajes["serial_de_sonda"] == serial]["porcentaje_de_datos_recibidos_mas_interpolados"].iloc[0]]*len(variables))
+        array_porcentaje_de_datos_recibidos_mas_interpolados_tabla3.append([df_datos_porcentajes[df_datos_porcentajes["serial_de_sonda"] == serial]["porcentaje_de_datos_recibidos_mas_interpolados"].iloc[0]]*len(variables))
+    
+    
+    array_seriales_tabla3 = np.array(array_seriales_tabla3).flatten()
+    array_fecha_inicio_tabla3 = np.array(array_fecha_inicio_tabla3).flatten() + "/" + np.array(array_fecha_fin_tabla3).flatten()
+    array_variables_tabla3 = np.array(array_variables_tabla3).flatten()
+    array_cantidad_de_datos_esperados_tabla3 = np.array(array_cantidad_de_datos_esperados_tabla3).flatten()
+    array_cantidad_de_datos_recibidos_tabla3 = np.array(array_cantidad_de_datos_recibidos_tabla3).flatten()
+    array_porcentaje_de_datos_recibidos_mas_interpolados_tabla3 = np.array(array_porcentaje_de_datos_recibidos_mas_interpolados_tabla3).flatten()
+    array_porcentaje_de_datos_recibidos_mas_interpolados_tabla3 = np.array(array_porcentaje_de_datos_recibidos_mas_interpolados_tabla3).flatten()
+    
+    tabla3_dict = {
+    "serial_de_sonda":  array_seriales_tabla3,
+    "fecha_de_inicio": array_fecha_inicio_tabla3,
+    "fecha_final": array_fecha_fin_tabla3,
+    "cantidad_de_datos_esperados": array_cantidad_de_datos_esperados_tabla3,
+    "cantidad_de_datos_recibidos": array_cantidad_de_datos_recibidos_tabla3,
+    "porcentaje_de_datos_recibidos_mas_interpolados": array_porcentaje_de_datos_recibidos_mas_interpolados_tabla3,
+    "porcentaje_de_datos_recibidos_mas_interpolados": array_porcentaje_de_datos_recibidos_mas_interpolados_tabla3
+}
+    tabla3 = pd.DataFrame(tabla3_dict)
+           
+    opciones_de_tabla.set_detectar_merge(True)
+    opciones_de_tabla.set_columnas_para_merge([0,1])
+    estilos_de_tabla.set_estilo_de_columna(2, "texto_tablas_justificado")
+    estilos_de_tabla.set_estilo_de_columna(3, "texto_tablas_justificado")   
+    
+    diccionario_de_reemplazos["<<tabla_transmision>>"] = {
+        "tabla": tabla3,
+        "estilos_de_tabla": estilos_de_tabla,
+        "opciones_de_tabla": opciones_de_tabla
+    }
+    
+    #################### Tabla 4. Porcentaje de no visualizacion############################     
+    
+    array_seriales_tabla4 = []
+    array_variables_tabla4 = []
+    array_cantidad_de_datos_esperados_tabla4 = []
+    array_cantidad_de_datos_recibidos_tabla4 = []
+    array_porcentaje_de_datos_no_visualizados_tabla4 = []
+    
+    for serial in enumerate(seriales):
+        array_seriales_tabla4.append([serial]*len(variables))
+        array_variables_tabla4.append(variables)
+        temp = df_datos_porcentajes[df_datos_porcentajes["serial_de_sonda"] == serial]["temp"].iloc[0]
+        posicion_geografica = df_datos_porcentajes[df_datos_porcentajes["serial_de_sonda"] == serial]["posicion_geografica"].iloc[0]
+        rapidez = df_datos_porcentajes[df_datos_porcentajes["serial_de_sonda"] == serial]["rapidez"].iloc[0]
+        direccion = df_datos_porcentajes[df_datos_porcentajes["serial_de_sonda"] == serial]["direccion"].iloc[0]
+        array_variables_tabla4.append([temp, posicion_geografica, rapidez, direccion])
+       
+        array_cantidad_de_datos_esperados_tabla4.append([df_datos_porcentajes[df_datos_porcentajes["serial_de_sonda"] == serial]["cantidad_de_datos_esperados"].iloc[0]]*len(variables))
+        array_cantidad_de_datos_recibidos_tabla4.append([df_datos_porcentajes[df_datos_porcentajes["serial_de_sonda"] == serial]["cantidad_de_datos_recibidos"].iloc[0]]*len(variables))
+        array_porcentaje_de_datos_no_visualizados_tabla4.append([100 - df_datos_porcentajes[df_datos_porcentajes["serial_de_sonda"] == serial]["porcentaje_de_datos_recibidos_mas_interpolados"].iloc[0]]*len(variables))
+       
+    
+    array_seriales_tabla4 = np.array(array_seriales_tabla4).flatten()
+    array_variables_tabla4 = np.array(array_variables_tabla4).flatten()
+    array_cantidad_de_datos_esperados_tabla4 = np.array(array_cantidad_de_datos_esperados_tabla4).flatten()
+    array_cantidad_de_datos_recibidos_tabla4 = np.array(array_cantidad_de_datos_recibidos_tabla4).flatten()
+    array_porcentaje_de_datos_no_visualizados_tabla4 = np.array(array_porcentaje_de_datos_no_visualizados_tabla4).flatten()
+  
+    tabla4_dict = {
+    "serial_de_sonda":  array_seriales_tabla4,
+    "cantidad_de_datos_esperados": array_cantidad_de_datos_esperados_tabla4,
+    "cantidad_de_datos_recibidos": array_cantidad_de_datos_recibidos_tabla4,
+    "porcentaje_de_datos_no_visualizados": array_porcentaje_de_datos_no_visualizados_tabla4
+    
+}
+    tabla4 = pd.DataFrame(tabla4_dict)
+           
+    opciones_de_tabla.set_detectar_merge(True)
+    opciones_de_tabla.set_columnas_para_merge([0,1])
+    estilos_de_tabla.set_estilo_de_columna(2, "texto_tablas_justificado")
+    estilos_de_tabla.set_estilo_de_columna(3, "texto_tablas_justificado")   
+    
+    diccionario_de_reemplazos["<<tabla_no_visualizacion>>"] = {
         "tabla": tabla4,
         "estilos_de_tabla": estilos_de_tabla,
         "opciones_de_tabla": opciones_de_tabla

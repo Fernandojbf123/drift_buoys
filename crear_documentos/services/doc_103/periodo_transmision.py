@@ -1,0 +1,2 @@
+def periodo_transmision():
+    
