@@ -1,6 +1,7 @@
 import os
 from docx import Document
 
+
 def abrir_plantilla_doris(ruta_a_la_plantilla: str) -> Document:
     """Abre el documento plantilla de DORIS y devuelve un objeto Document.
 
@@ -20,3 +21,4 @@ def abrir_plantilla_doris(ruta_a_la_plantilla: str) -> Document:
         raise e
     
     return documento
+
