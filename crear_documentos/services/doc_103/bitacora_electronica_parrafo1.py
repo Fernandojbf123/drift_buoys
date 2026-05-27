@@ -3,7 +3,7 @@ from services.manager_variables_excel_datos_despliegue import *
 from services.manager_variables_excel_datos_campania import *
 
 
-def bitacora_electronica_parrafo2(df_datos_campanias: pd.DataFrame, df_datos_despliegue: pd.DataFrame) -> str:
+def bitacora_electronica_parrafo1(df_datos_campanias: pd.DataFrame, df_datos_despliegue: pd.DataFrame) -> str:
     
     df_unicos= get_fecha_y_hora_de_embarque_y_campania_unicos(df_datos_campanias = df_datos_campanias)
     fechas_campanias_unicos = df_unicos["fecha_hora_de_embarque"].tolist()

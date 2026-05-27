@@ -10,10 +10,11 @@ from services.word_template_writer import *
 from services.manager_variables_excel_datos_campania import *
 from services.manager_variables_excel_datos_despliegue import *
 from services.manager_variables_excel_documento import *
+from services.doc_103.manager_porcentajes import *
 
 # Constructores individuales
 from services.doc_103.introduccion_parrafo1 import *
-from services.doc_103.bitacora_electronica_parrafo2 import *
+from services.doc_103.bitacora_electronica_parrafo1 import *
 
 
 ############################ DICCIONARIO DE REEMPLAZOS PARA FIGURAS ############################
@@ -27,10 +28,29 @@ class Dictfiguras():
         self.bookmark = ""
 
     def set_ruta(self, varvalue: str):
+
         carpeta = get_ruta_a_carpeta_de_las_figuras(usar_NAS=True)
-        ruta_completa = os.path.join(carpeta, varvalue+".jpg")
-        self.ruta = ruta_completa.strip()
-    
+
+        extensiones = [".png", ".jpg", ".jpeg", ".tiff", ".tif"]
+
+        ruta_completa = None
+
+        for ext in extensiones:
+            posible_ruta = os.path.join(carpeta, varvalue + ext)
+
+            if os.path.exists(posible_ruta):
+                ruta_completa = posible_ruta
+                break
+
+        # VALIDACIÓN DE EXISTENCIA DE LA IMAGEN
+        if ruta_completa is None:
+            raise FileNotFoundError(
+                f"No se encontró la imagen: {varvalue} con extensiones {extensiones}"
+            )
+
+        self.ruta = ruta_completa  
+        
+        
     def set_tamanio(self, tamanio: int):
         self.tamanio = tamanio
     
@@ -52,58 +72,90 @@ class Dictfiguras():
             "bookmark": self.bookmark
         }
 
-def construir_diccionario_agregar_figuras(df_datos_documento: pd.DataFrame, df_datos_despliegue: pd.DataFrame, df_datos_campanias: pd.DataFrame) -> dict:
+def construir_diccionario_agregar_figuras(
+    df_datos_documento: pd.DataFrame,
+    df_datos_despliegue: pd.DataFrame,
+    df_datos_campanias: pd.DataFrame
+) -> dict:
+
     dict_documento = {}
-    varnames_documento = get_varnames_documento(df_datos_documento = df_datos_documento) 
+    varnames_documento = get_varnames_documento(df_datos_documento=df_datos_documento)
 
     for ivarname, varname in enumerate(varnames_documento):
-        varvalues = get_variable_documento(df_datos_documento = df_datos_documento, nombre_variable = varname)
+
+        varvalues = get_variable_documento(
+            df_datos_documento=df_datos_documento,
+            nombre_variable=varname
+        )
+
+        # SOLO FIGURAS
         if varname.startswith("fig_"):
-            dict_temporal = Dictfiguras()  
-            array=[]
+
+            lista_figuras = [] 
+
+            next_varname = (
+                varnames_documento[ivarname + 1]
+                if ivarname + 1 < len(varnames_documento)
+                else None
+            )
+
             for ivarvalue, varvalue in enumerate(varvalues):
+
+                dict_temporal = Dictfiguras()
+
                 dict_temporal.set_ruta(varvalue)
-                dict_temporal.set_tamanio(3) 
+                dict_temporal.set_tamanio(3)
                 dict_temporal.set_bookmark(varvalue)
                 dict_temporal.set_titulo("")
-                next_varname = varnames_documento[ivarname+1]
-                
-                if next_varname.startswith("pie_"):
-                    pie_value = get_variable_documento(df_datos_documento = df_datos_documento, nombre_variable = next_varname)
-                    dict_temporal.set_titulo(pie_value[ivarvalue])
-                
-                if varname.lower() == "fig_mapa_de_despliegue".lower():
-                    titulo = f"Mapa con los puntos de despliegue de las sondas oceanográficas"
-                    dict_temporal.set_titulo(titulo)
-                    dict_temporal.set_tamanio(6)  
 
-                if varname.lower() == "fig_esquema_componentes_de_sonda".lower():
-                    numero_de_serie = varvalue.split("_")[-1]
-                    titulo = f"Figura esquemática con los componentes de las sondas oceanográficas"
-                    dict_temporal.set_titulo(titulo)
-                    dict_temporal.set_tamanio(6)  
-                    
+                # PIE
+                if isinstance(next_varname, str) and next_varname.startswith("pie_"):
+
+                    pie_value = get_variable_documento(
+                        df_datos_documento=df_datos_documento,
+                        nombre_variable=next_varname
+                    )
+
+                    if ivarvalue < len(pie_value):
+                        dict_temporal.set_titulo(pie_value[ivarvalue])
+
+                # CASOS ESPECIALES
+                if varname.lower() == "fig_mapa_de_despliegue".lower():
+                    dict_temporal.set_titulo("Mapa con los puntos de despliegue de las sondas oceanográficas")
+                    dict_temporal.set_tamanio(6)
+
+                elif varname.lower() == "fig_esquema_componentes_de_sonda".lower():
+                    dict_temporal.set_titulo("Figura esquemática con los componentes de las sondas oceanográficas")
+                    dict_temporal.set_tamanio(6)
+
                 elif varname.lower() == "fig_mapa_trayectoria".lower():
                     numero_de_serie = varvalue.split("_")[-1]
-                    titulo = f"Mapa de trayectoria de la sonda oceanográfica {numero_de_serie} desde su despliegue (punto en color amarillo) hasta el último dato transmitido dentro de la vigencia de la orden de servicio (punto en color rojo)"
+                    titulo = (
+                        f"Mapa de trayectoria de la sonda oceanográfica {numero_de_serie} "
+                        f"desde su despliegue hasta el último dato."
+                    )
+                    dict_temporal.set_titulo(titulo)
+                    dict_temporal.set_tamanio(6)
+
+                elif varname.lower() == "fig_transmision".lower():
+                    fecha_inicio = get_dia_de_liberacion(df_datos_campanias=df_datos_campanias) 
+                    fecha_final = get_fecha_final_vigencia(df_datos_despliegue=df_datos_despliegue)
+
+                    titulo = (
+                        "Series de tiempo de temperatura, componentes u y v, rapidez y dirección "
+                        f"de la sonda oceanográfica. "
+                        f"El periodo va del {fecha_inicio} al {fecha_final}."
+                    )
+
                     dict_temporal.set_titulo(titulo)
                     dict_temporal.set_tamanio(6)
                     
-                elif varname.lower() == "fig_transmision".lower():
-                    
-                    fecha_inicio = get_fecha_y_hora_de_embarque_y_campania_unicos(df_datos_campanias = df_datos_campanias)
-                    fecha_final = get_fecha_final_vigencia(df_datos_despliegue = df_datos_despliegue)
-                    titulo  = f"Series de tiempo de temperatura, las componentes u (Oeste-Este) y v (Sur-Norte), y de la rapidez y dirección"
-                    titulo += f"de la corriente superficial de la sonda oceanográfica {numero_de_serie}."
-                    titulo += f"La dirección es oceanográfica (hacia dónde va la corriente y medida hacia la derecha a partir del Norte)." 
-                    titulo += f"El periodo va del {fecha_inicio} al {fecha_final}."
-                    dict_temporal.set_titulo(titulo)
-                    dict_temporal.set_tamanio(6)  
-                
-                array.append(dict_temporal.return_dict())
-                
-            dict_documento["<<"+varname+">>"] = array
-            
+
+                lista_figuras.append(dict_temporal.return_dict())
+
+            # guardar en diccionario final
+            dict_documento["<<"+varname+">>"] = lista_figuras
+
     return dict_documento
 
 
@@ -125,7 +177,9 @@ def construir_diccionario_de_datos_documento(df_datos_despliegue: pd.DataFrame,
     diccionario_de_reemplazos["<<fecha_de_entrega>>"] = get_fecha_entrega(df_datos_despliegue = df_datos_despliegue)
     
     # seriales de sondas
-    diccionario_de_reemplazos["<<seriales_de_sondas>>"] = get_seriales_de_sondas(df_datos_despliegue = df_datos_despliegue)
+    seriales_de_sondas = get_seriales_de_sondas(df_datos_despliegue = df_datos_despliegue)
+    diccionario_de_reemplazos["<<seriales_de_sondas>>"] = ", ".join([str(serial) for serial in seriales_de_sondas])  # Convierte a string con formato "12345, 67890"
+   
     diccionario_de_reemplazos["<<numero_de_sondas>>"] = get_numero_de_sondas(df_datos_despliegue = df_datos_despliegue) 
     
     ## mes y_año de liberacion
@@ -134,9 +188,11 @@ def construir_diccionario_de_datos_documento(df_datos_despliegue: pd.DataFrame,
     diccionario_de_reemplazos["<<introduccion_parrafo1>>"] = introduccion_parrafo1(df_datos_campanias = df_datos_campanias, 
                                                                                                                         df_datos_despliegue= df_datos_despliegue)
     
-    diccionario_de_reemplazos["<<bitacora_electronica_parrafo2>>"] = bitacora_electronica_parrafo2(df_datos_campanias = df_datos_campanias, 
+    diccionario_de_reemplazos["<<bitacora_electronica_parrafo1>>"] = bitacora_electronica_parrafo1(df_datos_campanias = df_datos_campanias, 
                                                                                                                         df_datos_despliegue= df_datos_despliegue)
+    diccionario_de_reemplazos["<<fecha_inicio>>"] = get_dia_de_liberacion(df_datos_campanias = df_datos_campanias)
     
+    diccionario_de_reemplazos["<<porcentaje_de_transmision>>"] = get_porcentaje_maximo_de_transmision(df_porcentajes = df_porcentajes)
    
 ############################# DICCIONARIO DE REEMPLAZOS PARA TABLAS ############################
 # Es probable que acá necesite varios esquemas, dependiendo de la tabla.
@@ -150,6 +206,20 @@ def construir_diccionario_de_reemplazos_para_tablas(df_datos_despliegue: pd.Data
     opciones_de_tabla = OpcionesTabla()
     estilos_de_tabla = EstilosTabla(doc)
     estilos_de_tabla.set_estilo_por_defecto("texto_tablas_centrado")
+    
+    tabla1 = df_datos_despliegue[["serial_de_sonda","latitud_plan","longitud_plan","fecha_y_hora_de_despliegue_maniobra","estado_despliegue"]]
+    tabla1.insert(0,"secuencia", range(1, len(tabla1) + 1))
+    tabla1["secuencia"] = tabla1["secuencia"].astype(int).astype(str)
+    tabla1["serial_de_sonda"] = tabla1["serial_de_sonda"].astype(int).astype(str)
+    tabla1["latitud_plan"] = tabla1["latitud_plan"].astype(str)
+    tabla1["longitud_plan"] = tabla1["longitud_plan"].astype(str)
+    tabla1["fecha_y_hora_de_despliegue_maniobra"] = pd.to_datetime(tabla1["fecha_y_hora_de_despliegue_maniobra"], format = "%d/%m/%Y %H:%M:%S").dt.strftime("%d/%m/%Y %H:%M")
+    diccionario_de_reemplazos["<<tabla_equipos>>"] = {
+        "tabla": tabla1,
+        "estilos_de_tabla": estilos_de_tabla,
+        "opciones_de_tabla": opciones_de_tabla
+    }
+
     
     df_datos_despliegue["serial_de_sonda"] = df_datos_despliegue["serial_de_sonda"].astype(int).astype(str)
     
@@ -286,7 +356,7 @@ def construir_diccionario_de_reemplazos_para_tablas(df_datos_despliegue: pd.Data
     df_expanded["porcentaje_visualizado"] = df_expanded["porcentaje_de_datos_recibidos_mas_interpolados"]
 
     # 5. Porcentaje NO visualizado
-    df_expanded["porcentaje_no_visualizado"] = 100 - df_expanded["porcentaje_visualizado"]
+    df_expanded["porcentaje_no_visualizado"] = 100 - df_expanded["porcentaje_visualizado"].round(2)
 
     # 6. Tabla final
     tabla4 = df_expanded[[
