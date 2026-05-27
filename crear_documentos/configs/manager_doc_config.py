@@ -10,6 +10,10 @@ def get_orden_de_servicio():
     """Obtiene un valor de la configuración general de forma dinámica"""
     return configs.configuracion_documentos.orden_de_servicio
 
+def get_fecha_de_solicitud():
+    """Obtiene un valor de la configuración general de forma dinámica"""
+    return configs.configuracion_documentos.fecha_de_solicitud
+
 def ruta_al_excel_para_crear_documento():
     """Obtiene un valor de la configuración general de forma dinámica"""
     ruta_al_NAS = os.getenv("ruta_al_NAS")

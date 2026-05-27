@@ -1,7 +1,6 @@
 
 orden_de_servicio = "238"
-
-
+fecha_de_solicitud = "01 de abril de 2026" 
 
 ruta_al_excel_para_crear_documento = "\\Med_2025-2026\\General\\Sondas_DORIS\\2026_info_documentos_103.xlsx"
 hoja_del_excel_para_crear_documeto = "04" # "01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12" (corresponde a la hoja del excel que se usará para crear los documentos. El número debe ser un string, no un entero, y debe corresponder al nombre de la hoja en el excel maestro. Por ejemplo, si la hoja se llama "1", entonces el valor debe ser "1". Si la hoja se llama "instalacion", entonces el valor debe ser "instalacion".)

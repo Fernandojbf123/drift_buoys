@@ -158,7 +158,6 @@ def construir_diccionario_agregar_figuras(
 
     return dict_documento
 
-
 ############################ DICCIONARIO DE REEMPLAZOS PARA TEXTO ############################
 def construir_diccionario_de_datos_documento(df_datos_despliegue: pd.DataFrame, 
                                             df_datos_campanias: pd.DataFrame,
@@ -168,6 +167,8 @@ def construir_diccionario_de_datos_documento(df_datos_despliegue: pd.DataFrame,
     
     ## orden de servicio
     diccionario_de_reemplazos["<<orden_de_servicio>>"] = get_orden_de_servicio()    
+    # fecha de solicitud
+    diccionario_de_reemplazos["<<fecha_de_solicitud>>"] = get_fecha_de_solicitud()    
     
     ## fechas de vigencia
     diccionario_de_reemplazos["<<fecha_inicio_vigencia>>"] = get_fecha_inicio_vigencia(df_datos_despliegue = df_datos_despliegue)
@@ -193,6 +194,8 @@ def construir_diccionario_de_datos_documento(df_datos_despliegue: pd.DataFrame,
     diccionario_de_reemplazos["<<fecha_inicio>>"] = get_dia_de_liberacion(df_datos_campanias = df_datos_campanias)
     
     diccionario_de_reemplazos["<<porcentaje_de_transmision>>"] = get_porcentaje_maximo_de_transmision(df_porcentajes = df_porcentajes)
+    
+    diccionario_de_reemplazos["<<periodo_de_transmision>>"] = get_periodo_de_transmision(df_porcentajes = df_porcentajes)
    
 ############################# DICCIONARIO DE REEMPLAZOS PARA TABLAS ############################
 # Es probable que acá necesite varios esquemas, dependiendo de la tabla.

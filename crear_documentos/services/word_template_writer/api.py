@@ -11,6 +11,7 @@ Functions:
     - reemplazar_texto_en_plantilla: Replace text variables in template
     - insertar_documento_externo_en_plantilla: Insert external Word documents
     - rellenar_tablas_en_plantilla: Fill tables with DataFrame data
+    - reemplazar_variables_en_tablas: Replace variables inside tables with text or figures
 """
 
 # Import helper functions from private modules
