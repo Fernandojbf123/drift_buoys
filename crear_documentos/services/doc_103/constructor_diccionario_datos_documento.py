@@ -52,7 +52,7 @@ class Dictfiguras():
             "bookmark": self.bookmark
         }
 
-def construir_diccionario_agregar_figuras(df_datos_documento: pd.DataFrame) -> dict:
+def construir_diccionario_agregar_figuras(df_datos_documento: pd.DataFrame, df_datos_despliegue: pd.DataFrame, df_datos_campanias: pd.DataFrame) -> dict:
     dict_documento = {}
     varnames_documento = get_varnames_documento(df_datos_documento = df_datos_documento) 
 
@@ -91,12 +91,12 @@ def construir_diccionario_agregar_figuras(df_datos_documento: pd.DataFrame) -> d
                     
                 elif varname.lower() == "fig_transmision".lower():
                     
-                    fecha_inicio = get_fecha_y_hora_de_embarque_y_campania_unicos(df_datos_documento = df_datos_documento)[0]
-                    fecha_final = get_fecha_final_vigencia(df_datos_documento = df_datos_documento)
+                    fecha_inicio = get_fecha_y_hora_de_embarque_y_campania_unicos(df_datos_campanias = df_datos_campanias)
+                    fecha_final = get_fecha_final_vigencia(df_datos_despliegue = df_datos_despliegue)
                     titulo  = f"Series de tiempo de temperatura, las componentes u (Oeste-Este) y v (Sur-Norte), y de la rapidez y dirección"
                     titulo += f"de la corriente superficial de la sonda oceanográfica {numero_de_serie}."
                     titulo += f"La dirección es oceanográfica (hacia dónde va la corriente y medida hacia la derecha a partir del Norte)." 
-                    titulo+= f"El periodo va del {fecha_inicio} al {fecha_final}."
+                    titulo += f"El periodo va del {fecha_inicio} al {fecha_final}."
                     dict_temporal.set_titulo(titulo)
                     dict_temporal.set_tamanio(6)  
                 
@@ -111,6 +111,7 @@ def construir_diccionario_agregar_figuras(df_datos_documento: pd.DataFrame) -> d
 def construir_diccionario_de_datos_documento(df_datos_despliegue: pd.DataFrame, 
                                             df_datos_campanias: pd.DataFrame,
                                             df_datos_documento: pd.DataFrame,
+                                            df_porcentajes: pd.DataFrame,
                                             diccionario_de_reemplazos: dict):
     
     ## orden de servicio
@@ -142,10 +143,9 @@ def construir_diccionario_de_datos_documento(df_datos_despliegue: pd.DataFrame,
 def construir_diccionario_de_reemplazos_para_tablas(df_datos_despliegue: pd.DataFrame, 
                                                     df_datos_campanias: pd.DataFrame,
                                                     df_datos_documento: pd.DataFrame,
-                                                    df_datos_porcentajes: pd.DataFrame,
+                                                    df_porcentajes: pd.DataFrame,
                                                     diccionario_de_reemplazos: dict,
                                                     doc: object):
-    
     
     opciones_de_tabla = OpcionesTabla()
     estilos_de_tabla = EstilosTabla(doc)
@@ -207,56 +207,53 @@ def construir_diccionario_de_reemplazos_para_tablas(df_datos_despliegue: pd.Data
     
     
     #####################Tabla 3. porcentajes de transmision ##########################
-    df_datos_porcentajes["serial_de_sonda"] = df_datos_porcentajes["serial_de_sonda"].astype(int).astype(str)
-   
-    variables = ["Tempertaura del agua de mar",
-                "Posición geográfica", 
-                "Rapidez",
-                "Dirección"]   
-    
-    array_seriales_tabla3 = []
-    array_fecha_inicio_tabla3 = []
-    array_fecha_fin_tabla3 = []
-    array_variables_tabla3 = []
-    array_cantidad_de_datos_esperados_tabla3 = []
-    array_cantidad_de_datos_recibidos_tabla3 = []
-    array_porcentaje_de_datos_recibidos_mas_interpolados_tabla3 = []
-    
-    for serial in enumerate(seriales):
-        array_seriales_tabla3.append([serial]*len(variables))
-        array_variables_tabla3.append(variables)
-        temp = df_datos_porcentajes[df_datos_porcentajes["serial_de_sonda"] == serial]["temp"].iloc[0]
-        posicion_geografica = df_datos_porcentajes[df_datos_porcentajes["serial_de_sonda"] == serial]["posicion_geografica"].iloc[0]
-        rapidez = df_datos_porcentajes[df_datos_porcentajes["serial_de_sonda"] == serial]["rapidez"].iloc[0]
-        direccion = df_datos_porcentajes[df_datos_porcentajes["serial_de_sonda"] == serial]["direccion"].iloc[0]
-        array_variables_tabla3.append([temp, posicion_geografica, rapidez, direccion])
-       
-        array_fecha_inicio_tabla3.append([df_datos_porcentajes[df_datos_porcentajes["serial_de_sonda"] == serial]["fecha_de_inicio"].iloc[0]]*len(variables))
-        array_fecha_fin_tabla3.append([df_datos_porcentajes[df_datos_porcentajes["serial_de_sonda"] == serial]["fecha_final"].iloc[0]]*len(variables))
-        array_cantidad_de_datos_esperados_tabla3.append([df_datos_porcentajes[df_datos_porcentajes["serial_de_sonda"] == serial]["cantidad_de_datos_esperados"].iloc[0]]*len(variables))
-        array_cantidad_de_datos_recibidos_tabla3.append([df_datos_porcentajes[df_datos_porcentajes["serial_de_sonda"] == serial]["cantidad_de_datos_recibidos"].iloc[0]]*len(variables))
-        array_porcentaje_de_datos_recibidos_mas_interpolados_tabla3.append([df_datos_porcentajes[df_datos_porcentajes["serial_de_sonda"] == serial]["porcentaje_de_datos_recibidos_mas_interpolados"].iloc[0]]*len(variables))
-        array_porcentaje_de_datos_recibidos_mas_interpolados_tabla3.append([df_datos_porcentajes[df_datos_porcentajes["serial_de_sonda"] == serial]["porcentaje_de_datos_recibidos_mas_interpolados"].iloc[0]]*len(variables))
-    
-    
-    array_seriales_tabla3 = np.array(array_seriales_tabla3).flatten()
-    array_fecha_inicio_tabla3 = np.array(array_fecha_inicio_tabla3).flatten() + "/" + np.array(array_fecha_fin_tabla3).flatten()
-    array_variables_tabla3 = np.array(array_variables_tabla3).flatten()
-    array_cantidad_de_datos_esperados_tabla3 = np.array(array_cantidad_de_datos_esperados_tabla3).flatten()
-    array_cantidad_de_datos_recibidos_tabla3 = np.array(array_cantidad_de_datos_recibidos_tabla3).flatten()
-    array_porcentaje_de_datos_recibidos_mas_interpolados_tabla3 = np.array(array_porcentaje_de_datos_recibidos_mas_interpolados_tabla3).flatten()
-    array_porcentaje_de_datos_recibidos_mas_interpolados_tabla3 = np.array(array_porcentaje_de_datos_recibidos_mas_interpolados_tabla3).flatten()
-    
-    tabla3_dict = {
-    "serial_de_sonda":  array_seriales_tabla3,
-    "fecha_de_inicio": array_fecha_inicio_tabla3,
-    "fecha_final": array_fecha_fin_tabla3,
-    "cantidad_de_datos_esperados": array_cantidad_de_datos_esperados_tabla3,
-    "cantidad_de_datos_recibidos": array_cantidad_de_datos_recibidos_tabla3,
-    "porcentaje_de_datos_recibidos_mas_interpolados": array_porcentaje_de_datos_recibidos_mas_interpolados_tabla3,
-    "porcentaje_de_datos_recibidos_mas_interpolados": array_porcentaje_de_datos_recibidos_mas_interpolados_tabla3
-}
-    tabla3 = pd.DataFrame(tabla3_dict)
+    df_porcentajes["serial_de_sonda"] = df_porcentajes["serial_de_sonda"].astype(str)
+
+    variables = [
+        "Temperatura del agua de mar",
+        "Posición geográfica",
+        "Rapidez",
+        "Dirección"
+    ]
+
+    # 1. Expandir filas (serial × variables)
+    df_expanded = (
+        df_porcentajes
+        .loc[df_porcentajes.index.repeat(len(variables))]
+        .copy()
+        .reset_index(drop=True)
+    )
+
+    # 2. Asignar variables
+    df_expanded["variable"] = variables * len(df_porcentajes)
+
+    # 3. Fecha inicio / fin van en una columna
+    df_expanded["fecha_inicio_fin"] = (
+        df_expanded["fecha_de_inicio"].astype(str)
+        + " / " +
+        df_expanded["fecha_final"].astype(str)
+    )
+
+    # 4. Métricas repetidas automáticamente
+    df_expanded["cantidad_de_datos_esperados"] = df_expanded["cantidad_de_datos_esperados"]
+    df_expanded["cantidad_de_datos_recibidos"] = df_expanded["cantidad_de_datos_recibidos"]
+
+    # 5. Porcentajes repetidos en ambas columnas (como pediste)
+    df_expanded["porcentaje"] = df_expanded["porcentaje_de_datos_recibidos_mas_interpolados"]
+
+    df_expanded["porcentaje_de_transmision"] = df_expanded["porcentaje"]
+    df_expanded["porcentaje_de_visualizacion"] = df_expanded["porcentaje"]
+
+    # 6. Tabla final lista para Word
+    tabla3 = df_expanded[[
+        "serial_de_sonda",
+        "fecha_inicio_fin",
+        "variable",
+        "cantidad_de_datos_esperados",
+        "cantidad_de_datos_recibidos",
+        "porcentaje_de_transmision",
+        "porcentaje_de_visualizacion"
+    ]]
            
     opciones_de_tabla.set_detectar_merge(True)
     opciones_de_tabla.set_columnas_para_merge([0,1])
@@ -270,49 +267,45 @@ def construir_diccionario_de_reemplazos_para_tablas(df_datos_despliegue: pd.Data
     }
     
     #################### Tabla 4. Porcentaje de no visualizacion############################     
+    # 1. Expandir filas (serial × variables)
+    df_expanded = (
+        df_porcentajes
+        .loc[df_porcentajes.index.repeat(len(variables))]
+        .copy()
+        .reset_index(drop=True)
+    )
+
+    # 2. Asignar variables
+    df_expanded["variable"] = variables * len(df_porcentajes)
+
+    # 3. Métricas base
+    df_expanded["cantidad_de_datos_esperados"] = df_expanded["cantidad_de_datos_esperados"]
+    df_expanded["cantidad_de_datos_recibidos"] = df_expanded["cantidad_de_datos_recibidos"]
+
+    # 4. Porcentaje visualizado (base)
+    df_expanded["porcentaje_visualizado"] = df_expanded["porcentaje_de_datos_recibidos_mas_interpolados"]
+
+    # 5. Porcentaje NO visualizado
+    df_expanded["porcentaje_no_visualizado"] = 100 - df_expanded["porcentaje_visualizado"]
+
+    # 6. Tabla final
+    tabla4 = df_expanded[[
+        "serial_de_sonda",
+        "variable",
+        "cantidad_de_datos_esperados",
+        "cantidad_de_datos_recibidos",
+        "porcentaje_no_visualizado"
+    ]]
     
-    array_seriales_tabla4 = []
-    array_variables_tabla4 = []
-    array_cantidad_de_datos_esperados_tabla4 = []
-    array_cantidad_de_datos_recibidos_tabla4 = []
-    array_porcentaje_de_datos_no_visualizados_tabla4 = []
-    
-    for serial in enumerate(seriales):
-        array_seriales_tabla4.append([serial]*len(variables))
-        array_variables_tabla4.append(variables)
-        temp = df_datos_porcentajes[df_datos_porcentajes["serial_de_sonda"] == serial]["temp"].iloc[0]
-        posicion_geografica = df_datos_porcentajes[df_datos_porcentajes["serial_de_sonda"] == serial]["posicion_geografica"].iloc[0]
-        rapidez = df_datos_porcentajes[df_datos_porcentajes["serial_de_sonda"] == serial]["rapidez"].iloc[0]
-        direccion = df_datos_porcentajes[df_datos_porcentajes["serial_de_sonda"] == serial]["direccion"].iloc[0]
-        array_variables_tabla4.append([temp, posicion_geografica, rapidez, direccion])
-       
-        array_cantidad_de_datos_esperados_tabla4.append([df_datos_porcentajes[df_datos_porcentajes["serial_de_sonda"] == serial]["cantidad_de_datos_esperados"].iloc[0]]*len(variables))
-        array_cantidad_de_datos_recibidos_tabla4.append([df_datos_porcentajes[df_datos_porcentajes["serial_de_sonda"] == serial]["cantidad_de_datos_recibidos"].iloc[0]]*len(variables))
-        array_porcentaje_de_datos_no_visualizados_tabla4.append([100 - df_datos_porcentajes[df_datos_porcentajes["serial_de_sonda"] == serial]["porcentaje_de_datos_recibidos_mas_interpolados"].iloc[0]]*len(variables))
-       
-    
-    array_seriales_tabla4 = np.array(array_seriales_tabla4).flatten()
-    array_variables_tabla4 = np.array(array_variables_tabla4).flatten()
-    array_cantidad_de_datos_esperados_tabla4 = np.array(array_cantidad_de_datos_esperados_tabla4).flatten()
-    array_cantidad_de_datos_recibidos_tabla4 = np.array(array_cantidad_de_datos_recibidos_tabla4).flatten()
-    array_porcentaje_de_datos_no_visualizados_tabla4 = np.array(array_porcentaje_de_datos_no_visualizados_tabla4).flatten()
-  
-    tabla4_dict = {
-    "serial_de_sonda":  array_seriales_tabla4,
-    "cantidad_de_datos_esperados": array_cantidad_de_datos_esperados_tabla4,
-    "cantidad_de_datos_recibidos": array_cantidad_de_datos_recibidos_tabla4,
-    "porcentaje_de_datos_no_visualizados": array_porcentaje_de_datos_no_visualizados_tabla4
-    
-}
-    tabla4 = pd.DataFrame(tabla4_dict)
-           
     opciones_de_tabla.set_detectar_merge(True)
     opciones_de_tabla.set_columnas_para_merge([0,1])
     estilos_de_tabla.set_estilo_de_columna(2, "texto_tablas_justificado")
     estilos_de_tabla.set_estilo_de_columna(3, "texto_tablas_justificado")   
+    
     
     diccionario_de_reemplazos["<<tabla_no_visualizacion>>"] = {
         "tabla": tabla4,
         "estilos_de_tabla": estilos_de_tabla,
         "opciones_de_tabla": opciones_de_tabla
     }
+    
