@@ -135,6 +135,7 @@ def construir_diccionario_agregar_figuras(df_datos_documento: pd.DataFrame, df_d
 def construir_diccionario_de_datos_documento(df_datos_despliegue: pd.DataFrame, 
                                             df_datos_campanias: pd.DataFrame,
                                             df_porcentajes: pd.DataFrame,
+                                            df_datos_documento: pd.DataFrame,
                                             diccionario_de_reemplazos: dict):
     ## orden de servicio
     diccionario_de_reemplazos["<<orden_de_servicio>>"] = get_orden_de_servicio()    
@@ -159,7 +160,7 @@ def construir_diccionario_de_datos_documento(df_datos_despliegue: pd.DataFrame,
     
     diccionario_de_reemplazos["<<introduccion_parrafo1>>"] = introduccion_parrafo1(df_datos_campanias = df_datos_campanias, 
                                                                                                                         df_datos_despliegue= df_datos_despliegue)
-    diccionario_de_reemplazos["<<bitacora_electronica_parrafo1>>"] = bitacora_electronica_parrafo1(df_datos_campanias = df_datos_campanias, df_porcentajes = df_porcentajes)
+    diccionario_de_reemplazos["<<bitacora_electronica_parrafo1>>"] = bitacora_electronica_parrafo1(df_datos_despliegue = df_datos_despliegue, df_porcentajes = df_porcentajes)
     diccionario_de_reemplazos["<<fecha_inicio>>"] = get_dia_de_liberacion(df_porcentajes= df_porcentajes)
 
     diccionario_de_reemplazos["<<porcentaje_de_transmision>>"] = get_porcentaje_maximo_de_transmision(df_porcentajes = df_porcentajes)

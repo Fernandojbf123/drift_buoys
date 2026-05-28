@@ -13,22 +13,48 @@ def get_porcentaje_maximo_de_transmision(df_porcentajes: pd.DataFrame) -> str:
     return f"{porcentaje_maximo_de_transmision:.2f}"       
 
 def get_periodo_de_transmision(df_porcentajes: pd.DataFrame) -> str:
-    df = df_porcentajes.copy() 
-    df["fecha_inicio"] = pd.to_datetime(df["fecha_de_inicio"], format="%d-%m-%Y %H:%M:%S", errors="coerce").dt.date
-    df["fecha_final"] = pd.to_datetime(df["fecha_final"], format="%d-%m-%Y %H:%M:%S", errors="coerce").dt.date
+
+    df = df_porcentajes.copy()
+
+    df["fecha_inicio"] = pd.to_datetime(
+        df["fecha_de_inicio"],
+        format="%d-%m-%Y %H:%M:%S",
+        errors="coerce"
+    ).dt.date
+
+    df["fecha_final"] = pd.to_datetime(
+        df["fecha_final"],
+        format="%d-%m-%Y %H:%M:%S",
+        errors="coerce"
+    ).dt.date
+
     df["fecha_final"] = df["fecha_final"].fillna(df["fecha_inicio"])
-    periodos_df = (df[["fecha_inicio", "fecha_final"]].dropna(subset=["fecha_inicio"]).drop_duplicates().sort_values("fecha_inicio"))
+
+    periodos_df = (
+        df[["fecha_inicio", "fecha_final"]]
+        .dropna(subset=["fecha_inicio"])
+        .drop_duplicates()
+        .sort_values("fecha_inicio")
+    )
+
     periodos = []
+
     for _, row in periodos_df.iterrows():
+
         inicio = row["fecha_inicio"].strftime("%d/%m/%Y")
         fin = row["fecha_final"].strftime("%d/%m/%Y")
 
+        periodos.append(f"del {inicio} al {fin}")
+
     if not periodos:
         return ""
+
     if len(periodos) == 1:
         return periodos[0]
+
     if len(periodos) == 2:
         return " y ".join(periodos)
+
     return ", ".join(periodos[:-1]) + " y " + periodos[-1]
 
 def get_dia_de_liberacion(df_porcentajes: pd.DataFrame) -> str: 
