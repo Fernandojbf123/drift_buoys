@@ -29,6 +29,13 @@ def get_fecha_inicio_vigencia(df_datos_despliegue: pd.DataFrame) -> str:
     fecha_inicio_vigencia = timestamp_a_texto_espanol(fecha = fecha_inicio_vigencia, mes_y_anio=False)
     return fecha_inicio_vigencia
 
+def get_dia_inicio_vigencia(df_datos_despliegue: pd.DataFrame) -> int:
+    """
+    Obtiene únicamente el día de la fecha de inicio de vigencia.
+    """
+    fecha_inicio_vigencia = get_fecha_inicio_vigencia(df_datos_despliegue)
+    return fecha_inicio_vigencia.day
+
 def get_fecha_final_vigencia(df_datos_despliegue: pd.DataFrame) -> str:
     fecha_inicio_vigencia = df_datos_despliegue["fecha_inicio_vigencia"].iloc[0]
     fecha_inicio_vigencia = pd.to_datetime(fecha_inicio_vigencia, format= "%d/%m/%Y", errors='coerce')

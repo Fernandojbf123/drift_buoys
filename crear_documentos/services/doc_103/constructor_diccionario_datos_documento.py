@@ -172,6 +172,7 @@ def construir_diccionario_de_datos_documento(df_datos_despliegue: pd.DataFrame,
     
     ## fechas de vigencia
     diccionario_de_reemplazos["<<fecha_inicio_vigencia>>"] = get_fecha_inicio_vigencia(df_datos_despliegue = df_datos_despliegue)
+    diccionario_de_reemplazos["<<dia_inicio_vigencia>>"] = get_dia_inicio_vigencia(df_datos_despliegue = df_datos_despliegue)
     diccionario_de_reemplazos["<<fecha_final_vigencia>>"] = get_fecha_final_vigencia(df_datos_despliegue = df_datos_despliegue)
     
     # fecha de entrega
@@ -180,7 +181,6 @@ def construir_diccionario_de_datos_documento(df_datos_despliegue: pd.DataFrame,
     # seriales de sondas
     seriales_de_sondas = get_seriales_de_sondas(df_datos_despliegue = df_datos_despliegue)
     diccionario_de_reemplazos["<<seriales_de_sondas>>"] = ", ".join([str(serial) for serial in seriales_de_sondas])  # Convierte a string con formato "12345, 67890"
-   
     diccionario_de_reemplazos["<<numero_de_sondas>>"] = get_numero_de_sondas(df_datos_despliegue = df_datos_despliegue) 
     
     ## mes y_año de liberacion
@@ -188,11 +188,10 @@ def construir_diccionario_de_datos_documento(df_datos_despliegue: pd.DataFrame,
     
     diccionario_de_reemplazos["<<introduccion_parrafo1>>"] = introduccion_parrafo1(df_datos_campanias = df_datos_campanias, 
                                                                                                                         df_datos_despliegue= df_datos_despliegue)
-    
     diccionario_de_reemplazos["<<bitacora_electronica_parrafo1>>"] = bitacora_electronica_parrafo1(df_datos_campanias = df_datos_campanias, 
                                                                                                                         df_datos_despliegue= df_datos_despliegue)
     diccionario_de_reemplazos["<<fecha_inicio>>"] = get_dia_de_liberacion(df_datos_campanias = df_datos_campanias)
-    
+
     diccionario_de_reemplazos["<<porcentaje_de_transmision>>"] = get_porcentaje_maximo_de_transmision(df_porcentajes = df_porcentajes)
     
     diccionario_de_reemplazos["<<periodo_de_transmision>>"] = get_periodo_de_transmision(df_porcentajes = df_porcentajes)
@@ -300,24 +299,20 @@ def construir_diccionario_de_reemplazos_para_tablas(df_datos_despliegue: pd.Data
     # 2. Asignar variables
     df_expanded["variable"] = variables * len(df_porcentajes)
 
-    # 3. Fecha inicio / fin van en una columna
+    # 3. Fecha inicio / fin (MANTENER EL TEXTO EN TODAS LAS FILAS)
+    # No borres el contenido de las duplicadas, para que el merge funcione
     df_expanded["fecha_inicio_fin"] = (
         df_expanded["fecha_de_inicio"].astype(str)
         + " / " +
         df_expanded["fecha_final"].astype(str)
     )
 
-    # 4. Métricas repetidas automáticamente
-    df_expanded["cantidad_de_datos_esperados"] = df_expanded["cantidad_de_datos_esperados"]
-    df_expanded["cantidad_de_datos_recibidos"] = df_expanded["cantidad_de_datos_recibidos"]
-
-    # 5. Porcentajes repetidos en ambas columnas (como pediste)
+    # 4. Métricas y 5. Porcentajes (Se mantienen igual)
     df_expanded["porcentaje"] = df_expanded["porcentaje_de_datos_recibidos_mas_interpolados"]
-
     df_expanded["porcentaje_de_transmision"] = df_expanded["porcentaje"]
     df_expanded["porcentaje_de_visualizacion"] = df_expanded["porcentaje"]
 
-    # 6. Tabla final lista para Word
+    # 6. Tabla final
     tabla3 = df_expanded[[
         "serial_de_sonda",
         "fecha_inicio_fin",
@@ -327,9 +322,13 @@ def construir_diccionario_de_reemplazos_para_tablas(df_datos_despliegue: pd.Data
         "porcentaje_de_transmision",
         "porcentaje_de_visualizacion"
     ]]
-           
+            
+    # --- LA CLAVE ESTÁ AQUÍ ---
     opciones_de_tabla.set_detectar_merge(True)
-    opciones_de_tabla.set_columnas_para_merge([0,1])
+    # Al poner [0, 1], la librería buscará textos idénticos en la col 0 y col 1 
+    # y los combinará verticalmente. 
+    opciones_de_tabla.set_columnas_para_merge([0, 1]) 
+
     estilos_de_tabla.set_estilo_de_columna(2, "texto_tablas_justificado")
     estilos_de_tabla.set_estilo_de_columna(3, "texto_tablas_justificado")   
     
@@ -359,7 +358,9 @@ def construir_diccionario_de_reemplazos_para_tablas(df_datos_despliegue: pd.Data
     df_expanded["porcentaje_visualizado"] = df_expanded["porcentaje_de_datos_recibidos_mas_interpolados"]
 
     # 5. Porcentaje NO visualizado
-    df_expanded["porcentaje_no_visualizado"] = 100 - df_expanded["porcentaje_visualizado"].round(2)
+    df_expanded["porcentaje_no_visualizado"] = 100 - df_expanded["porcentaje_visualizado"]
+    
+    df_expanded["porcentaje_no_visualizado"] = df_expanded["porcentaje_no_visualizado"].round(2)
 
     # 6. Tabla final
     tabla4 = df_expanded[[
@@ -371,7 +372,7 @@ def construir_diccionario_de_reemplazos_para_tablas(df_datos_despliegue: pd.Data
     ]]
     
     opciones_de_tabla.set_detectar_merge(True)
-    opciones_de_tabla.set_columnas_para_merge([0,1])
+    opciones_de_tabla.set_columnas_para_merge([0, 1])
     estilos_de_tabla.set_estilo_de_columna(2, "texto_tablas_justificado")
     estilos_de_tabla.set_estilo_de_columna(3, "texto_tablas_justificado")   
     

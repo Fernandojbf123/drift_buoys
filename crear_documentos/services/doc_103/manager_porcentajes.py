@@ -10,19 +10,26 @@ def get_df_porcentajes():
 
 def get_porcentaje_maximo_de_transmision(df_porcentajes: pd.DataFrame) -> str:
     porcentaje_maximo_de_transmision = df_porcentajes["porcentaje_de_datos_recibidos_mas_interpolados"].max()
-    return f"{porcentaje_maximo_de_transmision:.2f}%"       
+    return f"{porcentaje_maximo_de_transmision:.2f}"       
            
+import pandas as pd
+
 def get_periodo_de_transmision(df_porcentajes: pd.DataFrame) -> str:
-
-    df_porcentajes["fecha_inicio"] = pd.to_datetime(df_porcentajes["fecha_de_inicio"], format="%d-%m-%Y %H:%M:%S", errors="coerce")
-    df_porcentajes["fecha_final"] = pd.to_datetime(df_porcentajes["fecha_de_finalizacion"], format="%d-%m-%Y %H:%M:%S", errors="coerce")
-
+    df_porcentajes["fecha_inicio"] = pd.to_datetime(df_porcentajes["fecha_de_inicio"], format="%d-%m-%Y %H:%M:%S", errors="coerce").dt.date
+    df_porcentajes["fecha_final"] = pd.to_datetime(df_porcentajes["fecha_final"], format="%d-%m-%Y %H:%M:%S", errors="coerce").dt.date
+    periodos_unicos = df_porcentajes[["fecha_inicio", "fecha_final"]].drop_duplicates()
     periodos = []
-    for _, row in df_porcentajes.iterrows():
-
+    for _, row in periodos_unicos.iterrows():
         inicio = row["fecha_inicio"].strftime("%d/%m/%Y")
         fin = row["fecha_final"].strftime("%d/%m/%Y")
-
         periodos.append(f"del {inicio} al {fin}")
-
     return " y ".join(periodos)
+
+def get_dia_de_liberacion(df_porcentajes: pd.DataFrame) -> str:
+    df_porcentajes["fecha_de_inicio"] = pd.to_datetime(
+        df_porcentajes["fecha_de_inicio"],
+        format="%d/%m/%Y %H:%M",
+        errors="coerce")
+    fecha_primera = df_porcentajes["fecha_de_inicio"].iloc[0]
+    dia = fecha_primera.day
+    return dia

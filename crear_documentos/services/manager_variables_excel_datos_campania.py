@@ -65,12 +65,3 @@ def get_mes_y_anio_de_liberacion(df_datos_campanias: pd.DataFrame) -> str:
     mes_y_anio_de_liberacion = timestamp_a_texto_espanol(mes_y_anio_de_liberacion, mes_y_anio=True) 
     return mes_y_anio_de_liberacion
 
-def get_dia_de_liberacion(df_datos_campanias: pd.DataFrame) -> str:
-    df = get_fecha_y_hora_de_embarque_y_campania_unicos(df_datos_campanias)
-    df["fecha_hora_de_embarque"] = pd.to_datetime(
-        df["fecha_hora_de_embarque"],
-        format="%d/%m/%Y %H:%M",
-        errors="coerce")
-    fecha_primera = df["fecha_hora_de_embarque"].iloc[0]
-    dia = fecha_primera.day
-    return dia
