@@ -23,16 +23,19 @@ def get_numero_de_sondas(df_datos_despliegue: pd.DataFrame) -> int:
     numero_de_sondas = len(df_datos_despliegue)
     return numero_de_sondas
 
-def get_fecha_inicio_vigencia(df_datos_despliegue: pd.DataFrame) -> str:
+def get_fecha_inicio_vigencia(df_datos_despliegue: pd.DataFrame) -> pd.Timestamp:
+    """Obtiene la fecha de inicio de vigencia como Timestamp."""
     fecha_inicio_vigencia = df_datos_despliegue["fecha_inicio_vigencia"].iloc[0]
-    fecha_inicio_vigencia = pd.to_datetime(fecha_inicio_vigencia, format= "%d/%m/%Y", errors='coerce')
-    fecha_inicio_vigencia = timestamp_a_texto_espanol(fecha = fecha_inicio_vigencia, mes_y_anio=False)
+    fecha_inicio_vigencia = pd.to_datetime(fecha_inicio_vigencia, format="%d/%m/%Y", errors="coerce")
     return fecha_inicio_vigencia
 
+def get_fecha_inicio_vigencia_texto(df_datos_despliegue: pd.DataFrame) -> str:
+    """Obtiene la fecha de inicio de vigencia en texto español."""
+    fecha_inicio_vigencia = get_fecha_inicio_vigencia(df_datos_despliegue)
+    return timestamp_a_texto_espanol(fecha=fecha_inicio_vigencia,mes_y_anio=False)
+
 def get_dia_inicio_vigencia(df_datos_despliegue: pd.DataFrame) -> int:
-    """
-    Obtiene únicamente el día de la fecha de inicio de vigencia.
-    """
+    """Obtiene únicamente el día de la fecha de inicio de vigencia."""
     fecha_inicio_vigencia = get_fecha_inicio_vigencia(df_datos_despliegue)
     return fecha_inicio_vigencia.day
 
