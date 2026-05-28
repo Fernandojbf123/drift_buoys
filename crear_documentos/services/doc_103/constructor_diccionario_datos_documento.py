@@ -134,10 +134,8 @@ def construir_diccionario_agregar_figuras(df_datos_documento: pd.DataFrame, df_d
 ############################ DICCIONARIO DE REEMPLAZOS PARA TEXTO ############################
 def construir_diccionario_de_datos_documento(df_datos_despliegue: pd.DataFrame, 
                                             df_datos_campanias: pd.DataFrame,
-                                            df_datos_documento: pd.DataFrame,
                                             df_porcentajes: pd.DataFrame,
                                             diccionario_de_reemplazos: dict):
-    
     ## orden de servicio
     diccionario_de_reemplazos["<<orden_de_servicio>>"] = get_orden_de_servicio()    
     # fecha de solicitud
@@ -161,8 +159,7 @@ def construir_diccionario_de_datos_documento(df_datos_despliegue: pd.DataFrame,
     
     diccionario_de_reemplazos["<<introduccion_parrafo1>>"] = introduccion_parrafo1(df_datos_campanias = df_datos_campanias, 
                                                                                                                         df_datos_despliegue= df_datos_despliegue)
-    diccionario_de_reemplazos["<<bitacora_electronica_parrafo1>>"] = bitacora_electronica_parrafo1(df_datos_campanias = df_datos_campanias, 
-                                                                                                                        df_datos_despliegue= df_datos_despliegue)
+    diccionario_de_reemplazos["<<bitacora_electronica_parrafo1>>"] = bitacora_electronica_parrafo1(df_datos_campanias = df_datos_campanias, df_porcentajes = df_porcentajes)
     diccionario_de_reemplazos["<<fecha_inicio>>"] = get_dia_de_liberacion(df_porcentajes= df_porcentajes)
 
     diccionario_de_reemplazos["<<porcentaje_de_transmision>>"] = get_porcentaje_maximo_de_transmision(df_porcentajes = df_porcentajes)
@@ -172,12 +169,9 @@ def construir_diccionario_de_datos_documento(df_datos_despliegue: pd.DataFrame,
 ############################# DICCIONARIO DE REEMPLAZOS PARA TABLAS ############################
 # Es probable que acá necesite varios esquemas, dependiendo de la tabla.
 def construir_diccionario_de_reemplazos_para_tablas(df_datos_despliegue: pd.DataFrame, 
-                                                    df_datos_campanias: pd.DataFrame,
-                                                    df_datos_documento: pd.DataFrame,
                                                     df_porcentajes: pd.DataFrame,
                                                     diccionario_de_reemplazos: dict,
                                                     doc: object):
-    
     opciones_de_tabla = OpcionesTabla()
     estilos_de_tabla = EstilosTabla(doc)
     estilos_de_tabla.set_estilo_por_defecto("texto_tablas_centrado")
@@ -192,8 +186,7 @@ def construir_diccionario_de_reemplazos_para_tablas(df_datos_despliegue: pd.Data
     diccionario_de_reemplazos["<<tabla_equipos>>"] = {
         "tabla": tabla1,
         "estilos_de_tabla": estilos_de_tabla,
-        "opciones_de_tabla": opciones_de_tabla
-    }
+        "opciones_de_tabla": opciones_de_tabla}
 
     
     df_datos_despliegue["serial_de_sonda"] = df_datos_despliegue["serial_de_sonda"].astype(int).astype(str)
@@ -250,7 +243,6 @@ def construir_diccionario_de_reemplazos_para_tablas(df_datos_despliegue: pd.Data
         "opciones_de_tabla": opciones_de_tabla
     }
     
-    
     #####################Tabla 3. porcentajes de transmision ##########################
     df_porcentajes["serial_de_sonda"] = df_porcentajes["serial_de_sonda"].astype(str)
 
@@ -278,14 +270,12 @@ def construir_diccionario_de_reemplazos_para_tablas(df_datos_despliegue: pd.Data
             
     opciones_de_tabla.set_detectar_merge(True)
     opciones_de_tabla.set_columnas_para_merge([0, 1]) 
-    
     estilos_de_tabla.set_estilo_de_columna(2, "texto_tablas_justificado")
     estilos_de_tabla.set_estilo_de_columna(3, "texto_tablas_justificado")
     estilos_de_tabla.set_estilo_de_columna(4, "texto_tablas_centrado")
     estilos_de_tabla.set_estilo_de_columna(5, "texto_tablas_centrado")
     estilos_de_tabla.set_estilo_de_columna(6, "texto_tablas_centrado")
     estilos_de_tabla.set_estilo_de_columna(7, "texto_tablas_centrado")
-
 
     diccionario_de_reemplazos["<<tabla_transmision>>"] = {
         "tabla": tabla3,
@@ -295,29 +285,14 @@ def construir_diccionario_de_reemplazos_para_tablas(df_datos_despliegue: pd.Data
     
     #################### Tabla 4. Porcentaje de no visualizacion############################     
     # 1. Expandir filas (serial × variables)
-    df_expanded = (
-        df_porcentajes
-        .loc[df_porcentajes.index.repeat(len(variables))]
-        .copy()
-        .reset_index(drop=True)
-    )
-
-    # 2. Asignar variables
+    df_expanded = (df_porcentajes.loc[df_porcentajes.index.repeat(len(variables))].copy().reset_index(drop=True))
     df_expanded["variable"] = variables * len(df_porcentajes)
-
-    # 3. Métricas base
     df_expanded["cantidad_de_datos_esperados"] = df_expanded["cantidad_de_datos_esperados"]
     df_expanded["cantidad_de_datos_recibidos"] = df_expanded["cantidad_de_datos_recibidos"]
-
-    # 4. Porcentaje visualizado (base)
     df_expanded["porcentaje_visualizado"] = df_expanded["porcentaje_de_datos_recibidos_mas_interpolados"]
-
-    # 5. Porcentaje NO visualizado
     df_expanded["porcentaje_no_visualizado"] = 100 - df_expanded["porcentaje_visualizado"]
-    
     df_expanded["porcentaje_no_visualizado"] = df_expanded["porcentaje_no_visualizado"].round(2)
 
-    # 6. Tabla final
     tabla4 = df_expanded[[
         "serial_de_sonda",
         "variable",
@@ -328,7 +303,7 @@ def construir_diccionario_de_reemplazos_para_tablas(df_datos_despliegue: pd.Data
     
     opciones_de_tabla.set_detectar_merge(True)
     opciones_de_tabla.set_columnas_para_merge([0, 1])
-    estilos_de_tabla.set_estilo_de_columna(1, "texto_tablas_justificado")
+    estilos_de_tabla.set_estilo_de_columna(1, "texto_tablas_centrado")
     estilos_de_tabla.set_estilo_de_columna(2, "texto_tablas_centrado")
     estilos_de_tabla.set_estilo_de_columna(3, "texto_tablas_centrado")
     estilos_de_tabla.set_estilo_de_columna(4, "texto_tablas_centrado")

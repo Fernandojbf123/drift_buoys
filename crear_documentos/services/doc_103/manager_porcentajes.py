@@ -18,15 +18,10 @@ def get_periodo_de_transmision(df_porcentajes: pd.DataFrame) -> str:
     df["fecha_final"] = pd.to_datetime(df["fecha_final"], format="%d-%m-%Y %H:%M:%S", errors="coerce").dt.date
     df["fecha_final"] = df["fecha_final"].fillna(df["fecha_inicio"])
     periodos_df = (df[["fecha_inicio", "fecha_final"]].dropna(subset=["fecha_inicio"]).drop_duplicates().sort_values("fecha_inicio"))
-
     periodos = []
     for _, row in periodos_df.iterrows():
         inicio = row["fecha_inicio"].strftime("%d/%m/%Y")
         fin = row["fecha_final"].strftime("%d/%m/%Y")
-        if row["fecha_inicio"] == row["fecha_final"]:
-            periodos.append(f"el {inicio}")
-        else:
-            periodos.append(f"del {inicio} al {fin}")
 
     if not periodos:
         return ""
@@ -44,15 +39,28 @@ def get_dia_de_liberacion(df_porcentajes: pd.DataFrame) -> str:
     return dia
 
 def get_periodo_transmision_sonda_individual(df_porcentajes: pd.DataFrame, serial_de_sonda: str) -> str:
-
-    df_filtrado = df_porcentajes[df_porcentajes["serial_de_sonda"].astype(str).str.strip() == str(serial_de_sonda).strip()].copy()
-    if df_filtrado.empty:
-        return ""
+    meses_es = {1: "enero", 2: "febrero", 3: "marzo", 4: "abril", 5: "mayo",
+        6: "junio", 7: "julio", 8: "agosto", 9: "septiembre", 10: "octubre",
+        11: "noviembre", 12: "diciembre"}
+    df_filtrado = df_porcentajes[df_porcentajes["serial_de_sonda"].astype(str).str.strip()== str(serial_de_sonda).strip()].copy()
     df_filtrado["fecha_de_inicio"] = pd.to_datetime(df_filtrado["fecha_de_inicio"], format="%d/%m/%Y %H:%M", errors="coerce")
     df_filtrado["fecha_final"] = pd.to_datetime(df_filtrado["fecha_final"], format="%d/%m/%Y %H:%M", errors="coerce")
     fecha_inicio = df_filtrado["fecha_de_inicio"].min()
     fecha_final = df_filtrado["fecha_final"].max()
-    fecha_inicio = fecha_inicio.strftime("%d/%m/%Y")
-    fecha_final = fecha_final.strftime("%d/%m/%Y")
-    
-    return f"del {fecha_inicio} al {fecha_final}"
+    dia_inicio = fecha_inicio.day
+    dia_final = fecha_final.day
+    mes_inicio = fecha_inicio.month
+    mes_final = fecha_final.month
+    anio_inicio = fecha_inicio.year
+    anio_final = fecha_final.year
+    if mes_inicio == mes_final and anio_inicio == anio_final:
+        mes = meses_es[mes_inicio]
+        return f"del {dia_inicio} al {dia_final} de {mes} de {anio_inicio}"
+    elif anio_inicio == anio_final:
+        return (
+            f"del {dia_inicio} de {meses_es[mes_inicio]} "
+            f"al {dia_final} de {meses_es[mes_final]} de {anio_inicio}")
+    else:
+        return (
+            f"del {dia_inicio} de {meses_es[mes_inicio]} de {anio_inicio} "
+            f"al {dia_final} de {meses_es[mes_final]} de {anio_final}")
