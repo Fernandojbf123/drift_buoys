@@ -58,58 +58,110 @@ class Dictfiguras():
             "bookmark": self.bookmark
         }
 
-def construir_diccionario_agregar_figuras(df_datos_documento: pd.DataFrame) -> dict:
+def construir_diccionario_agregar_figuras(
+    df_datos_documento: pd.DataFrame
+) -> dict:
+
     dict_documento = {}
-    varnames_documento = get_varnames_documento(df_datos_documento = df_datos_documento) 
+
+    varnames_documento = get_varnames_documento(
+        df_datos_documento=df_datos_documento
+    )
 
     for ivarname, varname in enumerate(varnames_documento):
-        varvalues = get_variable_documento(df_datos_documento = df_datos_documento, nombre_variable = varname)
+
+        varvalues = get_variable_documento(
+            df_datos_documento=df_datos_documento,
+            nombre_variable=varname
+        )
+
         if varname.startswith("fig_"):
-            dict_temporal = Dictfiguras()  
-            array=[]
+
+            array = []
+
             for ivarvalue, varvalue in enumerate(varvalues):
+
+                dict_temporal = Dictfiguras()
+
                 dict_temporal.set_ruta(varvalue)
-                dict_temporal.set_tamanio(3) 
+                dict_temporal.set_tamanio(3)
                 dict_temporal.set_bookmark(varvalue)
                 dict_temporal.set_titulo("")
-                next_varname = varnames_documento[ivarname+1]
-                
-                if next_varname.startswith("pie_"):
-                    pie_value = get_variable_documento(df_datos_documento = df_datos_documento, nombre_variable = next_varname)
-                    dict_temporal.set_titulo(pie_value[ivarvalue])
-                
+
+                # Validar que exista siguiente variable
+                if ivarname + 1 < len(varnames_documento):
+
+                    next_varname = varnames_documento[ivarname + 1]
+
+                    if next_varname.startswith("pie_"):
+
+                        pie_value = get_variable_documento(
+                            df_datos_documento=df_datos_documento,
+                            nombre_variable=next_varname
+                        )
+
+                        if ivarvalue < len(pie_value):
+                            dict_temporal.set_titulo(
+                                pie_value[ivarvalue]
+                            )
+
                 if varname.lower() == "fig_mapa_de_despliegue".lower():
-                    dict_temporal.set_tamanio(6)  
+                    dict_temporal.set_tamanio(6)
 
                 if varname.lower() == "fig_esquema_de_sonda".lower():
+
                     numero_de_serie = varvalue.split("_")[-1]
-                    titulo = f"Despliegue de sonda oceanográfica {numero_de_serie}"
-                    dict_temporal.set_titulo(titulo)
-                    dict_temporal.set_tamanio(6)  
-                    
-                elif varname.lower() == "fig_pruebas_de_transmision".lower():
-                    numero_de_serie = varvalue.split("_")[-1]
-                    titulo = f"Datos enviados durante las pruebas de laboratorio para la sonda {numero_de_serie}"
+
+                    titulo = (
+                        f"Despliegue de sonda oceanográfica "
+                        f"{numero_de_serie}"
+                    )
+
                     dict_temporal.set_titulo(titulo)
                     dict_temporal.set_tamanio(6)
-                    
+
+                elif varname.lower() == "fig_pruebas_de_transmision".lower():
+
+                    numero_de_serie = varvalue.split("_")[-1]
+
+                    titulo = (
+                        f"Datos enviados durante las pruebas "
+                        f"de laboratorio para la sonda "
+                        f"{numero_de_serie}"
+                    )
+
+                    dict_temporal.set_titulo(titulo)
+                    dict_temporal.set_tamanio(6)
+
                 elif varname.lower() == "fig_pruebas_baterias".lower():
-                    titulo = f"Datos transmitidos del estado de las baterias durante las 24 horas de las pruebas de funcionamiento"
+
+                    titulo = (
+                        "Datos transmitidos del estado de las "
+                        "baterias durante las 24 horas de las "
+                        "pruebas de funcionamiento"
+                    )
+
                     dict_temporal.set_titulo(titulo)
-                    dict_temporal.set_tamanio(6)  
-                
+                    dict_temporal.set_tamanio(6)
+
                 elif varname.lower() == "fig_ubicacion_durante_pruebas".lower():
-                    titulo = f"Mapa con la información con las primeras 24 horas de transmisión de las sondas"
+
+                    titulo = (
+                        "Mapa con la información con las primeras "
+                        "24 horas de transmisión de las sondas"
+                    )
+
                     dict_temporal.set_titulo(titulo)
-                    dict_temporal.set_tamanio(6)  
-                    
+                    dict_temporal.set_tamanio(6)
+
                 elif varname.lower() == "fig_pruebas_de_funcionamiento".lower():
+
                     dict_temporal.set_tamanio(6)
 
                 array.append(dict_temporal.return_dict())
-                
-            dict_documento["<<"+varname+">>"] = array
-            
+
+            dict_documento[f"<<{varname}>>"] = array
+
     return dict_documento
 
 
