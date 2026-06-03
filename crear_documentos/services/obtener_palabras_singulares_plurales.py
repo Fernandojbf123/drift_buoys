@@ -21,6 +21,7 @@ def obtener_palabras_singulares_plurales(es_singular: bool) -> dict:
         "campania_campanias": "campaña" if es_singular else "campañas",
         "embarcacion_embarcaciones": "embarcación" if es_singular else "embarcaciones",
         "liberacion_liberaciones": "liberación" if es_singular else "liberaciones",
+        "plan_planes": "plan" if es_singular else "planes",
         
         # Pronombres
         "cual_cuales": "cual" if es_singular else "cuales",

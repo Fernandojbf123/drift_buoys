@@ -17,9 +17,9 @@ from services.doc_101.descripcion_actividades_previas.descripcion_actividades_pr
 from services.doc_101.descripcion_actividades_previas.descripcion_actividades_previas_parrafo3 import *
 
 from services.doc_101.ejecucion_de_la_campania.ejecucion_de_la_campania_parrafo1 import *
-from services.doc_101.ejecucion_de_la_campania.ejecucion_de_la_campania_parrafo2 import *
-from services.doc_101.ejecucion_de_la_campania.ejecucion_de_la_campania_parrafo3 import *
-from services.doc_101.ejecucion_de_la_campania.ejecucion_de_la_campania_parrafo4 import *
+from crear_documentos.services.doc_101.ejecucion_de_la_campania.ejecucion_de_la_campania_parrafo2 import *
+from crear_documentos.services.doc_101.ejecucion_de_la_campania.ejecucion_de_la_campania_parrafo2 import *
+from crear_documentos.services.doc_101.ejecucion_de_la_campania.ejecucion_de_la_campania_parrafo6 import *
 
 
 ############################ DICCIONARIO DE REEMPLAZOS PARA FIGURAS ############################
@@ -238,7 +238,6 @@ def construir_diccionario_de_reemplazos_para_tablas(df_datos_despliegue: pd.Data
                                                     diccionario_de_reemplazos: dict,
                                                     doc: object):
     
-    
     opciones_de_tabla = OpcionesTabla()
     estilos_de_tabla = EstilosTabla(doc)
     estilos_de_tabla.set_estilo_por_defecto("texto_tablas_centrado")
@@ -254,7 +253,6 @@ def construir_diccionario_de_reemplazos_para_tablas(df_datos_despliegue: pd.Data
         "opciones_de_tabla": opciones_de_tabla
     }
     
-    
     tabla3 = df_datos_despliegue[["serial_de_sonda","latitud_plan","longitud_plan","fecha_y_hora_de_despliegue_maniobra","estado_despliegue"]]
     tabla3.insert(0,"secuencia", range(1, len(tabla3) + 1))
     tabla3["secuencia"] = tabla3["secuencia"].astype(int).astype(str)
@@ -262,13 +260,20 @@ def construir_diccionario_de_reemplazos_para_tablas(df_datos_despliegue: pd.Data
     tabla3["latitud_plan"] = tabla3["latitud_plan"].astype(str)
     tabla3["longitud_plan"] = tabla3["longitud_plan"].astype(str)
     tabla3["fecha_y_hora_de_despliegue_maniobra"] = pd.to_datetime(tabla3["fecha_y_hora_de_despliegue_maniobra"], format = "%d/%m/%Y %H:%M:%S").dt.strftime("%d/%m/%Y %H:%M")
+    
+    
     diccionario_de_reemplazos["<<tabla_maniobra>>"] = {
         "tabla": tabla3,
         "estilos_de_tabla": estilos_de_tabla,
         "opciones_de_tabla": opciones_de_tabla
     }
-
-
+    
+    estilos_de_tabla.set_estilo_de_columna(0, "texto_tablas_centrado")
+    estilos_de_tabla.set_estilo_de_columna(1, "texto_tablas_centrado")   
+    estilos_de_tabla.set_estilo_de_columna(2, "texto_tablas_centrado")
+    estilos_de_tabla.set_estilo_de_columna(3, "texto_tablas_centrado")   
+    estilos_de_tabla.set_estilo_de_columna(4, "texto_tablas_centrado")
+    
 
     
     df_datos_despliegue["serial_de_sonda"] = df_datos_despliegue["serial_de_sonda"].astype(int).astype(str)

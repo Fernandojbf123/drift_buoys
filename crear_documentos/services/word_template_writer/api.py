@@ -213,7 +213,7 @@ def insertar_referencias_cruzadas_en_plantilla(doc, diccionario_de_reemplazos: d
                 # Caso: Múltiples figuras - "Figura X a la Y"
                 aux_insertar_referencia_cruzada(parrafo, primer_bookmark, texto_antes="Figura", mostrar_numero=True)
                 parrafo.add_run(" a la ")
-                aux_insertar_referencia_cruzada(parrafo, ultimo_bookmark, texto_antes="", mostrar_numero=True)
+                aux_insertar_referencia_cruzada(parrafo, ultimo_bookmark, texto_antes="Figura", mostrar_numero=True)
             
             # Avanzar posición actual
             pos_actual = pos_marcador + len(variable_ref)
