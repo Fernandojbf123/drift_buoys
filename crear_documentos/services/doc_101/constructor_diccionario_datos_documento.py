@@ -15,11 +15,14 @@ from services.manager_variables_excel_documento import *
 from services.doc_101.descripcion_actividades_previas.descripcion_actividades_previas_parrafo1 import *
 from services.doc_101.descripcion_actividades_previas.descripcion_actividades_previas_parrafo2 import *
 from services.doc_101.descripcion_actividades_previas.descripcion_actividades_previas_parrafo3 import *
+from services.convertir_coordenadas import *
 
 from services.doc_101.ejecucion_de_la_campania.ejecucion_de_la_campania_parrafo1 import *
-from crear_documentos.services.doc_101.ejecucion_de_la_campania.ejecucion_de_la_campania_parrafo2 import *
-from crear_documentos.services.doc_101.ejecucion_de_la_campania.ejecucion_de_la_campania_parrafo2 import *
-from crear_documentos.services.doc_101.ejecucion_de_la_campania.ejecucion_de_la_campania_parrafo6 import *
+from services.doc_101.ejecucion_de_la_campania.ejecucion_de_la_campania_parrafo2 import *
+from services.doc_101.ejecucion_de_la_campania.ejecucion_de_la_campania_parrafo3 import *
+from services.doc_101.ejecucion_de_la_campania.ejecucion_de_la_campania_parrafo4 import *
+from services.doc_101.ejecucion_de_la_campania.ejecucion_de_la_campania_parrafo5 import *
+from services.doc_101.ejecucion_de_la_campania.ejecucion_de_la_campania_parrafo6 import *
 
 
 ############################ DICCIONARIO DE REEMPLAZOS PARA FIGURAS ############################
@@ -34,8 +37,17 @@ class Dictfiguras():
 
     def set_ruta(self, varvalue: str):
         carpeta = get_ruta_a_carpeta_de_las_figuras(usar_NAS=True)
-        ruta_completa = os.path.join(carpeta, varvalue+".jpg")
-        self.ruta = ruta_completa.strip()
+        extensiones = [".png", ".jpg", ".jpeg", ".tiff", ".tif"]
+        ruta_completa = None
+
+        for ext in extensiones:
+            posible_ruta = os.path.join(carpeta, varvalue + ext)
+            if os.path.exists(posible_ruta):
+                ruta_completa = posible_ruta
+                break
+        if ruta_completa is None:
+            raise FileNotFoundError(f"No se encontró la imagen: {varvalue} con extensiones {extensiones}")
+        self.ruta = ruta_completa  
     
     def set_tamanio(self, tamanio: int):
         self.tamanio = tamanio
@@ -209,10 +221,11 @@ def construir_diccionario_de_datos_documento(df_datos_despliegue: pd.DataFrame,
     diccionario_de_reemplazos["<<ejecucion_de_la_campania_parrafo3>>"] = ejecucion_de_la_campania_parrafo3(df_datos_campanias = df_datos_campanias, 
                                                                                                             df_datos_despliegue= df_datos_despliegue)
     
-    diccionario_de_reemplazos["<<ejecucion_de_la_campania_parrafo4>>"] = ejecucion_de_la_campania_parrafo4(df_datos_campanias = df_datos_campanias, 
-                                                                                                            df_datos_despliegue= df_datos_despliegue)
+    diccionario_de_reemplazos["<<ejecucion_de_la_campania_parrafo4>>"] = ejecucion_de_la_campania_parrafo4(df_datos_campanias = df_datos_campanias)
     
-
+    diccionario_de_reemplazos["<<ejecucion_de_la_campania_parrafo5>>"] = ejecucion_de_la_campania_parrafo5(df_datos_campanias = df_datos_campanias)
+    
+    diccionario_de_reemplazos["<<ejecucion_de_la_campania_parrafo6>>"] = ejecucion_de_la_campania_parrafo6(df_datos_despliegue= df_datos_despliegue)
 
 ############################ DICCIONARIO DE REEMPLAZOS PARA PLANES DE CRUCEROS ############################
 def construir_diccionario_de_reemplazos_para_plan_de_cruceros(df_datos_despliegue: pd.DataFrame, 
@@ -252,15 +265,18 @@ def construir_diccionario_de_reemplazos_para_tablas(df_datos_despliegue: pd.Data
         "estilos_de_tabla": estilos_de_tabla,
         "opciones_de_tabla": opciones_de_tabla
     }
-    
+    estilos_de_tabla.set_estilo_de_columna(0, "texto_tablas_centrado")
+    estilos_de_tabla.set_estilo_de_columna(1, "texto_tablas_centrado")   
+    estilos_de_tabla.set_estilo_de_columna(2, "texto_tablas_centrado")
+    estilos_de_tabla.set_estilo_de_columna(3, "texto_tablas_centrado")   
+
     tabla3 = df_datos_despliegue[["serial_de_sonda","latitud_plan","longitud_plan","fecha_y_hora_de_despliegue_maniobra","estado_despliegue"]]
     tabla3.insert(0,"secuencia", range(1, len(tabla3) + 1))
     tabla3["secuencia"] = tabla3["secuencia"].astype(int).astype(str)
     tabla3["serial_de_sonda"] = tabla3["serial_de_sonda"].astype(int).astype(str)
-    tabla3["latitud_plan"] = tabla3["latitud_plan"].astype(str)
-    tabla3["longitud_plan"] = tabla3["longitud_plan"].astype(str)
+    tabla3["latitud_plan"] = (tabla3["latitud_plan"].astype(float).apply(lambda x: convertir_cualquier_coordenada_a_grados_y_minutos(x, tipo="lat")))
+    tabla3["longitud_plan"] = (tabla3["longitud_plan"].astype(float).apply(lambda x: convertir_cualquier_coordenada_a_grados_y_minutos(x, tipo="lon")))
     tabla3["fecha_y_hora_de_despliegue_maniobra"] = pd.to_datetime(tabla3["fecha_y_hora_de_despliegue_maniobra"], format = "%d/%m/%Y %H:%M:%S").dt.strftime("%d/%m/%Y %H:%M")
-    
     
     diccionario_de_reemplazos["<<tabla_maniobra>>"] = {
         "tabla": tabla3,
@@ -268,12 +284,11 @@ def construir_diccionario_de_reemplazos_para_tablas(df_datos_despliegue: pd.Data
         "opciones_de_tabla": opciones_de_tabla
     }
     
-    estilos_de_tabla.set_estilo_de_columna(0, "texto_tablas_centrado")
+    #estilos_de_tabla.set_estilo_de_columna(0, "texto_tablas_centrado")
     estilos_de_tabla.set_estilo_de_columna(1, "texto_tablas_centrado")   
     estilos_de_tabla.set_estilo_de_columna(2, "texto_tablas_centrado")
     estilos_de_tabla.set_estilo_de_columna(3, "texto_tablas_centrado")   
     estilos_de_tabla.set_estilo_de_columna(4, "texto_tablas_centrado")
-    
 
     
     df_datos_despliegue["serial_de_sonda"] = df_datos_despliegue["serial_de_sonda"].astype(int).astype(str)

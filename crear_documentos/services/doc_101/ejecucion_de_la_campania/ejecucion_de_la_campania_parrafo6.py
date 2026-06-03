@@ -6,7 +6,7 @@ from services.manager_variables_excel_datos_campania import *
 from services.timestamp_a_texto_espanol import *
 from services.obtener_palabras_singulares_plurales import *
 
-def ejecucion_de_la_campania_parrafo6(df_datos_campanias: pd.DataFrame, df_datos_despliegue: pd.DataFrame) -> str:
+def ejecucion_de_la_campania_parrafo6(df_datos_despliegue: pd.DataFrame) -> str:
     
     numero_de_sondas = get_numero_de_sondas(df_datos_despliegue = df_datos_despliegue)
     p= obtener_palabras_singulares_plurales(es_singular = numero_de_sondas == 1)

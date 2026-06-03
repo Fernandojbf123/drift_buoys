@@ -6,9 +6,10 @@ from services.manager_variables_excel_datos_campania import *
 from services.timestamp_a_texto_espanol import *
 from services.obtener_palabras_singulares_plurales import *
 
-def ejecucion_de_la_campania_parrafo5(df_datos_campanias: pd.DataFrame, df_datos_despliegue: pd.DataFrame) -> str:
+def ejecucion_de_la_campania_parrafo5(df_datos_campanias: pd.DataFrame) -> str:
     
     df_unicos= get_fecha_y_hora_de_embarque_y_campania_unicos(df_datos_campanias = df_datos_campanias)
+    campanias_unicas = df_unicos["campania"].unique()
     fechas_campanias_unicos = df_unicos["fecha_hora_de_embarque"].tolist()
     campanias_unicos = df_unicos["campania"].tolist()
     
@@ -16,15 +17,15 @@ def ejecucion_de_la_campania_parrafo5(df_datos_campanias: pd.DataFrame, df_datos
     p = obtener_palabras_singulares_plurales(es_singular = es_una_campania)
    
     texto = ""
-    for i, (fecha_campania, campania) in enumerate(zip(fechas_campanias_unicos, campanias_unicos)):
+    for i, (fecha_campania, campania_unicas) in enumerate(zip(fechas_campanias_unicos, campanias_unicos)):
         
         if i == 0:
-            texto += f"{campania} realizada el {timestamp_a_texto_espanol(fecha_campania, mes_y_anio = False)}"
+            texto += f"{campania_unicas} realizada el {timestamp_a_texto_espanol(fecha_campania, mes_y_anio = False)}"
         
         elif i < len(fechas_campanias_unicos) - 1:
-            texto += f", la campaña {campania} realizada el {timestamp_a_texto_espanol(fecha_campania, mes_y_anio = False)}"       
+            texto += f", la campaña {campania_unicas} realizada el {timestamp_a_texto_espanol(fecha_campania, mes_y_anio = False)}"       
         
         elif i == len(fechas_campanias_unicos) - 1:
-            texto += f" y la campaña {campania} realizada el {timestamp_a_texto_espanol(fecha_campania, mes_y_anio = False)}"
+            texto += f" y la campaña {campania_unicas} realizada el {timestamp_a_texto_espanol(fecha_campania, mes_y_anio = False)}"
             
     return texto

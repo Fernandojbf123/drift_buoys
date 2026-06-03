@@ -34,4 +34,5 @@ def obtener_palabras_singulares_plurales(es_singular: bool) -> dict:
         "fue_fueron": "fue" if es_singular else "fueron",
         "llevo_llevaron": "llevó" if es_singular else "llevaron",
         "dividio_dividieron": "dividió" if es_singular else "dividieron",
+        "enviado_enviados": "enviado" if es_singular else "enviados",
     }
