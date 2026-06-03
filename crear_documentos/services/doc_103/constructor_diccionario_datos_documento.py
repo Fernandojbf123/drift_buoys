@@ -255,7 +255,7 @@ def construir_diccionario_de_reemplazos_para_tablas(df_datos_despliegue: pd.Data
     df_expanded = (df_porcentajes.loc[df_porcentajes.index.repeat(len(variables))].copy().reset_index(drop=True))
     df_expanded["variable"] = variables * len(df_porcentajes)
     df_expanded["fecha_inicio_fin"] = (df_expanded["fecha_de_inicio"].astype(str) + " / " + df_expanded["fecha_final"].astype(str))
-    df_expanded["porcentaje"] = df_expanded["porcentaje_de_datos_recibidos_mas_interpolados"]
+    df_expanded["porcentaje"] = df_expanded["porcentaje_de_datos_recibidos"]
     df_expanded["porcentaje_de_transmision"] = df_expanded["porcentaje"]
     df_expanded["porcentaje_de_visualizacion"] = df_expanded["porcentaje"]
 
@@ -291,7 +291,7 @@ def construir_diccionario_de_reemplazos_para_tablas(df_datos_despliegue: pd.Data
     df_expanded["cantidad_de_datos_esperados"] = df_expanded["cantidad_de_datos_esperados"]
     df_expanded["cantidad_de_datos_recibidos"] = df_expanded["cantidad_de_datos_recibidos"]
     df_expanded["porcentaje_visualizado"] = df_expanded["porcentaje_de_datos_recibidos_mas_interpolados"]
-    df_expanded["porcentaje_no_visualizado"] = 100 - df_expanded["porcentaje_visualizado"]
+    df_expanded["porcentaje_no_visualizado"] = 100 - df_expanded["porcentaje_no_visualizado"]
     df_expanded["porcentaje_no_visualizado"] = df_expanded["porcentaje_no_visualizado"].round(2)
 
     tabla4 = df_expanded[[
