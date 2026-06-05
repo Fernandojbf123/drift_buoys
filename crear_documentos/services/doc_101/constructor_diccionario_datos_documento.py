@@ -250,6 +250,7 @@ def construir_diccionario_de_reemplazos_para_tablas(df_datos_despliegue: pd.Data
     opciones_de_tabla = OpcionesTabla()
     estilos_de_tabla = EstilosTabla(doc)
     estilos_de_tabla.set_estilo_por_defecto("texto_tablas_centrado")
+    
     tabla2 = df_datos_despliegue[["serial_de_sonda","latitud_maniobra","longitud_maniobra"]]
     tabla2.insert(0,"secuencia", range(1, len(tabla2) + 1))
     tabla2["secuencia"] = tabla2["secuencia"].astype(int).astype(str)
@@ -275,9 +276,11 @@ def construir_diccionario_de_reemplazos_para_tablas(df_datos_despliegue: pd.Data
         "estilos_de_tabla": estilos_de_tabla,
         "opciones_de_tabla": opciones_de_tabla
     }
-
     
     df_datos_despliegue["serial_de_sonda"] = df_datos_despliegue["serial_de_sonda"].astype(int).astype(str)
+    opciones_de_tabla4 = OpcionesTabla()
+    estilos_de_tabla4 = EstilosTabla(doc)
+    estilos_de_tabla4.set_estilo_por_defecto("texto_tablas_centrado")
     
     equipos = ["GPS primario",
                 "GPS secundario", 
@@ -320,13 +323,13 @@ def construir_diccionario_de_reemplazos_para_tablas(df_datos_despliegue: pd.Data
     }
     tabla4 = pd.DataFrame(tabla4_dict)
         
-    opciones_de_tabla.set_detectar_merge(True)
-    opciones_de_tabla.set_columnas_para_merge([0,1])
-    estilos_de_tabla.set_estilo_de_columna(2, "texto_tablas_justificado")
-    estilos_de_tabla.set_estilo_de_columna(3, "texto_tablas_justificado")   
+    opciones_de_tabla4.set_detectar_merge(True)
+    opciones_de_tabla4.set_columnas_para_merge([0,1])
+    estilos_de_tabla4.set_estilo_de_columna(2, "texto_tablas_centrado")
+    estilos_de_tabla4.set_estilo_de_columna(3, "texto_tablas_centrado")   
     
     diccionario_de_reemplazos["<<tabla_equipos>>"] = {
         "tabla": tabla4,
-        "estilos_de_tabla": estilos_de_tabla,
-        "opciones_de_tabla": opciones_de_tabla
+        "estilos_de_tabla": estilos_de_tabla4,
+        "opciones_de_tabla": opciones_de_tabla4
     }
