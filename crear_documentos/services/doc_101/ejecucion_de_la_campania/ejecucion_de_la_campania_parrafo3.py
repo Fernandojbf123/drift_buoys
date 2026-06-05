@@ -14,7 +14,7 @@ def ejecucion_de_la_campania_parrafo3(df_datos_campanias: pd.DataFrame, df_datos
     es_una_campania = True if len(df_unicos) == 1 else False
     p = obtener_palabras_singulares_plurales(es_singular = es_una_campania)
     
-    texto = f" {p['la_las']}{p['campania_campanias']} de despliegue de las sondas oceanográficas. Para más detalles sobre {p['la_las']}{p['campania_campanias']} vea el"
+    texto = f" {p['la_las']} {p['campania_campanias']} de despliegue de las sondas oceanográficas. Para más detalles sobre {p['la_las']}{p['campania_campanias']} vea el"
         
     return texto
 

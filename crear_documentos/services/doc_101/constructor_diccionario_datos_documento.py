@@ -24,7 +24,6 @@ from services.doc_101.ejecucion_de_la_campania.ejecucion_de_la_campania_parrafo4
 from services.doc_101.ejecucion_de_la_campania.ejecucion_de_la_campania_parrafo5 import *
 from services.doc_101.ejecucion_de_la_campania.ejecucion_de_la_campania_parrafo6 import *
 
-
 ############################ DICCIONARIO DE REEMPLAZOS PARA FIGURAS ############################
 
 # ESQUEMA DEL DICCIONARIO DE FIGURAS
@@ -71,8 +70,7 @@ class Dictfiguras():
         }
 
 def construir_diccionario_agregar_figuras(
-    df_datos_documento: pd.DataFrame
-) -> dict:
+    df_datos_documento: pd.DataFrame) -> dict:
 
     dict_documento = {}
 
@@ -92,7 +90,7 @@ def construir_diccionario_agregar_figuras(
             array = []
 
             for ivarvalue, varvalue in enumerate(varvalues):
-
+                numero_de_sondas = len(varvalues)
                 dict_temporal = Dictfiguras()
 
                 dict_temporal.set_ruta(varvalue)
@@ -133,7 +131,7 @@ def construir_diccionario_agregar_figuras(
                     dict_temporal.set_tamanio(6)
 
                 elif varname.lower() == "fig_pruebas_de_transmision".lower():
-
+                    
                     numero_de_serie = varvalue.split("_")[-1]
 
                     titulo = (
@@ -159,8 +157,8 @@ def construir_diccionario_agregar_figuras(
                 elif varname.lower() == "fig_ubicacion_durante_pruebas".lower():
 
                     titulo = (
-                        "Mapa con la información con las primeras "
-                        "24 horas de transmisión de las sondas"
+                        "Mapa con la información de las primeras "
+                        f"24 horas de transmisión de las {numero_de_sondas} sondas"
                     )
 
                     dict_temporal.set_titulo(titulo)
@@ -175,7 +173,6 @@ def construir_diccionario_agregar_figuras(
             dict_documento[f"<<{varname}>>"] = array
 
     return dict_documento
-
 
 ############################ DICCIONARIO DE REEMPLAZOS PARA TEXTO ############################
 def construir_diccionario_de_datos_documento(df_datos_despliegue: pd.DataFrame, 
@@ -197,7 +194,7 @@ def construir_diccionario_de_datos_documento(df_datos_despliegue: pd.DataFrame,
     
     # seriales de sondas
     seriales_de_sondas = get_seriales_de_sondas(df_datos_despliegue = df_datos_despliegue)
-    diccionario_de_reemplazos["<<seriales_de_sondas>>"] = ", ".join([str(serial) for serial in seriales_de_sondas])  # Convierte a string con formato "12345, 67890"
+    diccionario_de_reemplazos["<<seriales_de_sondas>>"] = ", ".join([str(serial) for serial in seriales_de_sondas])  
     diccionario_de_reemplazos["<<numero_de_sondas>>"] = get_numero_de_sondas(df_datos_despliegue = df_datos_despliegue) 
     
     ## mes y_año de liberacion
@@ -242,7 +239,6 @@ def construir_diccionario_de_reemplazos_para_plan_de_cruceros(df_datos_despliegu
         rutas.append(ruta)
     diccionario_de_reemplazos["<<external_doc_plan_de_crucero>>"] = rutas
 
-    
 ############################# DICCIONARIO DE REEMPLAZOS PARA TABLAS ############################
 # Es probable que acá necesite varios esquemas, dependiendo de la tabla.
 def construir_diccionario_de_reemplazos_para_tablas(df_datos_despliegue: pd.DataFrame, 
@@ -265,10 +261,6 @@ def construir_diccionario_de_reemplazos_para_tablas(df_datos_despliegue: pd.Data
         "estilos_de_tabla": estilos_de_tabla,
         "opciones_de_tabla": opciones_de_tabla
     }
-    estilos_de_tabla.set_estilo_de_columna(0, "texto_tablas_centrado")
-    estilos_de_tabla.set_estilo_de_columna(1, "texto_tablas_centrado")   
-    estilos_de_tabla.set_estilo_de_columna(2, "texto_tablas_centrado")
-    estilos_de_tabla.set_estilo_de_columna(3, "texto_tablas_centrado")   
 
     tabla3 = df_datos_despliegue[["serial_de_sonda","latitud_plan","longitud_plan","fecha_y_hora_de_despliegue_maniobra","estado_despliegue"]]
     tabla3.insert(0,"secuencia", range(1, len(tabla3) + 1))
@@ -283,12 +275,6 @@ def construir_diccionario_de_reemplazos_para_tablas(df_datos_despliegue: pd.Data
         "estilos_de_tabla": estilos_de_tabla,
         "opciones_de_tabla": opciones_de_tabla
     }
-    
-    #estilos_de_tabla.set_estilo_de_columna(0, "texto_tablas_centrado")
-    estilos_de_tabla.set_estilo_de_columna(1, "texto_tablas_centrado")   
-    estilos_de_tabla.set_estilo_de_columna(2, "texto_tablas_centrado")
-    estilos_de_tabla.set_estilo_de_columna(3, "texto_tablas_centrado")   
-    estilos_de_tabla.set_estilo_de_columna(4, "texto_tablas_centrado")
 
     
     df_datos_despliegue["serial_de_sonda"] = df_datos_despliegue["serial_de_sonda"].astype(int).astype(str)
