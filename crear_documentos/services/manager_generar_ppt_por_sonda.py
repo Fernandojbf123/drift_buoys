@@ -1,3 +1,4 @@
+import psutil
 import win32com.client
 import os
 from pptx import Presentation
@@ -20,12 +21,15 @@ def reemplazar_en_slide(slide, diccionario):
                         if k in cell.text:
                             cell.text = cell.text.replace(k, str(v))
                             
+from copy import deepcopy
+
 def duplicar_slide(ppt, slide):
-    layout = slide.slide_layout
-    new_slide = ppt.slides.add_slide(layout)
+    xml_slides = ppt.slides._sldIdLst
+    new_slide = ppt.slides.add_slide(slide.slide_layout)
 
     for shape in slide.shapes:
-        new_slide.shapes._spTree.append(shape.element)
+        new_slide.shapes._spTree.append(deepcopy(shape.element))
+
     return new_slide
                            
 
@@ -47,43 +51,79 @@ def generar_ppt_por_sondas(ppt, diccionario_sondas):
     return ppt, slides_generados
 
 
+
+import shutil
+import os
+import time
+
+def cerrar_powerpoint_si_existe():
+    for p in psutil.process_iter(["name"]):
+        if p.info.get("name") and "POWERPNT.EXE" in p.info["name"]:
+            p.kill()
+            
 def exportar_ppt(ppt_path, output_folder):
+
+    ppt_path = os.path.abspath(ppt_path)
+
+    staging_ppt = os.path.join(os.getcwd(), "staging.pptx")
+    shutil.copy2(ppt_path, staging_ppt)
+
     ppt_app = win32com.client.Dispatch("PowerPoint.Application")
     ppt_app.Visible = 1
 
-    presentation = ppt_app.Presentations.Open(ppt_path)
+    presentation = None
 
-    os.makedirs(output_folder, exist_ok=True)
+    try:
+        presentation = ppt_app.Presentations.Open(staging_ppt, WithWindow=False)
 
-    pdf_path = os.path.join(output_folder, "reporte_sondas.pdf")
-    presentation.SaveAs(pdf_path, 32)
+        os.makedirs(output_folder, exist_ok=True)
+        pdf_path = os.path.join(output_folder, "reporte_sondas.pdf")
+
+        presentation.SaveAs(pdf_path, 32)
+
+    finally:
+        # 🔥 CIERRE GARANTIZADO
+        if presentation is not None:
+            try:
+                presentation.Close()
+            except:
+                pass
+
+        try:
+            ppt_app.Quit()
+        except:
+            pass
+
+        del presentation
+        del ppt_app
+
+        import gc
+        gc.collect()
+
+        time.sleep(2)
     
-    for i in range(1, presentation.Slides.Count + 1):
-        slide = presentation.Slides(i)
 
-        for j in range(1, slide.Shapes.Count + 1):
-            pass  # placeholder si luego quieres exportar shapes individuales
-
-        img_path = os.path.join(output_folder, f"esquema_sonda_{i}.png")
-        slide.Export(img_path, "PNG")
-
-    presentation.Close()
-    ppt_app.Quit()
-    
-from pptx import Presentation
-
-
-def ppt_sondas(
-    ppt,
-    diccionario_sondas,
-    output_ppt="output.pptx",
-    output_folder="salidas"):
+def ppt_sondas(ppt, diccionario_sondas):
 
     ppt, slides = generar_ppt_por_sondas(ppt, diccionario_sondas)
 
     ruta = get_ruta_a_carpeta_de_guardado_del_documento()
-    output_ppt = os.path.join(ruta, output_ppt) 
+
+    # nombre del archivo de salida (define explícitamente)
+    nombre_archivo = "output.pptx"
+
+    # ruta completa del ppt
+    output_ppt = os.path.join(ruta, nombre_archivo)
+
+    # asegurar que la carpeta exista
+    os.makedirs(os.path.dirname(output_ppt), exist_ok=True)
+
     ppt.save(output_ppt)
 
-    exportar_ppt(output_ppt, output_folder)
-    return output_ppt, output_folder
+    import time
+    time.sleep(2)
+
+    exportar_ppt(output_ppt, ruta)
+
+    return output_ppt, ruta
+
