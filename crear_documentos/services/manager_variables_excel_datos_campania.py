@@ -65,3 +65,12 @@ def get_mes_y_anio_de_liberacion(df_datos_campanias: pd.DataFrame) -> str:
     mes_y_anio_de_liberacion = timestamp_a_texto_espanol(mes_y_anio_de_liberacion, mes_y_anio=True) 
     return mes_y_anio_de_liberacion
 
+def get_fecha_y_hora_sonda_individual(df_datos_despliegue: pd.DataFrame):
+    fechas_horas = pd.to_datetime(
+        df_datos_despliegue["fecha_y_hora_de_despliegue_campo"],
+        format="%d/%m/%Y %H:%M",
+        errors="coerce")
+    fecha = fechas_horas.dt.strftime("%d/%m/%Y").tolist()
+    hora = fechas_horas.dt.strftime("%H:%M").tolist()
+
+    return fecha, hora

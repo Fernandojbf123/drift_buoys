@@ -84,6 +84,14 @@ def get_ruta_a_la_plantilla_de_word():
     """Obtiene un valor de la configuración general de forma dinámica"""
     return configs.configuracion_documentos.ruta_a_la_plantilla_de_word
 
+def get_ruta_a_la_plantilla_de_ppt():
+    """Obtiene un valor de la configuración general de forma dinámica"""
+    return configs.configuracion_documentos.ruta_a_la_plantilla_de_ppt
+
+def get_ruta_a_la_plantilla_de_pruebas():
+    """Obtiene un valor de la configuración general de forma dinámica"""
+    return configs.configuracion_documentos.ruta_a_la_plantilla_de_pruebas
+
 def get_ruta_a_carpeta_de_planes_de_crucero(usar_NAS: bool = False):
     """Obtiene un valor de la configuración general de forma dinámica"""
     ruta_al_NAS = os.getenv("ruta_al_NAS")

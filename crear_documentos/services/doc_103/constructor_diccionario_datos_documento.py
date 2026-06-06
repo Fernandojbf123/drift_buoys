@@ -166,7 +166,9 @@ def construir_diccionario_de_datos_documento(df_datos_despliegue: pd.DataFrame,
     diccionario_de_reemplazos["<<porcentaje_de_transmision>>"] = get_porcentaje_maximo_de_transmision(df_porcentajes = df_porcentajes)
     
     diccionario_de_reemplazos["<<periodo_de_transmision>>"] = get_periodo_de_transmision(df_porcentajes = df_porcentajes)
-   
+    
+    # diccionario_de_reemplazos["<<referencias>>"] = referencias(df_datos_campanias = df_datos_campanias)
+
 ############################# DICCIONARIO DE REEMPLAZOS PARA TABLAS ############################
 # Es probable que acá necesite varios esquemas, dependiendo de la tabla.
 def construir_diccionario_de_reemplazos_para_tablas(df_datos_despliegue: pd.DataFrame, 
@@ -291,7 +293,7 @@ def construir_diccionario_de_reemplazos_para_tablas(df_datos_despliegue: pd.Data
     df_expanded["cantidad_de_datos_esperados"] = df_expanded["cantidad_de_datos_esperados"]
     df_expanded["cantidad_de_datos_recibidos"] = df_expanded["cantidad_de_datos_recibidos"]
     df_expanded["porcentaje_visualizado"] = df_expanded["porcentaje_de_datos_recibidos_mas_interpolados"]
-    df_expanded["porcentaje_no_visualizado"] = 100 - df_expanded["porcentaje_no_visualizado"]
+    df_expanded["porcentaje_no_visualizado"] = 100 - df_expanded["porcentaje_visualizado"]
     df_expanded["porcentaje_no_visualizado"] = df_expanded["porcentaje_no_visualizado"].round(2)
 
     tabla4 = df_expanded[[
