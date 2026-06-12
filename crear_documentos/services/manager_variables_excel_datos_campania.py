@@ -14,7 +14,6 @@ def filtrar_datos_de_campanias(df_datos_campanias: pd.DataFrame, seriales_de_son
     df_datos_campanias = df_datos_campanias[df_datos_campanias["serial_boya"].isin(seriales_de_sondas)]
     return df_datos_campanias
 
-
 # DE LOS DATOS DE LAS MANIOBRAS Y DEL EMBARQUE
 def get_fecha_y_hora_de_maniobra(df_datos_campanias: pd.DataFrame) -> list[pd.Timestamp]:
     fechas_de_maniobra = pd.to_datetime(df_datos_campanias["fecha_y_hora_de_maniobra"], format= "%d/%m/%Y %H:%M", errors='coerce')
