@@ -2,20 +2,20 @@ general_config = {
     
     # 1. Principales editables por el usuario
     # Formato: 'AAAA-MM-DD HH:MM:SS'
-    "fecha_de_inicio_del_analisis": "2026-04-01 00:00:00", # 
-    "fecha_de_fin_del_analisis": "2026-04-30 23:59:59",
+    "fecha_de_inicio_del_analisis": "2026-05-01 00:00:00", # 
+    "fecha_de_fin_del_analisis": "2026-05-31 23:59:59",
     
     # Para 10.1
-    # "carpeta_de_datos_crudos": "C:\\Users\\Atmosfera\\Desktop\\datos_procesados\\doris\\10.1\\202604\\pruebas_lab", # Para pruebas de lab
-    # "carpeta_de_guardado_de_datos_procesados": "C:\\Users\\Atmosfera\\Desktop\\datos_procesados\\doris\\10.1\\202604\\pruebas_lab", # Para pruebas de lab
-    # "carpeta_de_guardado_de_figuras": "C:\\Users\\Atmosfera\\Desktop\\datos_procesados\\doris\\10.1\\202604\\pruebas_lab", # Para pruebas de lab
-    # "variables_a_graficar": ["voltaje"],
+    "carpeta_de_datos_crudos": "C:\\Users\\Atmosfera\\Desktop\\datos_procesados\\doris\\10.1\\202605\\pruebas_lab", # Para pruebas de lab
+    "carpeta_de_guardado_de_datos_procesados": "C:\\Users\\Atmosfera\\Desktop\\datos_procesados\\doris\\10.1\\202605\\pruebas_lab", # Para pruebas de lab
+    "carpeta_de_guardado_de_figuras": "C:\\Users\\Atmosfera\\Desktop\\datos_procesados\\doris\\10.1\\202605\\pruebas_lab", # Para pruebas de lab
+    "variables_a_graficar": ["voltaje"],
     
-    # Para informes 10.3
-    "carpeta_de_datos_crudos": "C:\\Users\\Atmosfera\\Desktop\\datos_crudos\\doris\\todos_los_datos",
-    "carpeta_de_guardado_de_datos_procesados": "C:\\Users\\Atmosfera\\Desktop\\datos_procesados\\doris\\10.3\\202604\\",
-    "carpeta_de_guardado_de_figuras": "C:\\Users\\Atmosfera\\Desktop\\datos_procesados\\doris\\10.3\\202604\\", # Para datos procesados
-    "variables_a_graficar": ["temperatura_mar", "u_corriente", "v_corriente", "rap_corriente", "dir_corriente","voltaje"],
+    # # Para informes 10.3
+    # "carpeta_de_datos_crudos": "C:\\Users\\Atmosfera\\Desktop\\datos_crudos\\doris\\todos_los_datos",
+    # "carpeta_de_guardado_de_datos_procesados": "C:\\Users\\Atmosfera\\Desktop\\datos_procesados\\doris\\10.3\\202604\\",
+    # "carpeta_de_guardado_de_figuras": "C:\\Users\\Atmosfera\\Desktop\\datos_procesados\\doris\\10.3\\202604\\", # Para datos procesados
+    # "variables_a_graficar": ["temperatura_mar", "u_corriente", "v_corriente", "rap_corriente", "dir_corriente","voltaje"],
 
 
      # Lista de seriales de sondas a analizar
@@ -31,8 +31,8 @@ general_config = {
     # "seriales_de_sondas": ["4878319", "4876179", "4912197", "4887980", "4866660"], # Todos los despliegues de marzo
     # "seriales_de_sondas": ["9878221","9878504", "9878225", "9876178","9878203"], # 18 de abril 2026
     # "seriales_de_sondas": ["4878505","9878218"], # 26 de abril 2026
-    "seriales_de_sondas": ["9878221", "9878504", "9878225", "9876178", "9878203", "4878505", "9878218"], # Todos de abril 2026
-    
+    # "seriales_de_sondas": ["9878221", "9878504", "9878225", "9876178", "9878203", "4878505", "9878218"], # Todos de abril 2026
+    "seriales_de_sondas": ["4910070","4912213", "4904116", "4901427","4912212"], # Despliegues de mayo 2026
     # 2. De la carga
     # cada cuanto tiempo debe medir y enviar información la sonda. Opciones: "1h", "0.5h"
     "delta_tiempo": "0.5h",

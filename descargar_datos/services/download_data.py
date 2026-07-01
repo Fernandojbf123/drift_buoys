@@ -1,0 +1,38 @@
+import os
+import subprocess
+from time import sleep
+from services.route_builder import build_download_url
+from services.ejecutar_wget import ejecutar_wget
+
+
+def download_data(carpeta_de_datos_crudos, seriales_de_sondas):
+    
+          
+    print("Seriales de sondas a descargar:", seriales_de_sondas)
+    print("Carpeta de datos crudos:", carpeta_de_datos_crudos)
+    
+    
+    for serial in seriales_de_sondas:
+        url = build_download_url(serial)
+        
+        print(" ")
+        print(f" ******* INICIA DESCARGA {serial} ********")
+        ruta_de_descarga = os.path.join(carpeta_de_datos_crudos, f"datos_Localizacion_{serial}_TOTAL.csv")
+        
+        max_retries = 5  # Número máximo de intentos de descarga
+        for intento in range(max_retries):
+            
+            found_error = ejecutar_wget(url, ruta_de_descarga)
+            if not found_error:
+                print("DESCARGA EXITOSA")
+                break  # Salir del bucle si la descarga fue exitosa
+            else:
+                print(f"ERROR EN LA DESCARGA, REINTENTANDO {intento + 1}/{max_retries}...")
+                sleep(2*intento)  # Esperar antes de reintentar
+            
+            if intento == max_retries - 1:
+                print(f"Error crítico: No se pudo descargar el archivo para el serial {serial} después de {max_retries} intentos.")
+                raise FileExistsError(f"********* DETIENIENDO EL PROCESO *********")
+            
+        print("--------------------------------------------------" )
+        

@@ -51,9 +51,6 @@ def get_resolucion_de_figuras():
 def get_seriales_sondas():
     return _get_config_value("seriales_de_sondas")
 
-def get_delta_tiempo():
-    return _get_config_value("delta_tiempo")
-
 def get_formato_figuras():
     return _get_config_value("formato_de_figuras")
 
