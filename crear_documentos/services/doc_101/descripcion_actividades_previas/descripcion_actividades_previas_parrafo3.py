@@ -48,8 +48,8 @@ def descripcion_actividades_previas_parrafo3(df_datos_campanias: pd.DataFrame, d
     texto += f" implementos adicionales que se utilizaron para las maniobras costa afuera. Es importante mencionar que el derrotero"
     texto += f" de {p['la_las']} {p['embarcacion_embarcaciones']} pudo estar sujeto a cambios de acuerdo a las condiciones atmosféricas el día del zarpe,"
     texto += f" y a las decisiones que el encargado de la embarcación consideró mejor para salvaguardar la seguridad de toda la"
-    texto += f" tripulación. Una vez realizado el plan de crucero de {p['la_las']} {p['campania_campanias']}"
-    texto += f", {p['este_estos']} {p['fue_fueron']} enviados a PEMEX para su autorización, previo a la ejecución de"
+    texto += f" tripulación. Una vez realizado el plan de crucero de {p['la_las']} {p['campania_campanias']},"
+    texto += f" {p['este_estos']} {p['fue_fueron']} {p['enviado_enviados']} a PEMEX para su autorización, previo a la ejecución de"
     texto += f" {p['la_las']} {p['campania_campanias']}, y de acuerdo con lo acordado en el Contrato No. 658225821"
     
     return texto

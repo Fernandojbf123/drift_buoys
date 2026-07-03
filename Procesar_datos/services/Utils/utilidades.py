@@ -5,6 +5,7 @@ import pickle
 from dotenv import load_dotenv
 import netCDF4 as nc
 
+import matplotlib.pyplot as plt
 from matplotlib.figure import Figure
 
 from configs.manager_configuracion import *

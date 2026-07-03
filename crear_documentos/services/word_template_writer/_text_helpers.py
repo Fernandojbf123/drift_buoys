@@ -45,7 +45,6 @@ def replace_text_variables_in_paragraph(paragraph, lista_variables):
     
     return paragraph
 
-
 def replace_text_variables_in_tables(doc, diccionario_de_reemplazos):
     """Reemplaza marcadores de posición en todas las celdas de todas las tablas del documento.
     
