@@ -1,13 +1,13 @@
 
-orden_de_servicio = "263"
-fecha_de_solicitud = "10 de abril de 2026" 
+orden_de_servicio = "299"
+fecha_de_solicitud = "21 de mayo de 2026" 
 
 ruta_al_excel_para_crear_documento = "\\Med_2025-2026\\General\\Sondas_DORIS\\2026_info_documentos_101.xlsx"
-hoja_del_excel_para_crear_documeto = "05" # "01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12" (corresponde a la hoja del excel que se usará para crear los documentos. El número debe ser un string, no un entero, y debe corresponder al nombre de la hoja en el excel maestro. Por ejemplo, si la hoja se llama "1", entonces el valor debe ser "1". Si la hoja se llama "instalacion", entonces el valor debe ser "instalacion".)
+hoja_del_excel_para_crear_documeto = "06" # "01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12" (corresponde a la hoja del excel que se usará para crear los documentos. El número debe ser un string, no un entero, y debe corresponder al nombre de la hoja en el excel maestro. Por ejemplo, si la hoja se llama "1", entonces el valor debe ser "1". Si la hoja se llama "instalacion", entonces el valor debe ser "instalacion".)
 
 # ruta_al_excel_para_crear_documentos_101 = ""
-ruta_a_carpeta_de_las_figuras = "\\Med_2025-2026\\Reportes_Edit\\Reporte_10.1\\202605\\documento"
-ruta_a_carpeta_de_guardado_del_documento = "\\Med_2025-2026\\Reportes_Edit\\Reporte_10.1\\202605\\documento"
+ruta_a_carpeta_de_las_figuras = "\\Med_2025-2026\\Reportes_Edit\\Reporte_10.1\\202606\\documento"
+ruta_a_carpeta_de_guardado_del_documento = "\\Med_2025-2026\\Reportes_Edit\\Reporte_10.1\\202606\\documento"
 
 ruta_al_excel_de_despliegue_de_sondas = "\\Med_2025-2026\\General\\base_de_datos_planes_de_crucero_y_doris.xlsx"
 hoja_del_excel_de_despliegue_de_sondas = "despliegue_doris"
@@ -24,5 +24,5 @@ ruta_a_la_plantilla_de_ppt = "C:\\Users\\Atmosfera\\Documents\\drift_buoys\\crea
 ruta_a_la_plantilla_de_pruebas = "C:\\Users\\Atmosfera\\Documents\\drift_buoys\\crear_documentos\\services\\doc_101\\plantilla_pruebas_de_funcionamiento.docx"
 ruta_a_carpeta_de_planes_de_crucero = "\\Med_2025-2026\\Reportes_Edit\\Planes_de_crucero\\Documentos\\rev" 
 
-ruta_al_excel_de_porcentajes = "\\Med_2025-2026\\Reportes_Edit\\Reporte_10.1\\202605\\documento\\porcentajes_de_las_sondas.xlsx" 
+ruta_al_excel_de_porcentajes = "\\Med_2025-2026\\Reportes_Edit\\Reporte_10.1\\202606\\documento\\porcentajes_de_las_sondas.xlsx" 
 
