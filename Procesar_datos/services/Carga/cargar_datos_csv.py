@@ -62,7 +62,13 @@ def cargar_datos_de_sonda(rutas_de_sondas: list, seriales_de_sondas: list)-> dic
     for iserial, serial in enumerate(seriales_de_sondas):
         ruta_de_sonda = rutas_de_sondas[iserial] # Ruta completa al archivo CSV de la sonda
         try:
-            output_dir[serial] = pd.read_csv(ruta_de_sonda)
+            data = pd.read_csv(ruta_de_sonda)
+            
+            if len(data) == 0:
+                print(f"El archivo CSV de la sonda {serial} está vacío. Se omite esta sonda.")
+                continue
+            
+            output_dir[serial] = data
             
             # Buscar los nombres de columnas de los datos crudos
             nombres_columnas_crudos = output_dir[serial].columns.tolist()

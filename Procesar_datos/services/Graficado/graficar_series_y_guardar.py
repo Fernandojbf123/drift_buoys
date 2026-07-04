@@ -10,7 +10,7 @@ from services.Utils.utilidades import *
 ################################################################################
 
 
-def graficar_series_y_guardar(mostrar_figura:bool=False) -> None:
+def graficar_series_y_guardar(datos: dict, mostrar_figura:bool=False) -> None:
     """
     Descripción:
         Función envoltorio que recorre un diccionario de DataFrames (uno por sonda)
@@ -37,7 +37,7 @@ def graficar_series_y_guardar(mostrar_figura:bool=False) -> None:
     nombre_del_archivo_de_datos_procesados = "datos_interpolados"#get_nombre_archivo_datos_procesados()
     ruta_de_archivo = os.path.join(ruta_a_la_carpeta_de_datos_procesados, nombre_del_archivo_de_datos_procesados)
 
-    datos = cargar_diccionario_pickle(ruta_de_archivo)
+    # datos = cargar_diccionario_pickle(ruta_de_archivo)
 
     seriales_de_sondas = get_seriales_sondas()
     # Recorrer cada sonda en el diccionario

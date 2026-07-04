@@ -12,11 +12,11 @@ def download_data(carpeta_de_datos_crudos, seriales_de_sondas):
     print("Carpeta de datos crudos:", carpeta_de_datos_crudos)
     
     
-    for serial in seriales_de_sondas:
+    for i, serial in enumerate(seriales_de_sondas):
         url = build_download_url(serial)
         
         print(" ")
-        print(f" ******* INICIA DESCARGA {serial} ********")
+        print(f" ******* INICIA DESCARGA {serial} || {i+1}/{len(seriales_de_sondas)} ********  ")
         ruta_de_descarga = os.path.join(carpeta_de_datos_crudos, f"datos_Localizacion_{serial}_TOTAL.csv")
         
         max_retries = 5  # Número máximo de intentos de descarga

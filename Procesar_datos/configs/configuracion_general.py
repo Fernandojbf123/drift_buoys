@@ -5,17 +5,17 @@ general_config = {
     "fecha_de_inicio_del_analisis": "2026-06-01 00:00:00", #
     "fecha_de_fin_del_analisis": "2026-06-30 23:59:59",
 
-    # Para 10.1
-    "carpeta_de_datos_crudos": "C:\\Users\\Atmosfera\\Desktop\\datos_procesados\\doris\\10.1\\202605\\pruebas_lab", # Para pruebas de lab
-    "carpeta_de_guardado_de_datos_procesados": "C:\\Users\\Atmosfera\\Desktop\\datos_procesados\\doris\\10.1\\202605\\pruebas_lab", # Para pruebas de lab
-    "carpeta_de_guardado_de_figuras": "C:\\Users\\Atmosfera\\Desktop\\datos_procesados\\doris\\10.1\\202605\\pruebas_lab", # Para pruebas de lab
-    "variables_a_graficar": ["voltaje"],
+    # # Para 10.1
+    # "carpeta_de_datos_crudos": "C:\\Users\\Atmosfera\\Desktop\\datos_procesados\\doris\\10.1\\202605\\pruebas_lab", # Para pruebas de lab
+    # "carpeta_de_guardado_de_datos_procesados": "C:\\Users\\Atmosfera\\Desktop\\datos_procesados\\doris\\10.1\\202605\\pruebas_lab", # Para pruebas de lab
+    # "carpeta_de_guardado_de_figuras": "C:\\Users\\Atmosfera\\Desktop\\datos_procesados\\doris\\10.1\\202605\\pruebas_lab", # Para pruebas de lab
+    # "variables_a_graficar": ["voltaje"],
     
-    # # Para informes 10.3
-    # "carpeta_de_datos_crudos": "C:\\Users\\Atmosfera\\Desktop\\datos_crudos\\doris\\todos_los_datos",
-    # "carpeta_de_guardado_de_datos_procesados": "C:\\Users\\Atmosfera\\Desktop\\datos_procesados\\doris\\10.3\\202604\\",
-    # "carpeta_de_guardado_de_figuras": "C:\\Users\\Atmosfera\\Desktop\\datos_procesados\\doris\\10.3\\202604\\", # Para datos procesados
-    # "variables_a_graficar": ["temperatura_mar", "u_corriente", "v_corriente", "rap_corriente", "dir_corriente","voltaje"],
+    # Para informes 10.3
+    "carpeta_de_datos_crudos": "C:\\Users\\Atmosfera\\Desktop\\datos_crudos\\doris\\todos_los_datos",
+    "carpeta_de_guardado_de_datos_procesados": "C:\\Users\\Atmosfera\\Desktop\\datos_procesados\\doris\\10.3\\202606\\",
+    "carpeta_de_guardado_de_figuras": "C:\\Users\\Atmosfera\\Desktop\\datos_procesados\\doris\\10.3\\202606\\", # Para datos procesados
+    "variables_a_graficar": ["temperatura_mar", "u_corriente", "v_corriente", "rap_corriente", "dir_corriente","voltaje"],
 
 
      # Lista de seriales de sondas a analizar
@@ -43,9 +43,9 @@ general_config = {
     "nombre_de_la_hoja_con_informacion_de_sondas": "despliegue_doris",
     "cantidad_de_decimales": 4,  # Cantidad de decimales a los que se redondearán los datos
     # Ruta a los datos de batimetría del GOM
-    "ruta_a_datos_batimetria": "C:\\Users\\Atmosfera\\Documents\\programacion\\codigos_python\\bases_de_datos\\batimetria_GEBCO_GOM_2023.nc",
+    "ruta_a_datos_batimetria": "C:\\programacion\\codigos_python\\bases_de_datos\\batimetria_GEBCO_GOM_2023.nc",
      # Ruta a los datos de topografía ETOPO1_Ice_g_gmt4 (se usan para dar los colores de tierra)
-    "ruta_a_datos_topografia": "C:\\Users\\Atmosfera\\Documents\\programacion\\codigos_python\\bases_de_datos\\topografia_ETOPO1_Ice_g_gmt4.nc",
+    "ruta_a_datos_topografia": "C:\\programacion\\codigos_python\\bases_de_datos\\topografia_ETOPO1_Ice_g_gmt4.nc",
 
     # 3. Del guardado
     # Ruta a la carpeta para guardar los datos procesados

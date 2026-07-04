@@ -1,6 +1,5 @@
 import os
 import pandas as pd
-import pptx
 from configs.manager_doc_config import *
 
 # modulo de construccion de diccionarios para templates de word de ezsnake by BelloDev
@@ -334,36 +333,3 @@ def construir_diccionario_de_reemplazos_para_tablas(df_datos_despliegue: pd.Data
         "estilos_de_tabla": estilos_de_tabla4,
         "opciones_de_tabla": opciones_de_tabla4
     }
-
-#############DICCIONARIO DE REEMPLAZOS PARA ESQUEMAS############################
-
-def construir_diccionario_de_reemplazos_para_esquemas(
-        df_datos_despliegue: pd.DataFrame,
-        df_datos_campanias: pd.DataFrame,
-        presentacion_de_esquemas: pptx.Presentation):
-
-    seriales_de_sondas = get_seriales_de_sondas(
-        df_datos_despliegue=df_datos_despliegue)
-
-    fechas, horas = get_fecha_y_hora_sonda_individual(
-        df_datos_despliegue=df_datos_despliegue)
-
-    diccionario_sondas = {}
-
-    for i, serial in enumerate(seriales_de_sondas):
-
-        diccionario_sondas[str(serial)] = {
-            "<<serial_de_sonda>>": serial,
-            "<<campania>>": get_campania(
-                df_datos_campanias=df_datos_campanias),
-            "<<latitud>>": get_lat_plan(
-                df_datos_campanias=df_datos_campanias),
-            "<<longitud>>": get_lon_plan(
-                df_datos_campanias=df_datos_campanias),
-            "<<fecha>>": fechas[i],
-            "<<hora>>": horas[i],
-            "<<mensaje_L1>>": "Maniobra exitosa",
-            "<<mensaje_L2>>": "Despliegue sin inconvenientes"
-        }
-
-    return diccionario_sondas

@@ -11,7 +11,7 @@ from .base.Gra_trayectorias_de_sonda import graficar_trayectorias_de_sonda
 from services.Graficado.base.Gra_dar_formato_a_figuras import *
 ################################################################################
 
-def graficar_mapa_con_posiciones(mostrar_figura: bool = False) -> None:
+def graficar_mapa_de_posiciones(datos: dict, mostrar_figura: bool = False) -> None:
     """
     Grafica un mapa de posiciones geográficas dentro de los límites dados.
     Utiliza la función graficar_mapa_cartopy para crear el mapa base.
@@ -30,7 +30,7 @@ def graficar_mapa_con_posiciones(mostrar_figura: bool = False) -> None:
     ruta_de_archivo = os.path.join(ruta_a_la_carpeta_de_datos_procesados, nombre_del_archivo_de_datos_procesados)
     ruta_al_archivo_de_datos_previos_a_la_fecha_de_estudio = os.path.join(ruta_a_la_carpeta_de_datos_procesados, get_nombre_del_archivo_de_datos_previos_a_la_fecha_de_estudio())
 
-    datos = cargar_diccionario_pickle(ruta_de_archivo) # Son los datos del periodo de vigencia
+    # datos = cargar_diccionario_pickle(ruta_de_archivo) # Son los datos del periodo de vigencia
     
     if get_graficar_trayectorias_pasadas(): # Si se solicita cargar las trayectorias pasadas
         datos_previos_a_la_fecha_de_estudio = cargar_diccionario_pickle(ruta_al_archivo_de_datos_previos_a_la_fecha_de_estudio) # Son los datos previos a la fecha de estudio

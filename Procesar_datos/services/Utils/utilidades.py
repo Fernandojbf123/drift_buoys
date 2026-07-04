@@ -23,36 +23,88 @@ from configs.manager_diccionario_variables import *
 def calcular_porcentaje_de_datos_recibidos(diccionario: dict) -> dict:
     """ Calcula el porcentaje de datos recibidos en un DataFrame."""
     
+    # Seriales que se desean cargar
+    seriales_de_sondas = get_seriales_sondas()
     
-    seriales_de_sondas = list(diccionario.keys()) 
-    fecha_de_inicio = []
-    fecha_final = []
-    cantidad_de_datos_esperados = []
-    cantidad_de_datos_recibidos = []
-    porcentajes = []
+    # Buscar los datos de despliegue de campo en la base de datos de despliegue de sondas
+    ruta_al_excel_de_despliegue_de_sondas = get_ruta_al_excel_de_despliegue_de_sondas()
+    hoja = get_nombre_de_la_hoja_con_informacion_de_sondas()
+    df_despliegue = pd.read_excel(ruta_al_excel_de_despliegue_de_sondas, sheet_name=hoja)
+    df_despliegue["serial_de_sonda"] = df_despliegue["serial_de_sonda"].astype(str)
+    df_despliegue = df_despliegue[df_despliegue["serial_de_sonda"].isin(seriales_de_sondas)]
+    
+    fecha_inicio_array = []
+    fecha_final_array = []
+    cantidad_de_datos_esperados_array=[]
+    cantidad_de_datos_recibidos_array=[]
+    porcentajes_array = []
+    
 
     for iserial, serial in enumerate(seriales_de_sondas):
-        data = diccionario[serial]
-        cantidad_de_datos_esperados.append(len(data))
-        cantidad_de_datos_recibidos.append(data.dropna().shape[0])
-        porcentaje = 0
-
-        fecha_de_inicio.append(data["tspan_rounded"].iloc[0])
-        fecha_final.append(data["tspan_rounded"].iloc[-1])
         
-        if cantidad_de_datos_esperados != 0:
-            porcentaje = round((cantidad_de_datos_recibidos[iserial] / cantidad_de_datos_esperados[iserial]) * 100, 2)
+        fecha_de_inicio = pd.NaT
+        fecha_final = pd.NaT
+        cantidad_de_datos_recibidos = 0
+        cantidad_de_datos_esperados = 0
+        porcentaje = 0
+        
+        try:
+            data = diccionario[serial]
+            
+            # Busco las horas de despliegue en la bitacora
+            sonda_info = df_despliegue[df_despliegue["serial_de_sonda"] == serial]
+            fecha_de_inicio_despliegue = pd.to_datetime(sonda_info["fecha_y_hora_de_primera_medicion"].iloc[0], format="%Y-%m-%d %H:%M")
+            
+            # Busco las fechas de inicio y fin de los datos recibidos dentro del periodo de interés
+            fecha_de_inicio_datos = data["tspan_de_envio"].iloc[0]
+            fecha_final_datos = data["tspan_de_envio"].iloc[-1]
 
-        porcentajes.append(porcentaje)
+            # Ahora elijo las fechas mínimas entre el despliegue y los datos recibidos
+            fecha_de_inicio = min(fecha_de_inicio_despliegue, fecha_de_inicio_datos)
+            fecha_final = fecha_final_datos
+            
+            fecha_de_inicio_redondeada = [fecha_de_inicio.replace(minute=0) if fecha_de_inicio.minute < 30 else fecha_de_inicio.replace(minute=30)]
+            fecha_de_final_redondeada = [fecha_final.replace(minute=0) if fecha_final.minute < 30 else fecha_final.replace(minute=30)]
+            tspan_synth = crear_rango_de_fechas_sintetico(fecha_de_inicio = fecha_de_inicio_redondeada[0], fecha_de_fin = fecha_de_final_redondeada[0], delta_tiempo = get_delta_tiempo())
+        
+            cantidad_de_datos_esperados = len(tspan_synth)
+            cantidad_de_datos_recibidos = len(data)
+            
+            porcentaje = round((cantidad_de_datos_recibidos / cantidad_de_datos_esperados) * 100, 2)
+            
+        
+        except:
+            print(f"No se encontraron datos para la sonda {serial}.")
+            sonda_info = df_despliegue[df_despliegue["serial_de_sonda"] == serial]
+            if sonda_info.empty:
+                print(f"No se encontró información de despliegue para la sonda {serial}.")
+                continue
+            
+            fecha_de_inicio = pd.to_datetime(sonda_info["fecha_y_hora_de_primera_medicion"].iloc[0], format="%Y-%m-%d %H:%M")
+            fecha_de_inicio_redondeada = [fecha_de_inicio.replace(minute=0) if fecha_de_inicio.minute < 30 else fecha_de_inicio.replace(minute=30)]
+            
+            fecha_final = fecha_de_inicio_redondeada[0] + pd.offsets.MonthEnd(0)
+            fecha_final_redondeada = [fecha_final.replace(hour=23).replace(minute=30)]
+            fecha_final = fecha_final_redondeada[0]
+            
+            tspan_synth = crear_rango_de_fechas_sintetico(fecha_de_inicio = fecha_de_inicio_redondeada[0], fecha_de_fin = fecha_final_redondeada[0], delta_tiempo = get_delta_tiempo())
+            cantidad_de_datos_esperados = len(tspan_synth)
+    
+    
+        fecha_inicio_array.append(fecha_de_inicio)
+        fecha_final_array.append(fecha_final)
+        cantidad_de_datos_esperados_array.append(cantidad_de_datos_esperados)
+        cantidad_de_datos_recibidos_array.append(cantidad_de_datos_recibidos)
+        porcentajes_array.append(porcentaje)
 
 
     dic = {
         "serial_de_sonda": seriales_de_sondas,
-        "fecha_de_inicio": fecha_de_inicio,
-        "fecha_final": fecha_final,
-        "cantidad_de_datos_esperados": cantidad_de_datos_esperados,
-        "cantidad_de_datos_recibidos": cantidad_de_datos_recibidos,
-        "porcentaje_de_datos_recibidos": porcentajes
+        "fecha_de_inicio": fecha_inicio_array,
+        "fecha_final": fecha_final_array,
+        "cantidad_de_datos_esperados": cantidad_de_datos_esperados_array,
+        "cantidad_de_datos_recibidos": cantidad_de_datos_recibidos_array,
+        "porcentaje_de_datos_recibidos": porcentajes_array
     }
         
     dataout = pd.DataFrame(dic)
@@ -114,7 +166,11 @@ def cargar_datos_de_batimetria() -> dict:
     }
     
     ruta = get_ruta_a_datos_batimetria()
-        
+    
+    if not os.path.exists(ruta):
+        raise FileNotFoundError(f"No se encontró el archivo de batimetría en la ruta: {ruta}")
+     
+    
     with nc.Dataset(ruta) as data:
         lon = data.variables['lon'][:]
         lat = data.variables['lat'][:]

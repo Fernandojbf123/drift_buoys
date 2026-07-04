@@ -19,10 +19,10 @@ usar_NAS = True # Indica si se quiere usar la ruta al NAS (True) o las rutas rel
 
 #ruta_a_la_plantilla_de_word = "C:\\programacion\\codigos_python\\drift_buoys\\crear_documentos\\services\\doc_103\\plantilla.docx" # CAMBIAR A DISCRECIÓN (EL ARCHIVO VIENE INCLUIDO EN EL PROYECTO)
 # nombre_de_la_plantilla_de_word_103 = "Concepto_10.3_Mediciones_DORIS_plantilla.docx" # CAMBIAR A DISCRECIÓN (EL ARCHIVO VIENE INCLUIDO EN EL PROYECTO)
-ruta_a_la_plantilla_de_word = "C:\\Users\\Atmosfera\\Documents\\drift_buoys\\crear_documentos\\services\\doc_101\\plantilla.docx"
-ruta_a_la_plantilla_de_ppt = "C:\\Users\\Atmosfera\\Documents\\drift_buoys\\crear_documentos\\services\\doc_101\\plantilla_esquemas_doris.pptx"
-ruta_a_la_plantilla_de_pruebas = "C:\\Users\\Atmosfera\\Documents\\drift_buoys\\crear_documentos\\services\\doc_101\\plantilla_pruebas_de_funcionamiento.docx"
+ruta_a_la_plantilla_de_word = "C:\\programacion\\codigos_python\\drift_buoys\\crear_documentos\\services\\doc_101\\plantilla.docx"
+ruta_a_la_plantilla_de_pruebas = "C:\\programacion\\codigos_python\\drift_buoys\\crear_documentos\\services\\doc_101\\plantilla_pruebas_de_funcionamiento.docx"
 ruta_a_carpeta_de_planes_de_crucero = "\\Med_2025-2026\\Reportes_Edit\\Planes_de_crucero\\Documentos\\rev" 
 
 ruta_al_excel_de_porcentajes = "\\Med_2025-2026\\Reportes_Edit\\Reporte_10.1\\202606\\documento\\porcentajes_de_las_sondas.xlsx" 
 
+# ruta_a_la_plantilla_de_ppt = "C:\\programacion\\codigos_python\\drift_buoys\\crear_documentos\\services\\doc_101\\plantilla_esquemas_doris.pptx"
