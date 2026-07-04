@@ -43,7 +43,7 @@ general_config = {
     "nombre_de_la_hoja_con_informacion_de_sondas": "despliegue_doris",
     "cantidad_de_decimales": 4,  # Cantidad de decimales a los que se redondearán los datos
     # Ruta a los datos de batimetría del GOM
-    "ruta_a_datos_batimetria": "C:\\programacion\\codigos_python\\bases_de_datos\\batimetria_GEBCO_GOM_2023.nc",
+    "ruta_a_datos_batimetria": "C:\\Users\\Atmosfera\\Documents\\programacion\\codigos_python\\bases_de_datos\\batimetria_GEBCO_GOM_2023.nc",
      # Ruta a los datos de topografía ETOPO1_Ice_g_gmt4 (se usan para dar los colores de tierra)
     "ruta_a_datos_topografia": "C:\\programacion\\codigos_python\\bases_de_datos\\topografia_ETOPO1_Ice_g_gmt4.nc",
 

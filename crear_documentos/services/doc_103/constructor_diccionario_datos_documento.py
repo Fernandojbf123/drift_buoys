@@ -292,8 +292,8 @@ def construir_diccionario_de_reemplazos_para_tablas(df_datos_despliegue: pd.Data
     df_expanded["variable"] = variables * len(df_porcentajes)
     df_expanded["cantidad_de_datos_esperados"] = df_expanded["cantidad_de_datos_esperados"]
     df_expanded["cantidad_de_datos_recibidos"] = df_expanded["cantidad_de_datos_recibidos"]
-    df_expanded["porcentaje_visualizado"] = df_expanded["porcentaje_de_datos_recibidos_mas_interpolados"]
-    df_expanded["porcentaje_no_visualizado"] = 100 - df_expanded["porcentaje_visualizado"]
+    # df_expanded["porcentaje_visualizado"] = df_expanded["porcentaje_de_datos_recibidos_mas_interpolados"]
+    df_expanded["porcentaje_no_visualizado"] = 100 - df_expanded["porcentaje_de_datos_recibidos"]
     df_expanded["porcentaje_no_visualizado"] = df_expanded["porcentaje_no_visualizado"].round(2)
 
     tabla4 = df_expanded[[

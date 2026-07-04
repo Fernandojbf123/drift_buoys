@@ -9,7 +9,7 @@ def get_df_porcentajes():
     return df_porcentajes
 
 def get_porcentaje_maximo_de_transmision(df_porcentajes: pd.DataFrame) -> str:
-    porcentaje_maximo_de_transmision = df_porcentajes["porcentaje_de_datos_recibidos_mas_interpolados"].max()
+    porcentaje_maximo_de_transmision = df_porcentajes["porcentaje_de_datos_recibidos"].max()
     return f"{porcentaje_maximo_de_transmision:.2f}"       
 
 def get_periodo_de_transmision(df_porcentajes: pd.DataFrame) -> str:
