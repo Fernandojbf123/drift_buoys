@@ -46,12 +46,8 @@ doris_hashes = {
     "4912223": "dGlwb1NlbGVjY2lvbj1UT1RBTCZ2YXJpYWJsZUlkPTk5JnBlcmlvZG89MCZmZWNoYUluaT0wJmZlY2hhRmluPTAmYnVveUlkPTE4Mw==",
     "4909282": "dGlwb1NlbGVjY2lvbj1UT1RBTCZ2YXJpYWJsZUlkPTk5JnBlcmlvZG89MCZmZWNoYUluaT0wJmZlY2hhRmluPTAmYnVveUlkPTE4NA==",
     "4912209": "dGlwb1NlbGVjY2lvbj1UT1RBTCZ2YXJpYWJsZUlkPTk5JnBlcmlvZG89MCZmZWNoYUluaT0wJmZlY2hhRmluPTAmYnVveUlkPTE4Ng==",
-    "4812205": "dGlwb1NlbGVjY2lvbj1UT1RBTCZ2YXJpYWJsZUlkPTk5JnBlcmlvZG89MCZmZWNoYUluaT0wJmZlY2hhRmluPTAmYnVveUlkPTE4Nw==",
-    
-    
+    "4912205": "dGlwb1NlbGVjY2lvbj1UT1RBTCZ2YXJpYWJsZUlkPTk5JnBlcmlvZG89MCZmZWNoYUluaT0wJmZlY2hhRmluPTAmYnVveUlkPTE4Nw==",
 }
-
-
 
 def get_hash(serial):
     """

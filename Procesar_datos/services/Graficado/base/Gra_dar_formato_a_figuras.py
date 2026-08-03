@@ -13,6 +13,7 @@ import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 from matplotlib.axes import Axes
 from matplotlib.ticker import MaxNLocator
+from sympy import isprime
 
 from configs.manager_diccionario_variables import *
 from configs.manager_configuracion import *
@@ -272,23 +273,25 @@ def calcular_xticks(tspan: pd.DatetimeIndex, n_ticks:int =5)-> tuple:
             xlim[1] = fecha_final.normalize() + pd.Timedelta(days=1) + pd.Timedelta(hours=2)
         
         # Try 3 ticks
-        xticks = pd.date_range(start=xlim[0].normalize(), end=tspan[len(tspan)-1], periods=n_ticks).normalize()
+        current_start_date = xlim[0].normalize() 
+        xticks = pd.date_range(start=current_start_date, end=tspan[len(tspan)-1], periods=n_ticks).normalize()
+        
+        es_primo = isprime((fecha_final.normalize()-current_start_date).days) # determina si la cantidad de días entre la fecha inicial y final es un número primo
         
         fin = False
         while fin == False:
-            greaterthaneleven = False # Es una bandera, que indica si alguna vez se pasó el límite de 11 ticks, para evitar un loop infinito. 
             check = np.array([False] * (len(xticks)-2))
             timedelta = xticks[1] - xticks[0]
             for itick in range(1,len(xticks)-1):
                 newdt = xticks[itick+1] - xticks[itick]
                 if newdt != timedelta:
                     n_ticks += 1
-                    if n_ticks >= 11 and greaterthaneleven == False: #Si se alcanza el límite de ticks, se resetea a 3 ticks y se vuelven a calcular los ticks; se activa la bandera
-                        n_ticks = 3
-                        greaterthaneleven = True
-                    elif n_ticks >= 11 and greaterthaneleven == True: # Si se vuelve a llegar al límite de ticks y la bandera está activada. Dará un error para que el usuario ajuste manualmente los ticks o aumente el rango de fechas.
-                        raise ValueError("No se pudo calcular un número adecuado de ticks para el eje X sin exceder el límite de 11 ticks. Considere aumentar el rango de fechas o ajustar manualmente los ticks.")                                            
-                    xticks = pd.date_range(start=xlim[0].normalize(), end=tspan[len(tspan)-1], periods=n_ticks).normalize()
+                    if n_ticks >= 11 and es_primo: # si la cantidad de días es primo, no se puede dividir en partes iguales, entonces inicio los ticks al día siguiente de la fecha inicial y pongo 5 ticks
+                        n_ticks = 5
+                        current_start_date = xlim[0].normalize()+ pd.Timedelta(days=1)
+                        es_primo = isprime(len(pd.date_range(current_start_date, fecha_final.normalize(), freq='D'))) # determina
+                                                   
+                    xticks = pd.date_range(start=current_start_date, end=tspan[len(tspan)-1], periods=n_ticks).normalize()
                     timedelta = xticks[1] - xticks[0]
                     break
                 else:
@@ -296,6 +299,9 @@ def calcular_xticks(tspan: pd.DatetimeIndex, n_ticks:int =5)-> tuple:
             
             if check.all() == True:
                 fin = True
+            
+            if n_ticks >= 11 and not es_primo: # si la cantidad de días es primo, no se puede dividir en partes iguales, entonces inicio los ticks al día siguiente de la fecha inicial y pongo 5 ticks
+                raise ValueError("No se pudo calcular los ticks de manera uniforme. Intente con un rango de fechas diferente o ajuste el número de ticks.")
 
     return xlim, xticks, formato_ticks
 
