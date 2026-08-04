@@ -42,7 +42,7 @@ demo.docx
 
 
 # Configuraciones de cada módulo
-/crear_documentos/configs/configuracion_documentos.py
-/descargar_datos/configs/configuracion_general.py
-/procesar_datos/configs/configuracion_general.py
-/reporte_diario/configs/configuracion_general.py
+crear_documentos/configs/configuracion_documentos.py
+descargar_datos/configs/configuracion_general.py
+procesar_datos/configs/configuracion_general.py
+reporte_diario/configs/configuracion_general.py
