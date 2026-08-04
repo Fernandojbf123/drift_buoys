@@ -25,8 +25,4 @@ def get_variable_documento(df_datos_documento: pd.DataFrame, nombre_variable: st
     if varvalue is None:
         raise ValueError(f"No se encontró la variable '{nombre_variable}' en el DataFrame de datos del documento.")
 
-
-
-
-
 ############################## DEL 10.3 ########################################

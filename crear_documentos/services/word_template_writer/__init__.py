@@ -71,6 +71,7 @@ Dependencias:
 
 # Funciones principales del orquestador (API pública en español)
 from .api import (
+    reemplazar_texto_en_cuadros_de_texto,
     insertar_figuras_en_plantilla,
     insertar_referencias_cruzadas_en_plantilla,
     reemplazar_texto_en_plantilla,
@@ -95,6 +96,7 @@ __all__ = [
     'insertar_figuras_en_plantilla',
     'insertar_referencias_cruzadas_en_plantilla',
     'reemplazar_texto_en_plantilla',
+    'reemplazar_texto_en_cuadros_de_texto',
     'reemplazar_variables_en_tablas',
     'insertar_documento_externo_en_plantilla',
     'rellenar_tablas_en_plantilla',
