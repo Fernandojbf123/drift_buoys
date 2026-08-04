@@ -271,8 +271,8 @@ def construir_diccionario_de_reemplazos_para_tablas(df_datos_despliegue: pd.Data
     tabla2.insert(0,"secuencia", range(1, len(tabla2) + 1))
     tabla2["secuencia"] = tabla2["secuencia"].astype(int).astype(str)
     tabla2["serial_de_sonda"] = tabla2["serial_de_sonda"].astype(int).astype(str)
-    tabla2["latitud_maniobra"] = tabla2["latitud_maniobra"].astype(str)
-    tabla2["longitud_maniobra"] = tabla2["longitud_maniobra"].astype(str)
+    tabla2["latitud_maniobra"] = (tabla2["latitud_maniobra"].astype(float).apply(lambda x: convertir_cualquier_coordenada_a_grados_y_minutos(x, tipo="lat")))
+    tabla2["longitud_maniobra"] = (tabla2["longitud_maniobra"].astype(float).apply(lambda x: convertir_cualquier_coordenada_a_grados_y_minutos(x, tipo="lon")))
     diccionario_de_reemplazos["<<tabla_plan>>"] = {
         "tabla": tabla2,
         "estilos_de_tabla": estilos_de_tabla,

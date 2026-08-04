@@ -6,7 +6,7 @@ ruta_al_excel_para_crear_documento = "\\Med_2025-2026\\General\\Sondas_DORIS\\20
 hoja_del_excel_para_crear_documeto = "07" # "01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12" (corresponde a la hoja del excel que se usará para crear los documentos. El número debe ser un string, no un entero, y debe corresponder al nombre de la hoja en el excel maestro. Por ejemplo, si la hoja se llama "1", entonces el valor debe ser "1". Si la hoja se llama "instalacion", entonces el valor debe ser "instalacion".)
 
 # ruta_al_excel_para_crear_documentos_103 = ""
-ruta_a_carpeta_de_las_figuras = "\\Med_2025-2026\\Reportes_Edit\\Reporte_10.3\\202606\\documento"
+ruta_a_carpeta_de_las_figuras = "\\Med_2025-2026\\Reportes_Edit\\Reporte_10.3\\202607\\documento"
 ruta_a_carpeta_de_guardado_del_documento = "\\Med_2025-2026\\Reportes_Edit\\Reporte_10.3\\202607\\documento"
 
 ruta_al_excel_de_despliegue_de_sondas = "\\Med_2025-2026\\General\\base_de_datos_planes_de_crucero_y_doris.xlsx"

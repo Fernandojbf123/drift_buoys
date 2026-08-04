@@ -77,7 +77,7 @@ def main() -> int:
         # primer día del mes siguiente
         fecha_para_nombre = (fecha_inicio_vigencia + pd.DateOffset(months=1)).replace(day=1)
         date_part = fecha_para_nombre.strftime("%Y%m%d")
-        nombre_salida = f"ASM-CICESE-Concepto_10.3_{date_part}_00_PRUEBA.docx"
+        nombre_salida = f"ASM-CICESE-Concepto_10.3_{date_part}_00.docx"
         guardar_documento(doc, nombre_archivo=nombre_salida)
 
         logging.info(f"Documento guardado: {nombre_salida}")
