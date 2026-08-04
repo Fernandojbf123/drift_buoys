@@ -46,7 +46,7 @@ general_config = {
     # Ruta a los datos de batimetría del GOM
     "ruta_a_datos_batimetria": "C:\\Users\\Atmosfera\\Documents\\programacion\\codigos_python\\bases_de_datos\\batimetria_GEBCO_GOM_2023.nc",
      # Ruta a los datos de topografía ETOPO1_Ice_g_gmt4 (se usan para dar los colores de tierra)
-    "ruta_a_datos_topografia": "C:\\programacion\\codigos_python\\bases_de_datos\\topografia_ETOPO1_Ice_g_gmt4.nc",
+    "ruta_a_datos_topografia": "C:\\Users\\Atmosfera\\Documents\\programacion\\codigos_python\\bases_de_datos\\topografia_ETOPO1_Ice_g_gmt4.nc",
 
     # 3. Del guardado
     # Ruta a la carpeta para guardar los datos procesados
