@@ -5,6 +5,13 @@
 __pycache__/
 *.py[cod]
 
+
+# Configuraciones de cada módulo
+crear_documentos/configs/configuracion_documentos.py
+descargar_datos/configs/configuracion_general.py
+Procesar_datos/configs/configuracion_general.py
+reporte_diario/configs/configuracion_general.py
+
 # Archivos de configuración de usuario
 *.env
 *.env.*
@@ -40,9 +47,3 @@ demo.docx
 ~*.tmp
 ~*.xlsx
 
-
-# Configuraciones de cada módulo
-crear_documentos/configs/configuracion_documentos.py
-descargar_datos/configs/configuracion_general.py
-procesar_datos/configs/configuracion_general.py
-reporte_diario/configs/configuracion_general.py
