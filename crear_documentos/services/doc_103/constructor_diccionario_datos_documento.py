@@ -115,7 +115,7 @@ def construir_diccionario_agregar_figuras(df_datos_documento: pd.DataFrame, df_d
                     periodo = get_periodo_transmision_sonda_individual(df_porcentajes=df_porcentajes, serial_de_sonda= str(numero_de_serie))
 
                     titulo = ("Series de tiempo de temperatura, componentes u y v, rapidez y dirección "
-                        f"de la sonda oceanográfica. "
+                        f"de la sonda oceanográfica {numero_de_serie}. "
                         f"El periodo va {periodo}.")
 
                     dict_temporal.set_titulo(titulo)

@@ -34,7 +34,7 @@ general_config = {
     #"seriales_de_sondas": ["9878221", "9878504", "9878225", "9876178", "9878203", "4878505", "9878218"], # Todos de abril 2026
     # "seriales_de_sondas": ["4910070","4912213", "4904116", "4901427","4912212"], # 26 de mayo  2026
     # "seriales_de_sondas" : ["4857577", "4909282", "4912199", "4912171", "4907604"], # 27 de junio  2026
-    "seriales_de_sondas" : ["4912205","4912209", "4909282","4912223","4912208"], # 20 de julio  2026
+    "seriales_de_sondas" : ["4912205","4912209", "9909282","4912223","4912208"], # 20 de julio  2026
     
     # 2. De la carga
     # cada cuanto tiempo debe medir y enviar información la sonda. Opciones: "1h", "0.5h"
