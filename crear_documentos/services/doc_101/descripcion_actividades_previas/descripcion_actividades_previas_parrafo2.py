@@ -14,7 +14,7 @@ def descripcion_actividades_previas_parrafo2(df_datos_campanias: pd.DataFrame, d
     p = obtener_palabras_singulares_plurales(es_singular = es_una_campania)
     
     
-    texto = f"Las actividades previas a {articulo} {palabra_campania} de liberación, comenzaron una vez que PEMEX proporcionó"
+    texto = f"Las actividades previas a {articulo} {palabra_campania} de liberación comenzaron una vez que PEMEX proporcionó"
     texto += f" al personal de ASM-CICESE las coordenadas para el despliegue de las {numero_de_sondas} sondas oceanográficas,"
     texto += f" diseñadas conforme a las necesidades específicas de PEMEX. Previo al despliegue de las sondas se realizaron las"
     texto += f" actividades determinadas de acuerdo al plan de trabajo del personal y, en la medida de lo posible, se consideraron"
