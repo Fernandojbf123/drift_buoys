@@ -276,6 +276,89 @@ def reemplazar_texto_en_plantilla(doc, diccionario_de_reemplazos):
     msg = "Se agregaron los textos al documento."
     print(msg)
 
+    
+def reemplazar_texto_en_cuadros_de_texto(doc, diccionario_de_reemplazos: dict):
+    """Reemplaza marcadores dentro de cuadros de texto en la plantilla."""
+
+    variables_texto = {
+        k: v for k, v in diccionario_de_reemplazos.items()
+        if "fig" not in k
+        and "ref" not in k
+        and "tabla" not in k
+        and "external_doc" not in k
+    }
+
+    def localname(tag: str) -> str:
+        return tag.split('}')[-1] if '}' in tag else tag
+
+    def iter_textbox_paragraphs(element):
+        for node in element.iter():
+            if localname(node.tag) != 'txbxContent':
+                continue
+            for paragraph in node.iter():
+                if localname(paragraph.tag) == 'p':
+                    yield paragraph
+
+    def textbox_parts():
+        seen_parts = set()
+
+        # Document body and headers/footers
+        yield doc.element
+        seen_parts.add(getattr(doc.element, 'partname', None))
+
+        for section in doc.sections:
+            header = getattr(section.header, '_element', None)
+            footer = getattr(section.footer, '_element', None)
+            for part in (header, footer):
+                if part is None:
+                    continue
+                part_name = getattr(part, 'partname', None)
+                if part_name not in seen_parts:
+                    seen_parts.add(part_name)
+                    yield part
+
+        # Additionally include all package parts that contain txbxContent
+        for part in doc.part.package.parts:
+            if not hasattr(part, '_element'):
+                continue
+            part_name = str(part.partname)
+            if part_name in seen_parts:
+                continue
+            if any(keyword in part_name for keyword in ("header", "footer", "document.xml")):
+                if 'txbxContent' in part._element.xml:
+                    seen_parts.add(part_name)
+                    yield part._element
+
+    reemplazos = 0
+
+    for part in textbox_parts():
+        for paragraph in iter_textbox_paragraphs(part):
+            text_nodes = [node for node in paragraph.iter() if localname(node.tag) == 't']
+            if not text_nodes:
+                continue
+
+            texto_original = ''.join(node.text or '' for node in text_nodes)
+            if not texto_original:
+                continue
+
+            texto_nuevo = texto_original
+            reemplazos_en_parrafo = 0
+
+            for key, dato in variables_texto.items():
+                valor = str(dato[0]) if isinstance(dato, list) and dato else str(dato)
+                if key in texto_nuevo:
+                    ocurrencias = texto_nuevo.count(key)
+                    texto_nuevo = texto_nuevo.replace(key, valor)
+                    reemplazos_en_parrafo += ocurrencias
+
+            if texto_nuevo != texto_original:
+                first_t = text_nodes[0]
+                first_t.text = texto_nuevo
+                for t_node in text_nodes[1:]:
+                    t_node.text = ""
+                reemplazos += reemplazos_en_parrafo
+
+    print(f"Se reemplazaron las variables de la portada")
 
 def insertar_documento_externo_en_plantilla(doc, diccionario_de_reemplazos):
     """Inserta uno o más documentos Word externos en la plantilla.

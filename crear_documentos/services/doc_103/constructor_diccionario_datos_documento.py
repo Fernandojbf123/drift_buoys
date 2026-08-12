@@ -5,7 +5,6 @@ from configs.manager_doc_config import *
 # modulo de construccion de diccionarios para templates de word de ezsnake by BelloDev
 from services.word_template_writer import *
 
-
 # Managers de variables de excel
 from services.manager_variables_excel_datos_campania import *
 from services.manager_variables_excel_datos_despliegue import *
@@ -116,7 +115,7 @@ def construir_diccionario_agregar_figuras(df_datos_documento: pd.DataFrame, df_d
                     periodo = get_periodo_transmision_sonda_individual(df_porcentajes=df_porcentajes, serial_de_sonda= str(numero_de_serie))
 
                     titulo = ("Series de tiempo de temperatura, componentes u y v, rapidez y dirección "
-                        f"de la sonda oceanográfica. "
+                        f"de la sonda oceanográfica {numero_de_serie}. "
                         f"El periodo va {periodo}.")
 
                     dict_temporal.set_titulo(titulo)
@@ -132,13 +131,27 @@ def construir_diccionario_agregar_figuras(df_datos_documento: pd.DataFrame, df_d
     
 
 ############################ DICCIONARIO DE REEMPLAZOS PARA TEXTO ############################
+
+def construir_diccionario_de_portada(df_datos_despliegue: pd.DataFrame, 
+                                    df_datos_campanias: pd.DataFrame,
+                                    df_datos_documento: pd.DataFrame,
+                                    diccionario_de_reemplazos: dict):
+    # seriales de sondas
+    seriales_de_sondas = get_seriales_de_sondas(df_datos_despliegue = df_datos_despliegue)
+    diccionario_de_reemplazos["<<seriales_de_sondas>>"] = ", ".join([str(serial) for serial in seriales_de_sondas])  
+    diccionario_de_reemplazos["<<fecha_inicio_vigencia_portada>>"] = (get_fecha_inicio_vigencia_portada(df_datos_despliegue = df_datos_despliegue))
+    diccionario_de_reemplazos["<<mes_anio_portada>>"] = get_mes_anio_portada(df_datos_despliegue = df_datos_despliegue)
+    diccionario_de_reemplazos["<<orden_de_servicio>>"] = get_orden_de_servicio_103()   
+    diccionario_de_reemplazos["<<fecha_final_vigencia>>"] = get_fecha_final_vigencia(df_datos_despliegue = df_datos_despliegue)
+    
 def construir_diccionario_de_datos_documento(df_datos_despliegue: pd.DataFrame, 
                                             df_datos_campanias: pd.DataFrame,
                                             df_porcentajes: pd.DataFrame,
                                             df_datos_documento: pd.DataFrame,
                                             diccionario_de_reemplazos: dict):
+   
     ## orden de servicio
-    diccionario_de_reemplazos["<<orden_de_servicio>>"] = get_orden_de_servicio()    
+    diccionario_de_reemplazos["<<orden_de_servicio>>"] = get_orden_de_servicio_103()    
     # fecha de solicitud
     diccionario_de_reemplazos["<<fecha_de_solicitud>>"] = get_fecha_de_solicitud()    
     

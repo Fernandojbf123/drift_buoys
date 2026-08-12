@@ -11,7 +11,7 @@ def ejecucion_de_la_campania_parrafo1(df_datos_campanias: pd.DataFrame, df_datos
     
     p = obtener_palabras_singulares_plurales(es_singular = es_una_campania)
     
-    texto = f"De acuerdo a lo anterior, la ejecución de {p["la_las"]} {p["campania_campanias"]} de liberación siguió un"
+    texto = f"De acuerdo con lo anterior, la ejecución de {p['la_las']} {p['campania_campanias']} de liberación siguió un"
     texto += " procedimiento seguro en todas las actividades que involucran la travesía y las maniobras del despliegue"
     
     return texto
