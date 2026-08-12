@@ -1,3 +1,4 @@
+import os
 from pathlib import Path
 import time
 import gc
@@ -5,56 +6,51 @@ from PIL import ImageGrab
 import win32com.client as win32
 import re
 
+"""
+excel_a_png.py
 
-def _obtener_serial_del_csv(archivo_csv):
-    archivo_csv = Path(archivo_csv)
+Convierte uno o varios archivos CSV en imágenes PNG.
 
-    # 1) Intentar extraerlo del nombre del archivo
-    match = re.search(
-        r"prueba_en_tierra[_-]*(?P<serial>.+?)(?:_TOTAL)?$",
-        archivo_csv.stem,
-        flags=re.I,
-    )
-    if match:
-        return match.group("serial").strip().replace(" ", "_")
+Requisitos:
+    pip install pywin32 pillow
 
-    # 2) Fallback: intentar leer el CSV y buscar una columna con "serial" o "sonda"
-    try:
-        import pandas as pd
+Requiere Microsoft Excel instalado.
+"""
 
-        df = pd.read_csv(archivo_csv, nrows=5)
-        for col in df.columns:
-            nombre_col = str(col).lower()
-            if "serial" in nombre_col or "sonda" in nombre_col:
-                for valor in df[col].dropna().astype(str).tolist():
-                    if valor:
-                        return valor.strip().replace(" ", "_")
-    except Exception:
-        pass
-
-    return None
+# ==========================================================
+# Funciones internas
+# ==========================================================
 
 def _abrir_excel(visible=False):
-    excel = win32.gencache.EnsureDispatch("Excel.Application")
+    excel = win32.Dispatch("Excel.Application")
     excel.Visible = visible
     excel.DisplayAlerts = False
-    excel.ScreenUpdating = False
-    excel.EnableEvents = False
     return excel
 
 
 def _formatear_hoja(hoja):
+    """
+    Ajusta formato de la hoja.
+    """
+
     hoja.Cells.Font.Name = "Calibri"
     hoja.Cells.Font.Size = 18
-    hoja.Cells.HorizontalAlignment = -4108
+
+    hoja.Cells.HorizontalAlignment = -4108   # xlCenter
     hoja.Cells.VerticalAlignment = -4108
+
     hoja.Cells.WrapText = False
+
     hoja.Columns.AutoFit()
     hoja.Rows.AutoFit()
 
-
 def _obtener_rango_utilizado(hoja, max_filas=None):
+    """
+    Devuelve el rango utilizado o solo las primeras max_filas.
+    """
+
     rango = hoja.UsedRange
+
     ultima_fila = rango.Rows.Count
     ultima_columna = rango.Columns.Count
 
@@ -66,64 +62,53 @@ def _obtener_rango_utilizado(hoja, max_filas=None):
         hoja.Cells(ultima_fila, ultima_columna)
     )
 
-
 def _copiar_rango_como_imagen(rango):
+    """
+    Copia el rango al portapapeles como imagen.
+    """
     rango.CopyPicture(Appearance=1, Format=2)
 
 
 def _guardar_portapapeles_png(ruta_png, espera=0.8):
+    """
+    Guarda la imagen del portapapeles.
+    """
+
     time.sleep(espera)
 
     imagen = ImageGrab.grabclipboard()
+
     if imagen is None:
         raise RuntimeError("No fue posible obtener la imagen del portapapeles.")
 
-    ruta_png.parent.mkdir(parents=True, exist_ok=True)
     imagen.save(ruta_png)
 
-def lista_csv_a_png(
-    lista_csv,
+
+# ==========================================================
+# Funciones públicas
+# ==========================================================
+
+def csv_a_png(
+    archivo_csv,
     carpeta_salida=None,
     visible=False,
-    max_filas=None
+    max_filas=None,
+    nombre_salida=None
 ):
-
     """
-    Convierte una lista de CSV en PNG.
+    Convierte un CSV en una imagen PNG.
 
     Parameters
     ----------
-    lista_csv : iterable
+    archivo_csv : str | Path
     carpeta_salida : str | Path | None
     visible : bool
-    max_filas : int | None
+
     Returns
     -------
-    list[Path]
+    Path
+        Ruta del PNG creado.
     """
-
-    resultados = []
-
-    
-    for archivo in lista_csv:
-        resultados.append(csv_a_png(
-        archivo,
-        carpeta_salida=carpeta_salida,
-        visible=visible,
-        max_filas=max_filas
-    )
-)
-    return resultados
-
-def csv_a_png(archivo_csv, carpeta_salida=None, visible=False, max_filas=None):
-    # Soporta un solo archivo o una lista de archivos
-    if isinstance(archivo_csv, (list, tuple, set)):
-        return lista_csv_a_png(
-            list(archivo_csv),
-            carpeta_salida=carpeta_salida,
-            visible=visible,
-            max_filas=max_filas,
-        )
 
     archivo_csv = Path(archivo_csv)
 
@@ -134,65 +119,31 @@ def csv_a_png(archivo_csv, carpeta_salida=None, visible=False, max_filas=None):
 
     carpeta_salida.mkdir(exist_ok=True, parents=True)
 
-    serial = _obtener_serial_del_csv(archivo_csv)
-    nombre_base = f"prueba_de_transmision_{serial}" if serial else f"prueba_de_transmision_{archivo_csv.stem}"
-    ruta_png = carpeta_salida / f"{nombre_base}.png"
+    ruta_png = os.path.join(carpeta_salida, nombre_salida)
 
-    excel = None
-    libro = None
-    hoja = None
-    rango = None
+    excel = _abrir_excel(visible)
 
     try:
-        excel = win32.gencache.EnsureDispatch("Excel.Application")
-        excel.Visible = visible
-        excel.DisplayAlerts = False
-        excel.ScreenUpdating = False
-        excel.EnableEvents = False
 
         libro = excel.Workbooks.Open(str(archivo_csv.resolve()))
+
         hoja = libro.Worksheets(1)
 
-        hoja.Cells.Font.Name = "Calibri"
-        hoja.Cells.Font.Size = 18
-        hoja.Cells.HorizontalAlignment = -4108
-        hoja.Cells.VerticalAlignment = -4108
-        hoja.Cells.WrapText = False
-        hoja.Columns.AutoFit()
-        hoja.Rows.AutoFit()
+        _formatear_hoja(hoja)
 
-        rango = hoja.UsedRange
-        ultima_fila = rango.Rows.Count
-        ultima_columna = rango.Columns.Count
+        rango = _obtener_rango_utilizado(
+            hoja,
+            max_filas=max_filas
+        )
+        _copiar_rango_como_imagen(rango)
 
-        if max_filas is not None:
-            ultima_fila = min(max_filas, ultima_fila)
+        _guardar_portapapeles_png(ruta_png)
 
-        rango = hoja.Range(hoja.Cells(1, 1), hoja.Cells(ultima_fila, ultima_columna))
-        rango.CopyPicture(Appearance=1, Format=2)
-
-        time.sleep(0.8)
-        imagen = ImageGrab.grabclipboard()
-        if imagen is None:
-            raise RuntimeError("No fue posible obtener la imagen del portapapeles.")
-
-        ruta_png.parent.mkdir(parents=True, exist_ok=True)
-        imagen.save(ruta_png)
+        libro.Close(False)
 
     finally:
-        try:
-            if libro is not None:
-                libro.Close(False)
-        except Exception:
-            pass
-
-        try:
-            if excel is not None:
-                excel.Quit()
-        except Exception:
-            pass
-
-        gc.collect()
-        time.sleep(0.5)
+        excel.Quit()
 
     return ruta_png
+
+
