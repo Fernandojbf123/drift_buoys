@@ -4,8 +4,35 @@ import gc
 from PIL import ImageGrab
 import win32com.client as win32
 import re
-from pathlib import Path
-import time
+
+
+def _obtener_serial_del_csv(archivo_csv):
+    archivo_csv = Path(archivo_csv)
+
+    # 1) Intentar extraerlo del nombre del archivo
+    match = re.search(
+        r"prueba_en_tierra[_-]*(?P<serial>.+?)(?:_TOTAL)?$",
+        archivo_csv.stem,
+        flags=re.I,
+    )
+    if match:
+        return match.group("serial").strip().replace(" ", "_")
+
+    # 2) Fallback: intentar leer el CSV y buscar una columna con "serial" o "sonda"
+    try:
+        import pandas as pd
+
+        df = pd.read_csv(archivo_csv, nrows=5)
+        for col in df.columns:
+            nombre_col = str(col).lower()
+            if "serial" in nombre_col or "sonda" in nombre_col:
+                for valor in df[col].dropna().astype(str).tolist():
+                    if valor:
+                        return valor.strip().replace(" ", "_")
+    except Exception:
+        pass
+
+    return None
 
 def _abrir_excel(visible=False):
     excel = win32.gencache.EnsureDispatch("Excel.Application")
@@ -53,36 +80,6 @@ def _guardar_portapapeles_png(ruta_png, espera=0.8):
 
     ruta_png.parent.mkdir(parents=True, exist_ok=True)
     imagen.save(ruta_png)
-
-
-def _obtener_serial_del_csv(archivo_csv):
-    archivo_csv = Path(archivo_csv)
-
-    # 1) Intentar extraerlo del nombre del archivo
-    match = re.search(
-        r"prueba_en_tierra[_-]*(?P<serial>.+?)(?:_TOTAL)?$",
-        archivo_csv.stem,
-        flags=re.I,
-    )
-    if match:
-        return match.group("serial").strip().replace(" ", "_")
-
-    # 2) Fallback: intentar leer el CSV y buscar una columna con "serial" o "sonda"
-    try:
-        import pandas as pd
-
-        df = pd.read_csv(archivo_csv, nrows=5)
-        for col in df.columns:
-            nombre_col = str(col).lower()
-            if "serial" in nombre_col or "sonda" in nombre_col:
-                for valor in df[col].dropna().astype(str).tolist():
-                    if valor:
-                        return valor.strip().replace(" ", "_")
-    except Exception:
-        pass
-
-    return None
-
 
 def csv_a_png(archivo_csv, carpeta_salida=None, visible=False, max_filas=None):
     # Soporta un solo archivo o una lista de archivos
