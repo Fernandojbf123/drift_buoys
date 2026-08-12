@@ -26,3 +26,5 @@ if __name__ == "__main__":
 else:
     # Ejecución como módulo
     print("Se llama como modulo")
+    
+    # manager_crear_datos_lab(config)

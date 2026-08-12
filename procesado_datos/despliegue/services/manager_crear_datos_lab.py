@@ -3,12 +3,13 @@ import pandas as pd
 
 from procesado_datos.despliegue.services.crear_datos_lab import crear_datos_lab
 from procesado_datos.config_modulo.ProcesadoConfig import ProcesadoConfig
+from procesado_datos.services.Utils.utilidades import guardar_diccionario_como_pickle
 from procesado_datos.despliegue.services.guardar_datos_lab_csv import guardar_datos_lab_csv
 from procesado_datos.services.Graficado.graficar_mapa_de_despliegue import graficar_mapa_de_despliegue
 from procesado_datos.services.Graficado.graficar_series_laboratorio_y_guardar import graficar_series_laboratorio_y_guardar
-from procesado_datos.services.Utils.utilidades import guardar_diccionario_como_pickle
 from procesado_datos.services.Graficado.graficar_mapa_prueba_lab import graficar_mapa_prueba_lab
 from procesado_datos.services.Utils.utilidades import *
+from procesado_datos.services.Utils.excel_a_png import csv_a_png
 
 
 def manager_crear_datos_lab(config: ProcesadoConfig):
@@ -57,3 +58,17 @@ def manager_crear_datos_lab(config: ProcesadoConfig):
         ruta_a_la_carpeta_de_guardado = ruta_a_la_carpeta_de_guardado,
         config = config
     )
+    
+    #7. Crear imágenes PNG de los CSV de las pruebas de transmisión de cada sonda
+    archivos = [os.path.join(ruta_a_la_carpeta_de_guardado, archivo) for archivo in os.listdir(ruta_a_la_carpeta_de_guardado) if archivo.endswith(".csv")]
+
+    for archivo in archivos:
+        serial = archivo.split("_")[-2]
+        csv_a_png(
+            archivo_csv = archivo,
+            carpeta_salida = ruta_a_la_carpeta_de_guardado, 
+            max_filas = 20,
+            nombre_salida = f"transmision_{serial}.png"
+        )
+        ruta_de_guardado = os.path.join(ruta_a_la_carpeta_de_guardado, f"transmision_{serial}.png")
+        print(f"Se generó la imagen PNG de prueba de transmisión: {ruta_de_guardado}")
