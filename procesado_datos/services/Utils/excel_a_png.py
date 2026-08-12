@@ -81,6 +81,40 @@ def _guardar_portapapeles_png(ruta_png, espera=0.8):
     ruta_png.parent.mkdir(parents=True, exist_ok=True)
     imagen.save(ruta_png)
 
+def lista_csv_a_png(
+    lista_csv,
+    carpeta_salida=None,
+    visible=False,
+    max_filas=None
+):
+
+    """
+    Convierte una lista de CSV en PNG.
+
+    Parameters
+    ----------
+    lista_csv : iterable
+    carpeta_salida : str | Path | None
+    visible : bool
+    max_filas : int | None
+    Returns
+    -------
+    list[Path]
+    """
+
+    resultados = []
+
+    
+    for archivo in lista_csv:
+        resultados.append(csv_a_png(
+        archivo,
+        carpeta_salida=carpeta_salida,
+        visible=visible,
+        max_filas=max_filas
+    )
+)
+    return resultados
+
 def csv_a_png(archivo_csv, carpeta_salida=None, visible=False, max_filas=None):
     # Soporta un solo archivo o una lista de archivos
     if isinstance(archivo_csv, (list, tuple, set)):
