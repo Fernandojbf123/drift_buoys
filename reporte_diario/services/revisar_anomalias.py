@@ -28,6 +28,9 @@ def revisar_anomalias():
                 print(f"El archivo para el serial {serial} está vacío o no tiene datos válidos.")
                 raise FileNotFoundError(f"El archivo para el serial {serial} está vacío o no tiene datos válidos.")
             
+            if df.empty:    
+                return f"El archivo para el serial {serial} está vacío o no tiene datos válidos."
+            
             df["fecha"] = pd.to_datetime(df["fecha"], format="%Y-%m-%dT%H:%M:%S.%fZ", errors='coerce')  # Convertir la columna 'fecha' a datetime
             # Los datos vienen en hora UTC; cambiarlos a CST
             df["fecha"] = df["fecha"]-pd.Timedelta(hours=6)  # Restar 6 horas para convertir de UTC a CST
