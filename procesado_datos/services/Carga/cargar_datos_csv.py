@@ -109,7 +109,7 @@ def leer_excel_de_despliegue_de_sondas(config) -> pd.DataFrame:
 
         df_excel = pd.read_excel(ruta_al_excel_de_despliegue_de_sondas, sheet_name=hoja)
         df_excel.dropna(subset=['serial_de_sonda'], inplace=True) # elimino ausentes o nulos para que la conversion no de error
-        df_excel['serial_de_sonda'] = df_excel['serial_de_sonda'].astype(float).astype(int).astype(str)
+        df_excel['serial_de_sonda'] = df_excel['serial_de_sonda'].astype(str)
         
         return df_excel
     
@@ -144,7 +144,7 @@ def seleccionar_rango_de_fechas(diccionario: dict,
     hoja = config.nombre_de_la_hoja_con_informacion_de_sondas
     df_excel = pd.read_excel(ruta_al_excel_de_despliegue_de_sondas, sheet_name=hoja)
     df_excel.dropna(subset=['serial_de_sonda'], inplace=True) # elimino ausentes o nulos para que la conversion no de error
-    df_excel['serial_de_sonda'] = df_excel['serial_de_sonda'].astype(float).astype(int).astype(str)
+    df_excel['serial_de_sonda'] = df_excel['serial_de_sonda'].astype(str)
     
     for serial in list(diccionario.keys()):
         idx = df_excel[df_excel['serial_de_sonda'] == serial].index[-1] # Siempre se tomará la última ocurrencia como el dato de despliegue
@@ -400,7 +400,7 @@ def agregar_coordenadas_de_despliegue_maniobras_al_excel_de_despliegue(diccionar
     ruta_al_excel_de_despliegue_de_sondas = ruta_al_excel_de_despliegue_de_sondas + ".xlsx"
     df_excel = pd.read_excel(ruta_al_excel_de_despliegue_de_sondas)
     df_excel_filtrado = df_excel.dropna(subset=['serial_de_sonda']).copy() # elimino ausentes o nulos para que la conversion no de error
-    df_excel_filtrado['serial_de_sonda'] = df_excel_filtrado['serial_de_sonda'].astype(float).astype(int).astype(str) 
+    df_excel_filtrado['serial_de_sonda'] = df_excel_filtrado['serial_de_sonda'].astype(str) 
     df_excel_filtrado["fecha_y_hora_de_despliegue_maniobra"] = pd.to_datetime(df_excel_filtrado["fecha_y_hora_de_despliegue_maniobra"]) # asegurar que el tipo sea string para evitar errores al asignar las fechas maniobras. Luego se vuelve a convertir a datetime al guardar el excel corregido.
     
     seriales = list(diccionario.keys())
