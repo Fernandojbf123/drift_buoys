@@ -24,7 +24,8 @@ def graficar_mapa_de_despliegue(mostrar_figura: bool = False, ruta_a_la_carpeta_
     # Cargar datos de despliegue desde Excel maestro
     df_excel_de_despliegue = leer_excel_de_despliegue_de_sondas(config)
     df_excel_de_despliegue.dropna(subset=['serial_de_sonda'], inplace=True) # elimino ausentes o nulos para que la conversion no de error
-    df_excel_de_despliegue['serial_de_sonda'] = df_excel_de_despliegue['serial_de_sonda'].astype(float).astype(int).astype(str) # Convertir a string
+    
+    df_excel_de_despliegue['serial_de_sonda'] = df_excel_de_despliegue['serial_de_sonda'].astype(str) # Convertir a string
     puerto_de_salida = df_excel_de_despliegue[df_excel_de_despliegue["serial_de_sonda"] == seriales_a_analizar[0]]["lugar_de_salida"].values[-1] # Acá me interesa ir al excel de despliegue buscar el serial y conseguir el puerto de salida
 
 
