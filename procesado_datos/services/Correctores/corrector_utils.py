@@ -58,7 +58,6 @@ def eliminar_datos_espurios(diccionario: dict) -> dict:
     return diccionario
 ################################
 
-
 ################# I #################
 def interpolar_datos_faltantes(diccionario: dict) -> dict:
     """ Interpola los datos faltantes en los dataframes del diccionario dado."""
@@ -113,3 +112,23 @@ def ordenar_df_por_fecha(data: pd.DataFrame, serial_de_sonda: str) -> pd.DataFra
         return data
     except Exception as e:
          raise ValueError(f"Ocurrió un error al ordenar los datos por fecha: {e}")
+     
+
+
+################# R #################
+def reemplazar_datos_de_rapidez_distancia_y_direccion_de_primera_medicion_por_null(diccionario: dict) -> dict:
+    """ Elimina los datos de rapidez, distancia y dirección de la primera medición de cada sonda."""
+    seriales_de_sondas = list(diccionario.keys())
+    for serial in seriales_de_sondas:
+        if not diccionario[serial].empty:
+            
+            # Reemplazar los valores de las columnas especificadas con NaN en la primera fila
+            variables_a_reemplazar= ["distancia", "rap_corriente", "dir_corriente", "dir_corriente_texto"]
+            for variable in variables_a_reemplazar:
+                diccionario[serial].loc[0, variable] = np.nan
+                                    
+            print(f"Sonda {serial}: Se eliminaron los datos de rapidez, distancia y dirección de la primera medición.")
+        else:
+            print(f"Sonda {serial}: No hay datos para procesar.")
+    
+    return diccionario
