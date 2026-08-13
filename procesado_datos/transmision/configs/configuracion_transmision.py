@@ -1,9 +1,9 @@
 config_transmision = {
 
     # 1. Principales editables por el usuario
-    "fecha_del_estudio": "2026-07-01", # Fecha de estudio para el análisis de datos
-    "fecha_de_inicio_del_analisis": "2026-07-01 00:00", # Formato: 'AAAA-MM-DD HH:MM'
-    "fecha_de_fin_del_analisis": "2026-07-31 23:59", # Formato: 'AAAA-MM-DD HH:MM'
+    "fecha_del_estudio": "2026-08-01", # Fecha de estudio para el análisis de datos
+    "fecha_de_inicio_del_analisis": "2026-08-01 00:00", # Formato: 'AAAA-MM-DD HH:MM'
+    "fecha_de_fin_del_analisis": "2026-08-31 23:59", # Formato: 'AAAA-MM-DD HH:MM'
     
     # Para informes 10.3
     "carpeta_de_datos_crudos": "C:\\Users\\Atmosfera\\Desktop\\datos_crudos\\doris\\todos_los_datos",
@@ -27,7 +27,8 @@ config_transmision = {
     #"seriales_de_sondas": ["9878221", "9878504", "9878225", "9876178", "9878203", "4878505", "9878218"], # Todos de abril 2026
     # "seriales_de_sondas": ["4910070","4912213", "4904116", "4901427","4912212"], # 26 de mayo  2026
     # "seriales_de_sondas" : ["4857577", "4909282", "4912199", "4912171", "4907604"], # 27 de junio  2026
-    "seriales_de_sondas" : ["4912208","4912223", "9909282", "4912205","4912209"], # 20 de julio 2026
+    # "seriales_de_sondas" : ["4912208","4912223", "9909282", "4912205","4912209"], # 20 de julio 2026
+    "seriales_de_sondas" : ["B059-4912225","B063-5340036", "B061-5339989", "B062-5340045", "B064-5340026"], # 12 de agosto 2026
     
     "origen_de_los_datos": "REALT",  # Opciones: 'REALT', 'MEM'
     # 3. Del guardado
