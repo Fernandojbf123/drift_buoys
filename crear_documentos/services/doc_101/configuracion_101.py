@@ -3,7 +3,7 @@
 ### Los parámetros a modificar son la hoja del excel para el mes de vigencia ###
 
 ruta_al_excel_para_crear_documento = "\\Med_2025-2026\\General\\Sondas_DORIS\\2026_info_documentos_101.xlsx"
-hoja_del_excel_para_crear_documento = "07" # "01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12" 
+hoja_del_excel_para_crear_documento = "08" # "01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12" 
 
 ruta_a_carpeta_de_las_figuras = "\\Med_2025-2026\\Reportes_Edit\\Reporte_10.1"
 ruta_a_carpeta_de_guardado_del_documento = "\\Med_2025-2026\\Reportes_Edit\\Reporte_10.1"

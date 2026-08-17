@@ -12,4 +12,3 @@ else:
     # Configuraciones heredadas del módulo Procesar_datos
     print("Cargando configuraciones desde el módulo Procesar_datos")
     
-    
