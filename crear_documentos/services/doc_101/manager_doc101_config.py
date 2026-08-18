@@ -53,7 +53,7 @@ def ruta_al_excel_para_crear_documento():
 
 def hoja_del_excel_para_crear_documento():
     """Obtiene un valor de la configuración general de forma dinámica"""
-    if not validate_config_value("hoja_del_excel_para_crear_documeto", expect_type=str, allow_empty=False):
+    if not validate_config_value("hoja_del_excel_para_crear_documento", expect_type=str, allow_empty=False):
         return None
     return services.doc101.configuracion_101
 
