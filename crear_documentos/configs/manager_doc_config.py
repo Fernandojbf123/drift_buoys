@@ -26,7 +26,7 @@ def ruta_al_excel_para_crear_documento():
 
 def hoja_del_excel_para_crear_documento():
     """Obtiene un valor de la configuración general de forma dinámica"""
-    return configs.configuracion_documentos.hoja_del_excel_para_crear_documeto
+    return configs.configuracion_documentos.hoja_del_excel_para_crear_documento
 
 def get_ruta_a_carpeta_de_las_figuras(usar_NAS: bool = False):
     """Obtiene un valor de la configuración general de forma dinámica"""
