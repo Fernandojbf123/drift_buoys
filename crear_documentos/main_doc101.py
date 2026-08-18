@@ -26,7 +26,7 @@ def main() -> int:
         df_documento = get_df_datos_documento()
 
         # Validar plantilla
-        plantilla = get_ruta_a_la_plantilla_de_word()
+        plantilla = get_ruta_a_la_plantilla_de_word(usar_NAS = True)
         if isinstance(plantilla, str) and plantilla.startswith("[CONFIG ERROR]"):
             raise RuntimeError(plantilla)
 
@@ -93,5 +93,4 @@ def main() -> int:
 
 
 if __name__ == "__main__":
-    main()
-    # sys.exit(main())
+    sys.exit(main())
