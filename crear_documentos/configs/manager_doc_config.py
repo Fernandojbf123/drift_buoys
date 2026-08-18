@@ -26,7 +26,7 @@ def ruta_al_excel_para_crear_documento():
 
 def hoja_del_excel_para_crear_documento():
     """Obtiene un valor de la configuración general de forma dinámica"""
-    return configs.configuracion_documentos.hoja_del_excel_para_crear_documeto
+    return configs.configuracion_documentos.hoja_del_excel_para_crear_documento
 
 def get_ruta_a_carpeta_de_las_figuras(usar_NAS: bool = False):
     """Obtiene un valor de la configuración general de forma dinámica"""
@@ -80,9 +80,15 @@ def get_usar_NAS():
     """Obtiene un valor de la configuración general de forma dinámica"""
     return configs.configuracion_documentos.usar_NAS
 
-def get_ruta_a_la_plantilla_de_word():
+def get_ruta_a_la_plantilla_de_word(usar_NAS: bool = False):
     """Obtiene un valor de la configuración general de forma dinámica"""
-    return configs.configuracion_documentos.ruta_a_la_plantilla_de_word
+    ruta_al_NAS = os.getenv("ruta_al_NAS")
+    carpeta = configs.configuracion_documentos.ruta_a_la_plantilla_de_word
+    if get_usar_NAS() and ruta_al_NAS:
+        ruta_completa = os.path.join(ruta_al_NAS, carpeta)   
+    else:
+        ruta_completa = carpeta  # Si no se encuentra la variable de entorno, usar la ruta relativa     
+    return ruta_completa
 
 def get_ruta_a_la_plantilla_de_ppt():
     """Obtiene un valor de la configuración general de forma dinámica"""
