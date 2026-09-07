@@ -194,8 +194,8 @@ def construir_diccionario_de_reemplazos_para_tablas(df_datos_despliegue: pd.Data
     
     tabla1 = df_datos_despliegue[["serial_de_sonda","latitud_plan","longitud_plan","fecha_y_hora_de_despliegue_maniobra","estado_despliegue"]]
     tabla1.insert(0,"secuencia", range(1, len(tabla1) + 1))
-    tabla1["secuencia"] = tabla1["secuencia"].astype(int).astype(str)
-    tabla1["serial_de_sonda"] = tabla1["serial_de_sonda"].astype(int).astype(str)
+    tabla1["secuencia"] = tabla1["secuencia"].astype(str)
+    tabla1["serial_de_sonda"] = tabla1["serial_de_sonda"].astype(str)
     tabla1["latitud_plan"] = tabla1["latitud_plan"].astype(str)
     tabla1["longitud_plan"] = tabla1["longitud_plan"].astype(str)
     tabla1["fecha_y_hora_de_despliegue_maniobra"] = pd.to_datetime(tabla1["fecha_y_hora_de_despliegue_maniobra"], format = "%d/%m/%Y %H:%M:%S").dt.strftime("%d/%m/%Y %H:%M")
@@ -205,7 +205,7 @@ def construir_diccionario_de_reemplazos_para_tablas(df_datos_despliegue: pd.Data
         "opciones_de_tabla": opciones_de_tabla}
 
     
-    df_datos_despliegue["serial_de_sonda"] = df_datos_despliegue["serial_de_sonda"].astype(int).astype(str)
+    df_datos_despliegue["serial_de_sonda"] = df_datos_despliegue["serial_de_sonda"].astype(str)
     
     equipos = ["GPS primario",
                 "GPS secundario", 

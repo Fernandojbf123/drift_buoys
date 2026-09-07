@@ -1,3 +1,6 @@
+
+from pydoc import doc
+
 from services.abrir_plantilla_doris import abrir_plantilla_doris
 from services.manager_variables_excel_datos_despliegue import *
 from services.manager_variables_excel_datos_campania import *
@@ -62,13 +65,22 @@ def main() -> int:
             doc=doc,
         )
         
+        # reemplazar_texto_en_cuadros_de_texto(doc=doc, diccionario_de_reemplazos=dict_demo)
+        # insertar_figuras_en_plantilla(doc=doc, diccionario_de_reemplazos=dict_demo)
+        # insertar_referencias_cruzadas_en_plantilla(doc=doc, diccionario_de_reemplazos=dict_demo)
+        # reemplazar_texto_en_plantilla(doc=doc, diccionario_de_reemplazos=dict_demo)
+        # insertar_documento_externo_en_plantilla(doc=doc, diccionario_de_reemplazos=dict_demo)
+        # rellenar_tablas_en_plantilla(doc=doc, diccionario_de_reemplazos=dict_demo)
+        # reemplazar_variables_en_tablas(doc=doc, diccionario_de_reemplazos=dict_demo)
+        
         reemplazar_texto_en_cuadros_de_texto(doc=doc, diccionario_de_reemplazos=dict_demo)
+        reemplazar_texto_en_plantilla(doc=doc,diccionario_de_reemplazos=dict_demo)
         insertar_figuras_en_plantilla(doc=doc, diccionario_de_reemplazos=dict_demo)
         insertar_referencias_cruzadas_en_plantilla(doc=doc, diccionario_de_reemplazos=dict_demo)
-        reemplazar_texto_en_plantilla(doc=doc, diccionario_de_reemplazos=dict_demo)
         insertar_documento_externo_en_plantilla(doc=doc, diccionario_de_reemplazos=dict_demo)
-        rellenar_tablas_en_plantilla(doc=doc, diccionario_de_reemplazos=dict_demo)
+        rellenar_tablas_en_plantilla(doc=doc,diccionario_de_reemplazos=dict_demo)
         reemplazar_variables_en_tablas(doc=doc, diccionario_de_reemplazos=dict_demo)
+
 
         # Calcular fecha para el nombre del documento: primer día del mes siguiente a la vigencia
         fecha_inicio_vigencia = get_fecha_inicio_vigencia(df_datos_despliegue_filtrado)
@@ -77,7 +89,7 @@ def main() -> int:
         # primer día del mes siguiente
         fecha_para_nombre = (fecha_inicio_vigencia + pd.DateOffset(months=1)).replace(day=1)
         date_part = fecha_para_nombre.strftime("%Y%m%d")
-        nombre_salida = f"ASM-CICESE-Concepto_10.3_{date_part}_00.docx"
+        nombre_salida = f"ASM-CICESE-Concepto_10.3_{date_part}_00_PRUEBA.docx"
         guardar_documento(doc, nombre_archivo=nombre_salida)
 
         logging.info(f"Documento guardado: {nombre_salida}")

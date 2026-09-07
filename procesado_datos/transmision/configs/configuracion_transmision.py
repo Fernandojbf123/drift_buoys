@@ -28,7 +28,9 @@ config_transmision = {
     # "seriales_de_sondas": ["4910070","4912213", "4904116", "4901427","4912212"], # 26 de mayo  2026
     # "seriales_de_sondas" : ["4857577", "4909282", "4912199", "4912171", "4907604"], # 27 de junio  2026
     # "seriales_de_sondas" : ["4912208","4912223", "9909282", "4912205","4912209"], # 20 de julio 2026
-    "seriales_de_sondas" : ["B059-4912225","B063-5340036", "B061-5339989", "B062-5340045", "B064-5340026"], # 12 de agosto 2026
+    # "seriales_de_sondas" : ["B059-4912225","B063-5340036", "B061-5339989", "B062-5340045", "B064-5340026"], # 12 de agosto 2026
+    "seriales_de_sondas" : ["B066-5340046","B060-5339972", "B065-5340042", "B053-4912198", "B048-4869012"], # 13 de agosto 2026
+    
     
     "origen_de_los_datos": "REALT",  # Opciones: 'REALT', 'MEM'
     # 3. Del guardado

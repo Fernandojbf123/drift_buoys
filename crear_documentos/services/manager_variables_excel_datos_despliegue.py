@@ -44,7 +44,7 @@ def validate_dataframe(df: pd.DataFrame, required_columns: list[str] | None = No
 
 ## Datos asociados a la hoja de datos de DORIS
 def get_df_datos_despliegue():
-    df_datos_despliegue = leer_excel(get_ruta_al_excel_de_despliegue_de_sondas(), nombre_de_hoja=get_hoja_del_excel_de_despliegue_de_sondas(), header=0)
+    df_datos_despliegue = leer_excel(get_ruta_al_excel_de_despliegue_de_sondas(usar_NAS=True), nombre_de_hoja=get_hoja_del_excel_de_despliegue_de_sondas(), header=0)
     return df_datos_despliegue
 
 def get_fecha_de_solicitud():
