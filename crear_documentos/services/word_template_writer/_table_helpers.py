@@ -8,11 +8,12 @@ Private module - Not intended for direct external use.
 Import from the public API in api.py instead.
 """
 
+from matplotlib import table
 import pandas as pd
 from typing import Union, Optional, Dict, List, Tuple
 from docx.oxml.ns import qn
 from .schemas_helpers import EstilosTabla, OpcionesTabla
-from ._table_styling import apply_cell_style, apply_row_height
+from ._table_styling import apply_cell_style, apply_row_height, apply_table_borders
 
 
 # ===== NORMALIZATION FUNCTIONS =====
@@ -349,7 +350,9 @@ def fill_table(
     
     # ===== PASO 2: BUSCAR TABLA CON MARCADOR =====
     table, fila_marcador, col_marcador = _find_table_with_marker(doc, nombre_marcador)
-    
+    apply_table_borders(table)
+   
+
     # ===== BUG FIX 1: DESACTIVAR REPETICIÓN DE ENCABEZADO EN FILA MARCADOR =====
     # La fila del marcador puede tener la propiedad tblHeader (encabezado repetible)
     # que hace que se repita en cada salto de página. Debemos desactivarla.
@@ -450,6 +453,7 @@ def fill_table(
     # Nota: Eliminamos de atrás hacia adelante para evitar problemas de índices
     for row_idx in range(total_filas - 1, ultima_fila_con_datos, -1):
         _delete_row(table, row_idx)
+    
     
     return doc
 

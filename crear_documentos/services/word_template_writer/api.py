@@ -23,7 +23,6 @@ from ._figure_helpers import (
 from ._text_helpers import replace_text_variables_in_paragraph, replace_text_variables_in_tables
 from ._document_helpers import insert_external_document
 from ._table_helpers import fill_table
-from docx.oxml.ns import qn
 
 
 def insertar_figuras_en_plantilla(doc, diccionario_de_reemplazos: dict):
@@ -129,24 +128,11 @@ def insertar_figuras_en_plantilla(doc, diccionario_de_reemplazos: dict):
                         bookmarks_info[variable_ref_key] = None  # Sin bookmarks para figuras sin título
                         break  # Ya se insertó, pasar a la siguiente variable
                 else:
-                    
                     # Caso 2: Figuras CON título (Caption + SEQ + Bookmarks)
-                    bookmarks_creados = aux_insertar_figuras_con_titulo(
-                        parrafo, variable, datos_figuras
-                    )
-
-                    print("DEBUG FIGURA:", variable)
-                    print("DEBUG BOOKMARKS:", bookmarks_creados)
-
+                    bookmarks_creados = aux_insertar_figuras_con_titulo(parrafo, variable, datos_figuras)
                     if bookmarks_creados:
                         bookmarks_info[variable_ref_key] = bookmarks_creados
-                        break
-
-                    # # Caso 2: Figuras CON título (Caption + SEQ + Bookmarks)
-                    # bookmarks_creados = aux_insertar_figuras_con_titulo(parrafo, variable, datos_figuras)
-                    # if bookmarks_creados:
-                    #     bookmarks_info[variable_ref_key] = bookmarks_creados
-                    #     break  # Ya se insertó, pasar a la siguiente variable
+                        break  # Ya se insertó, pasar a la siguiente variable
     
     # Mutar el diccionario agregando información de bookmarks
     diccionario_de_reemplazos.update(bookmarks_info)
@@ -204,16 +190,9 @@ def insertar_referencias_cruzadas_en_plantilla(doc, diccionario_de_reemplazos: d
         marcadores_en_parrafo.sort(key=lambda x: x[0])
         
         # Limpiar todos los runs del párrafo
-        # for run in parrafo.runs:
-        #     run.text = ""
-        # Guardar las propiedades del párrafo
-        p = parrafo._p
-
-        # Eliminar todos los elementos del párrafo excepto pPr
-        for child in list(p):
-            if child.tag != qn("w:pPr"):
-                p.remove(child)
-
+        for run in parrafo.runs:
+            run.text = ""
+        
         # Reconstruir el párrafo procesando todos los marcadores
         pos_actual = 0
         

@@ -188,187 +188,57 @@ def aux_insertar_figuras_con_titulo(paragraph, key, lista_figuras):
     return bookmarks_creados
 
 
-# def aux_insertar_referencia_cruzada(paragraph, nombre_bookmark, texto_antes="Figura", mostrar_numero=True):
-#     """Inserta una referencia cruzada a una figura en un párrafo.
+def aux_insertar_referencia_cruzada(paragraph, nombre_bookmark, texto_antes="Figura", mostrar_numero=True):
+    """Inserta una referencia cruzada a una figura en un párrafo.
     
-#     Args:
-#         paragraph: El párrafo donde insertar la referencia (objeto Paragraph)
-#         nombre_bookmark: Nombre del bookmark de la figura a referenciar
-#         texto_antes: Texto a mostrar antes del número (default: "Figura")
-#         mostrar_numero: Si True, muestra el número de la figura; si False, solo el bookmark
+    Args:
+        paragraph: El párrafo donde insertar la referencia (objeto Paragraph)
+        nombre_bookmark: Nombre del bookmark de la figura a referenciar
+        texto_antes: Texto a mostrar antes del número (default: "Figura")
+        mostrar_numero: Si True, muestra el número de la figura; si False, solo el bookmark
     
-#     Ejemplo de uso:
-#         # Para: "Como se muestra en la Figura 3"
-#         p = doc.add_paragraph("Como se muestra en la ")
-#         aux_insertar_referencia_cruzada(p, "_Ref_Fig_Mi_Figura", "Figura")
-#     """
-#     # Agregar texto antes si se proporciona
-#     print("DEBUG REFERENCIA:", nombre_bookmark)
-
-#     if texto_antes:
-#         run_texto = paragraph.add_run(texto_antes + " ")
-    
-#     # Crear el run para el campo REF
-#     run = paragraph.add_run()
-    
-#     # Crear el campo REF para la figura
-#     fldChar_begin = OxmlElement('w:fldChar')
-#     fldChar_begin.set(qn('w:fldCharType'), 'begin')
-    
-#     instrText = OxmlElement('w:instrText')
-#     instrText.set(qn('xml:space'), 'preserve')
-#     # \r muestra solo el número de secuencia (SEQ), \h hace el campo clickable (hyperlink)
-#     if mostrar_numero:
-#      instrText.text = f' REF {nombre_bookmark} \\r \\h '
-#     else:
-#       instrText.text = f' REF {nombre_bookmark} \\h '
-
-    
-#     fldChar_separate = OxmlElement('w:fldChar')
-#     fldChar_separate.set(qn('w:fldCharType'), 'separate')
-    
-#     # Texto por defecto (se actualizará en Word con F9)
-#     text_run = OxmlElement('w:r')
-#     text_elem = OxmlElement('w:t')
-#     text_elem.text = "XX"  # Placeholder que Word actualizará
-#     text_run.append(text_elem)
-    
-#     fldChar_end = OxmlElement('w:fldChar')
-#     fldChar_end.set(qn('w:fldCharType'), 'end')
-    
-#     # Agregar elementos al run
-#     run._element.append(fldChar_begin)
-#     run._element.append(instrText)
-#     run._element.append(fldChar_separate)
-#     run._element.append(text_run)
-#     run._element.append(fldChar_end)
-# def aux_insertar_referencia_cruzada(
-#     paragraph,
-#     nombre_bookmark,
-#     texto_antes="Figura",
-#     mostrar_numero=True
-# ):
-#     """Inserta un campo REF de Word apuntando al bookmark de una figura."""
-
-#     print("DEBUG REFERENCIA:", nombre_bookmark)
-
-#     # Texto anterior
-#     if texto_antes:
-#         paragraph.add_run(texto_antes + " ")
-
-#     p = paragraph._p
-
-#     # BEGIN
-#     run_begin = OxmlElement("w:r")
-#     fld_begin = OxmlElement("w:fldChar")
-#     fld_begin.set(qn("w:fldCharType"), "begin")
-#     run_begin.append(fld_begin)
-#     p.append(run_begin)
-
-#     # INSTRUCTION
-#     run_instr = OxmlElement("w:r")
-#     instr = OxmlElement("w:instrText")
-#     instr.set(qn("xml:space"), "preserve")
-
-#     instr.text = f" REF {nombre_bookmark} \\r \\h "
-
-#     run_instr.append(instr)
-#     p.append(run_instr)
-
-#     # SEPARATE
-#     run_separate = OxmlElement("w:r")
-#     fld_separate = OxmlElement("w:fldChar")
-#     fld_separate.set(qn("w:fldCharType"), "separate")
-#     run_separate.append(fld_separate)
-#     p.append(run_separate)
-
-#     # RESULTADO CACHEADO
-#     run_result = OxmlElement("w:r")
-#     text_result = OxmlElement("w:t")
-#     text_result.text = "1"
-#     run_result.append(text_result)
-#     p.append(run_result)
-
-#     # END
-#     run_end = OxmlElement("w:r")
-#     fld_end = OxmlElement("w:fldChar")
-#     fld_end.set(qn("w:fldCharType"), "end")
-#     run_end.append(fld_end)
-#     p.append(run_end)
-
-def aux_insertar_referencia_cruzada(
-    paragraph,
-    nombre_bookmark,
-    texto_antes="Figura",
-    mostrar_numero=True
-):
-    """Inserta una referencia cruzada REF real de Word."""
-
-    print("DEBUG REFERENCIA:", nombre_bookmark)
-
-    # Texto "Figura "
+    Ejemplo de uso:
+        # Para: "Como se muestra en la Figura 3"
+        p = doc.add_paragraph("Como se muestra en la ")
+        aux_insertar_referencia_cruzada(p, "_Ref_Fig_Mi_Figura", "Figura")
+    """
+    # Agregar texto antes si se proporciona
     if texto_antes:
-        paragraph.add_run(texto_antes + " ")
-
-    p = paragraph._p
-
-    # --------------------------------------------------
-    # BEGIN
-    # --------------------------------------------------
-    run_begin = OxmlElement("w:r")
-
-    fld_begin = OxmlElement("w:fldChar")
-    fld_begin.set(qn("w:fldCharType"), "begin")
-    fld_begin.set(qn("w:dirty"), "true")
-
-    run_begin.append(fld_begin)
-    p.append(run_begin)
-
-    # --------------------------------------------------
-    # INSTRUCTION
-    # --------------------------------------------------
-    run_instr = OxmlElement("w:r")
-
-    instr = OxmlElement("w:instrText")
-    instr.set(qn("xml:space"), "preserve")
-    instr.text = f" REF {nombre_bookmark} \\r \\h "
-
-    run_instr.append(instr)
-    p.append(run_instr)
-
-    # --------------------------------------------------
-    # SEPARATE
-    # --------------------------------------------------
-    run_separate = OxmlElement("w:r")
-
-    fld_separate = OxmlElement("w:fldChar")
-    fld_separate.set(qn("w:fldCharType"), "separate")
-
-    run_separate.append(fld_separate)
-    p.append(run_separate)
-
-    # --------------------------------------------------
-    # RESULTADO
-    # --------------------------------------------------
-    run_result = OxmlElement("w:r")
-
-    text_result = OxmlElement("w:t")
-    text_result.text = "1"
-
-    run_result.append(text_result)
-    p.append(run_result)
-
-    # --------------------------------------------------
-    # END
-    # --------------------------------------------------
-    run_end = OxmlElement("w:r")
-
-    fld_end = OxmlElement("w:fldChar")
-    fld_end.set(qn("w:fldCharType"), "end")
-
-    run_end.append(fld_end)
-    p.append(run_end)
-
+        run_texto = paragraph.add_run(texto_antes + " ")
+    
+    # Crear el run para el campo REF
+    run = paragraph.add_run()
+    
+    # Crear el campo REF para la figura
+    fldChar_begin = OxmlElement('w:fldChar')
+    fldChar_begin.set(qn('w:fldCharType'), 'begin')
+    
+    instrText = OxmlElement('w:instrText')
+    instrText.set(qn('xml:space'), 'preserve')
+    # \r muestra solo el número de secuencia (SEQ), \h hace el campo clickable (hyperlink)
+    if mostrar_numero:
+        instrText.text = f' REF {nombre_bookmark} \\h '
+    else:
+        instrText.text = f' REF {nombre_bookmark} \\r \\h '
+    
+    fldChar_separate = OxmlElement('w:fldChar')
+    fldChar_separate.set(qn('w:fldCharType'), 'separate')
+    
+    # Texto por defecto (se actualizará en Word con F9)
+    text_run = OxmlElement('w:r')
+    text_elem = OxmlElement('w:t')
+    text_elem.text = "XX"  # Placeholder que Word actualizará
+    text_run.append(text_elem)
+    
+    fldChar_end = OxmlElement('w:fldChar')
+    fldChar_end.set(qn('w:fldCharType'), 'end')
+    
+    # Agregar elementos al run
+    run._element.append(fldChar_begin)
+    run._element.append(instrText)
+    run._element.append(fldChar_separate)
+    run._element.append(text_run)
+    run._element.append(fldChar_end)
 
 
 def crear_pie_de_figura(parent, indice, titulo, bookmark_name=None):
@@ -432,83 +302,36 @@ def crear_pie_de_figura(parent, indice, titulo, bookmark_name=None):
     nuevo_p.append(bookmark_start)
     
     # Campo SEQ para numeración automática
-    # run_begin = OxmlElement('w:r')
-    # fldChar_begin = OxmlElement('w:fldChar')
-    # fldChar_begin.set(qn('w:fldCharType'), 'begin')
-    # run_begin.append(fldChar_begin)
-    # nuevo_p.append(run_begin)
-    
-    # run_instr = OxmlElement('w:r')
-    # instrText = OxmlElement('w:instrText')
-    # instrText.set(qn('xml:space'), 'preserve')
-    # instrText.text = ' SEQ Figura \\* ARABIC '
-    # run_instr.append(instrText)
-    # nuevo_p.append(run_instr)
-    
-    # run_separate = OxmlElement('w:r')
-    # fldChar_separate = OxmlElement('w:fldChar')
-    # fldChar_separate.set(qn('w:fldCharType'), 'separate')
-    # run_separate.append(fldChar_separate)
-    # nuevo_p.append(run_separate)
-    
-    # run_result = OxmlElement('w:r')
-    # text_result = OxmlElement('w:t')
-    # text_result.text = '1'  # Placeholder que Word actualizará
-    # run_result.append(text_result)
-    # nuevo_p.append(run_result)
-    
-    # run_end = OxmlElement('w:r')
-    # fldChar_end = OxmlElement('w:fldChar')
-    # fldChar_end.set(qn('w:fldCharType'), 'end')
-    # run_end.append(fldChar_end)
-    # nuevo_p.append(run_end)
-    
-    # Campo SEQ para numeración automática
     run_begin = OxmlElement('w:r')
-
     fldChar_begin = OxmlElement('w:fldChar')
     fldChar_begin.set(qn('w:fldCharType'), 'begin')
-
     run_begin.append(fldChar_begin)
     nuevo_p.append(run_begin)
-
-
+    
     run_instr = OxmlElement('w:r')
-
     instrText = OxmlElement('w:instrText')
     instrText.set(qn('xml:space'), 'preserve')
     instrText.text = ' SEQ Figura \\* ARABIC '
-
     run_instr.append(instrText)
     nuevo_p.append(run_instr)
-
-
+    
     run_separate = OxmlElement('w:r')
-
     fldChar_separate = OxmlElement('w:fldChar')
     fldChar_separate.set(qn('w:fldCharType'), 'separate')
-
     run_separate.append(fldChar_separate)
     nuevo_p.append(run_separate)
-
-
+    
     run_result = OxmlElement('w:r')
-
     text_result = OxmlElement('w:t')
-    text_result.text = '1'
-
+    text_result.text = '1'  # Placeholder que Word actualizará
     run_result.append(text_result)
     nuevo_p.append(run_result)
-
-
+    
     run_end = OxmlElement('w:r')
-
     fldChar_end = OxmlElement('w:fldChar')
     fldChar_end.set(qn('w:fldCharType'), 'end')
-
     run_end.append(fldChar_end)
     nuevo_p.append(run_end)
-
     
     # Bookmark end (después del número, antes del título)
     bookmark_end = OxmlElement('w:bookmarkEnd')
@@ -527,4 +350,3 @@ def crear_pie_de_figura(parent, indice, titulo, bookmark_name=None):
     parent.insert(indice, nuevo_p)
     
     return nuevo_p, bookmark_name
-

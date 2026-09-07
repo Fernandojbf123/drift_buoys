@@ -12,7 +12,7 @@ from typing import Optional, Tuple
 from docx.enum.text import WD_ALIGN_PARAGRAPH
 from docx.oxml.shared import OxmlElement
 from docx.oxml.ns import qn
-
+from openpyxl import cell
 
 def rgb_to_hex(rgb: Tuple[int, int, int]) -> str:
     """
@@ -164,6 +164,35 @@ def apply_row_height(row, height: int):
         row.height = height
 
 
+def apply_cell_borders(cell):
+    """
+    Aplica bordes a la celda: todos los lados y bordes internos.
+    """
+    tc_pr = cell._element.get_or_add_tcPr()
+
+    border_xml = OxmlElement('w:tcBorders')
+
+    for border_name, border_val in {
+        'w:top': 'single',
+        'w:left': 'single',
+        'w:bottom': 'single',
+        'w:right': 'single',
+        'w:insideH': 'single',
+        'w:insideV': 'single',
+    }.items():
+        border = OxmlElement(border_name)
+        border.set(qn('w:val'), border_val)
+        border.set(qn('w:sz'), '4')      # grosor ~ 1pt
+        border.set(qn('w:space'), '0')
+        border.set(qn('w:color'), 'auto')
+        border_xml.append(border)
+
+    existing = tc_pr.find(qn('w:tcBorders'))
+    if existing is not None:
+        tc_pr.remove(existing)
+
+    tc_pr.append(border_xml)
+
 def apply_cell_style(cell, doc, config: dict, row_idx: int, col_idx: int, merged_config: dict):
     """
     Aplica todos los estilos configurados a una celda.
@@ -205,3 +234,60 @@ def apply_cell_style(cell, doc, config: dict, row_idx: int, col_idx: int, merged
     # Aplicar color de texto
     if 'color_texto' in merged_config:
         apply_cell_text_color(cell, merged_config['color_texto'])
+        
+    apply_cell_borders(cell)
+
+def apply_table_borders(table):
+    tbl_pr = table._element.find(qn('w:tblPr'))
+    if tbl_pr is None:
+        tbl_pr = OxmlElement('w:tblPr')
+        table._element.insert(0, tbl_pr)
+
+    border_xml = OxmlElement('w:tblBorders')
+
+    for border_name, border_val in {
+        'w:top': 'single',
+        'w:left': 'single',
+        'w:bottom': 'single',
+        'w:right': 'single',
+        'w:insideH': 'single',
+        'w:insideV': 'single',
+    }.items():
+        border = OxmlElement(border_name)
+        border.set(qn('w:val'), border_val)
+        border.set(qn('w:sz'), '4')
+        border.set(qn('w:space'), '0')
+        border.set(qn('w:color'), 'auto')
+        border_xml.append(border)
+
+    existing = tbl_pr.find(qn('w:tblBorders'))
+    if existing is not None:
+        tbl_pr.remove(existing)
+
+    tbl_pr.append(border_xml)
+    
+def apply_cell_borders(cell):
+    tc_pr = cell._element.get_or_add_tcPr()
+
+    border_xml = OxmlElement('w:tcBorders')
+
+    for border_name, border_val in {
+        'w:top': 'single',
+        'w:left': 'single',
+        'w:bottom': 'single',
+        'w:right': 'single',
+        'w:insideH': 'single',
+        'w:insideV': 'single',
+    }.items():
+        border = OxmlElement(border_name)
+        border.set(qn('w:val'), border_val)
+        border.set(qn('w:sz'), '4')
+        border.set(qn('w:space'), '0')
+        border.set(qn('w:color'), 'auto')
+        border_xml.append(border)
+
+    existing = tc_pr.find(qn('w:tcBorders'))
+    if existing is not None:
+        tc_pr.remove(existing)
+
+    tc_pr.append(border_xml)
