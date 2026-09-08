@@ -14,15 +14,30 @@ Functions:
     - reemplazar_variables_en_tablas: Replace variables inside tables with text or figures
 """
 
+from copy import deepcopy
+from docx.oxml.ns import qn
+
 # Import helper functions from private modules
 from ._figure_helpers import (
     aux_insertar_figura_sin_titulo,
     aux_insertar_figuras_con_titulo,
     aux_insertar_referencia_cruzada,
 )
-from ._text_helpers import replace_text_variables_in_paragraph, replace_text_variables_in_tables
+from ._text_helpers import (
+    insertar_destino_en_marcador,
+    insertar_referencia_en_marcador,
+    replace_text_variables_in_paragraph,
+    replace_text_variables_in_tables,
+)
 from ._document_helpers import insert_external_document
 from ._table_helpers import fill_table
+
+
+def _preservar_espacios_del_run(run):
+    for elemento in run._r:
+        if elemento.tag == qn("w:t") and elemento.text:
+            if elemento.text[:1].isspace() or elemento.text[-1:].isspace():
+                elemento.set(qn("xml:space"), "preserve")
 
 
 def insertar_figuras_en_plantilla(doc, diccionario_de_reemplazos: dict):
@@ -166,11 +181,34 @@ def insertar_referencias_cruzadas_en_plantilla(doc, diccionario_de_reemplazos: d
                 (donde "8" y "10" son campos REF clickeables que muestran solo el número)
     """
     # Filtrar solo variables con bookmarks válidos
-    variables_validas = {k: v for k, v in diccionario_de_reemplazos.items() 
-                        if v is not None and k.startswith("<<ref_")}
+    variables_validas = {
+        k: v
+        for k, v in diccionario_de_reemplazos.items()
+        if (
+            v is not None
+            and k.startswith("<<ref_")
+            and not k.startswith("<<ref_tabla_")
+        )
+    }
     
     # Para cada párrafo
     for parrafo in doc.paragraphs:
+        runs_originales = []
+        offset_original = 0
+        for run in parrafo.runs:
+            texto_run = run.text or ""
+            formato_run = deepcopy(run._r.rPr) if run._r.rPr is not None else None
+            runs_originales.append(
+                (offset_original, offset_original + len(texto_run), formato_run)
+            )
+            offset_original += len(texto_run)
+
+        def formato_en_posicion(posicion):
+            for inicio_run, fin_run, formato_run in runs_originales:
+                if inicio_run <= posicion < fin_run:
+                    return formato_run
+            return None
+
         full_text = "".join(run.text for run in parrafo.runs)
         
         # Encontrar TODOS los marcadores <<ref_*>> en este párrafo
@@ -200,7 +238,11 @@ def insertar_referencias_cruzadas_en_plantilla(doc, diccionario_de_reemplazos: d
             # Agregar texto antes del marcador
             if pos_marcador > pos_actual:
                 texto_antes = full_text[pos_actual:pos_marcador]
-                parrafo.add_run(texto_antes)
+                run_antes = parrafo.add_run(texto_antes)
+                _preservar_espacios_del_run(run_antes)
+                formato = formato_en_posicion(pos_actual)
+                if formato is not None:
+                    run_antes._r.insert(0, deepcopy(formato))
             
             # Insertar la referencia cruzada
             primer_bookmark = lista_bookmarks[0]
@@ -208,12 +250,30 @@ def insertar_referencias_cruzadas_en_plantilla(doc, diccionario_de_reemplazos: d
             
             if len(lista_bookmarks) == 1:
                 # Caso: Solo una figura - "Figura X"
-                aux_insertar_referencia_cruzada(parrafo, primer_bookmark, texto_antes="Figura", mostrar_numero=True)
+                aux_insertar_referencia_cruzada(
+                    parrafo,
+                    primer_bookmark,
+                    texto_antes="Figura",
+                    mostrar_numero=True,
+                    formato=formato_en_posicion(pos_marcador)
+                )
             else:
                 # Caso: Múltiples figuras - "Figura X a la Y"
-                aux_insertar_referencia_cruzada(parrafo, primer_bookmark, texto_antes="Figura", mostrar_numero=True)
+                aux_insertar_referencia_cruzada(
+                    parrafo,
+                    primer_bookmark,
+                    texto_antes="Figura",
+                    mostrar_numero=True,
+                    formato=formato_en_posicion(pos_marcador)
+                )
                 parrafo.add_run(" a la ")
-                aux_insertar_referencia_cruzada(parrafo, ultimo_bookmark, texto_antes="Figura", mostrar_numero=True)
+                aux_insertar_referencia_cruzada(
+                    parrafo,
+                    ultimo_bookmark,
+                    texto_antes="Figura",
+                    mostrar_numero=True,
+                    formato=formato_en_posicion(pos_marcador)
+                )
             
             # Avanzar posición actual
             pos_actual = pos_marcador + len(variable_ref)
@@ -221,7 +281,14 @@ def insertar_referencias_cruzadas_en_plantilla(doc, diccionario_de_reemplazos: d
         # Agregar texto después del último marcador
         if pos_actual < len(full_text):
             texto_despues = full_text[pos_actual:]
-            parrafo.add_run(texto_despues)
+            run_despues = parrafo.add_run(texto_despues)
+            _preservar_espacios_del_run(run_despues)
+            formato = formato_en_posicion(pos_actual)
+            if formato is not None:
+                run_despues._r.insert(0, deepcopy(formato))
+            
+        # if variable_ref.startswith("<<ref_tabla_"):
+        #     prefijo = "Tabla"
 
     msg = "Referencias cruzadas insertadas."
     print(msg)
@@ -337,26 +404,47 @@ def reemplazar_texto_en_cuadros_de_texto(doc, diccionario_de_reemplazos: dict):
             if not text_nodes:
                 continue
 
-            texto_original = ''.join(node.text or '' for node in text_nodes)
-            if not texto_original:
+            if not any(node.text for node in text_nodes):
                 continue
-
-            texto_nuevo = texto_original
-            reemplazos_en_parrafo = 0
 
             for key, dato in variables_texto.items():
                 valor = str(dato[0]) if isinstance(dato, list) and dato else str(dato)
-                if key in texto_nuevo:
-                    ocurrencias = texto_nuevo.count(key)
-                    texto_nuevo = texto_nuevo.replace(key, valor)
-                    reemplazos_en_parrafo += ocurrencias
 
-            if texto_nuevo != texto_original:
-                first_t = text_nodes[0]
-                first_t.text = texto_nuevo
-                for t_node in text_nodes[1:]:
-                    t_node.text = ""
-                reemplazos += reemplazos_en_parrafo
+                while True:
+                    texto_completo = ''.join(node.text or '' for node in text_nodes)
+                    inicio = texto_completo.find(key)
+                    if inicio == -1:
+                        break
+
+                    fin = inicio + len(key)
+                    posiciones = []
+                    offset = 0
+
+                    for indice, node in enumerate(text_nodes):
+                        texto_nodo = node.text or ''
+                        siguiente_offset = offset + len(texto_nodo)
+                        if siguiente_offset > inicio and offset < fin:
+                            posiciones.append((indice, offset, siguiente_offset))
+                        offset = siguiente_offset
+
+                    primer_indice, primer_offset, _ = posiciones[0]
+                    ultimo_indice, _, ultimo_fin = posiciones[-1]
+                    primer_nodo = text_nodes[primer_indice]
+                    ultimo_nodo = text_nodes[ultimo_indice]
+
+                    prefijo = (primer_nodo.text or '')[:inicio - primer_offset]
+                    inicio_ultimo = ultimo_fin - len(ultimo_nodo.text or '')
+                    sufijo = (ultimo_nodo.text or '')[fin - inicio_ultimo:]
+
+                    if primer_indice == ultimo_indice:
+                        primer_nodo.text = prefijo + valor + sufijo
+                    else:
+                        primer_nodo.text = prefijo + valor
+                        for indice, _, _ in posiciones[1:-1]:
+                            text_nodes[indice].text = ''
+                        ultimo_nodo.text = sufijo
+
+                    reemplazos += 1
 
     print(f"Se reemplazaron las variables de la portada")
 
@@ -407,106 +495,42 @@ def insertar_documento_externo_en_plantilla(doc, diccionario_de_reemplazos):
                     msg = "Planes de crucero insertados"
                 print(msg)
 
+def rellenar_tablas_en_plantilla(
+    doc,
+    diccionario_de_reemplazos: dict
+):
 
-def rellenar_tablas_en_plantilla(doc, diccionario_de_reemplazos: dict):      
-    """Rellena una tabla en la plantilla con datos de un DataFrame o diccionario.
-    
-    Soporta estilos configurables, colores de fondo, MultiIndex, y merge de celdas.
-    
-    Args:
-        doc: Objeto Document de python-docx
-        nombre_marcador: Marcador a buscar en la tabla (ej: "<<table_sondas>>")
-        datos: DataFrame o diccionario con los datos a insertar
-              Formato dict: {"col1": [val1, val2, ...], "col2": [...], ...}
-        config_estilos: Configuración de estilos (EstilosTabla, dict, o None)
-                       Si None, usa estilos por defecto razonables
-        opciones_tabla: Opciones de tabla (OpcionesTabla, dict, o None)
-                       Si None, usa opciones por defecto
-    
-    Comportamiento:
-        - Busca el marcador en cualquier celda de las tablas del documento
-        - Inserta datos del DataFrame fila por fila, respetando orden de columnas
-        - Aplica estilos según jerarquía: celda > fila > columna > defecto
-        - Soporta colores de fondo RGB y estilos de párrafo del documento
-        - Aplana MultiIndex automáticamente si está activado en opciones
-        - Detecta y combina celdas verticales con valores repetidos (si está activado)
-        - Elimina fila marcador automáticamente (si está activado)
-    
-    Ejemplo de uso básico (sin estilos personalizados):
-        >>> from docx import Document
-        >>> doc = Document('plantilla.docx')
-        >>> datos = {
-        ...     'Secuencia': [0, 1, 2],
-        ...     'Localización': ['BOT-01', 'BOT-02', 'BOT-03'],
-        ...     'Latitud': [18.5, 18.6, 18.7]
-        ... }
-        >>> rellenar_tablas_en_plantilla(doc, "<<table_posiciones>>", datos)
-        >>> doc.save('documento_con_tabla.docx')
-    
-    Ejemplo avanzado (con estilos personalizados):
-        >>> from docx import Document
-        >>> from crear_documentos.services.word_template_writer import EstilosTabla, OpcionesTabla
-        >>> 
-        >>> doc = Document('plantilla.docx')
-        >>> 
-        >>> # Configurar estilos
-        >>> estilos = EstilosTabla(doc)
-        >>> estilos.set_color_de_columna(0, (230, 230, 250))  # Lavanda para primera columna
-        >>> estilos.set_estilo_de_columna(1, 'texto_tablas_justificado')
-        >>> estilos.set_color_de_fila(0, (255, 240, 245))  # Rosado para primera fila
-        >>> 
-        >>> # Configurar opciones
-        >>> opciones = OpcionesTabla()
-        >>> opciones.set_detectar_merge(True)
-        >>> opciones.set_columnas_para_merge([0, 1])  # Solo merge en columnas 0 y 1
-        >>> 
-        >>> # DataFrame con datos
-        >>> import pandas as pd
-        >>> df = pd.DataFrame({
-        ...     'Tipo': ['A', 'A', 'B', 'B'],
-        ...     'Subtipo': ['A1', 'A1', 'B1', 'B2'],
-        ...     'Valor': [10, 20, 30, 40]
-        ... })
-        >>> 
-        >>> rellenar_tablas_en_plantilla(doc, "<<table_datos>>", df, estilos, opciones)
-        >>> doc.save('documento_avanzado.docx')
-    
-    Ejemplo con diccionario de configuración (backward compatibility):
-        >>> config_dict = {
-        ...     "por_defecto": {"estilo_parrafo": "Normal", "altura_fila": 288290},
-        ...     "por_columna": {0: {"color_fondo": (230, 230, 250)}},
-        ...     "por_fila": {},
-        ...     "por_celda": {}
-        ... }
-        >>> opciones_dict = {
-        ...     "aplanar_multiindex": True,
-        ...     "detectar_merge": False,
-        ...     "columnas_para_merge": None,
-        ...     "eliminar_fila_marcador": True
-        ... }
-        >>> rellenar_tablas_en_plantilla(doc, "<<table_datos>>", datos, config_dict, opciones_dict)
-    
-    Raises:
-        ValueError: Si el marcador no se encuentra, si hay errores en la configuración,
-                   o si los datos están vacíos
-    
-    Nota:
-        - La plantilla debe tener un marcador <<nombre>> en alguna celda de la tabla
-        - El marcador se coloca típicamente en la primera fila de datos (no encabezado)
-        - Los datos se insertan por ORDEN de columna, no por nombre
-        - Columna 0 del DataFrame → Columna 0 de la tabla
-    """
-    
-    variables_texto = {k: v for k, v in diccionario_de_reemplazos.items() if k.startswith("<<tabla_")}
-    
-    for variable in variables_texto.keys():
+    variables_tabla = {
+        k: v
+        for k, v in diccionario_de_reemplazos.items()
+        if k.startswith("<<tabla_")
+    }
+
+    for variable in variables_tabla.keys():
+
         df_tabla = diccionario_de_reemplazos[variable]["tabla"]
-        config_estilos = diccionario_de_reemplazos[variable]["estilos_de_tabla"]
-        opciones_tabla = diccionario_de_reemplazos[variable]["opciones_de_tabla"]
-        fill_table(doc, variable, df_tabla, config_estilos, opciones_tabla)
-    
-        msg = f"Tabla '{variable}' rellenada correctamente."
-        print(msg)
+
+        config_estilos = (
+            diccionario_de_reemplazos[variable]
+            ["estilos_de_tabla"]
+        )
+
+        opciones_tabla = (
+            diccionario_de_reemplazos[variable]
+            ["opciones_de_tabla"]
+        )
+
+        fill_table(
+            doc,
+            variable,
+            df_tabla,
+            config_estilos,
+            opciones_tabla
+        )
+
+        print(
+            f"Tabla '{variable}' rellenada correctamente."
+        )
 
 
 def reemplazar_variables_en_tablas(doc, diccionario_de_reemplazos):

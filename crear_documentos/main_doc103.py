@@ -1,6 +1,5 @@
 
 from pydoc import doc
-
 from services.abrir_plantilla_doris import abrir_plantilla_doris
 from services.manager_variables_excel_datos_despliegue import *
 from services.manager_variables_excel_datos_campania import *
@@ -9,6 +8,7 @@ from services.doc_103.constructor_diccionario_datos_documento import *
 from services.word_template_writer import *
 from services.guardar_documento import guardar_documento
 from services.doc_103.manager_porcentajes import *
+from services.word_template_writer._table_helpers import procesar_titulos_y_referencias, activar_actualizacion_de_campos
 import pandas as pd
 import logging
 import sys
@@ -62,25 +62,22 @@ def main() -> int:
             df_datos_despliegue=df_datos_despliegue_filtrado,
             df_porcentajes=df_porcentajes,
             diccionario_de_reemplazos=dict_demo,
-            doc=doc,
+            doc=doc, 
+            df_datos_campanias=df_datos_campanias
         )
-        
-        # reemplazar_texto_en_cuadros_de_texto(doc=doc, diccionario_de_reemplazos=dict_demo)
-        # insertar_figuras_en_plantilla(doc=doc, diccionario_de_reemplazos=dict_demo)
-        # insertar_referencias_cruzadas_en_plantilla(doc=doc, diccionario_de_reemplazos=dict_demo)
-        # reemplazar_texto_en_plantilla(doc=doc, diccionario_de_reemplazos=dict_demo)
-        # insertar_documento_externo_en_plantilla(doc=doc, diccionario_de_reemplazos=dict_demo)
-        # rellenar_tablas_en_plantilla(doc=doc, diccionario_de_reemplazos=dict_demo)
-        # reemplazar_variables_en_tablas(doc=doc, diccionario_de_reemplazos=dict_demo)
         
         reemplazar_texto_en_cuadros_de_texto(doc=doc, diccionario_de_reemplazos=dict_demo)
         reemplazar_texto_en_plantilla(doc=doc,diccionario_de_reemplazos=dict_demo)
+        insertar_destino_en_marcador(doc=doc,marcador="<<destino_entregable_101>>",bookmark="referencia_entregable_101",numero="1",)
         insertar_figuras_en_plantilla(doc=doc, diccionario_de_reemplazos=dict_demo)
         insertar_referencias_cruzadas_en_plantilla(doc=doc, diccionario_de_reemplazos=dict_demo)
+        insertar_referencia_en_marcador(doc=doc,marcador="<<ref_entregable_101>>",bookmark="referencia_entregable_101",)
         insertar_documento_externo_en_plantilla(doc=doc, diccionario_de_reemplazos=dict_demo)
         rellenar_tablas_en_plantilla(doc=doc,diccionario_de_reemplazos=dict_demo)
         reemplazar_variables_en_tablas(doc=doc, diccionario_de_reemplazos=dict_demo)
 
+        procesar_titulos_y_referencias(doc=doc,diccionario_de_reemplazos=dict_demo)
+        activar_actualizacion_de_campos(doc=doc)
 
         # Calcular fecha para el nombre del documento: primer día del mes siguiente a la vigencia
         fecha_inicio_vigencia = get_fecha_inicio_vigencia(df_datos_despliegue_filtrado)

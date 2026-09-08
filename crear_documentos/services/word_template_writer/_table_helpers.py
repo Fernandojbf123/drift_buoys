@@ -8,12 +8,15 @@ Private module - Not intended for direct external use.
 Import from the public API in api.py instead.
 """
 
+from copy import deepcopy
 from matplotlib import table
 import pandas as pd
 from typing import Union, Optional, Dict, List, Tuple
 from docx.oxml.ns import qn
+from docx.text.paragraph import Paragraph
 from .schemas_helpers import EstilosTabla, OpcionesTabla
 from ._table_styling import apply_cell_style, apply_row_height, apply_table_borders
+from docx.oxml import OxmlElement
 
 
 # ===== NORMALIZATION FUNCTIONS =====
@@ -457,3 +460,444 @@ def fill_table(
     
     return doc
 
+
+def aux_insertar_tabla_con_titulo(paragraph, numero="1", titulo="Relación de equipos", bookmark_name="_Ref_Tabla_1"):
+    """
+    Crea una línea tipo:
+    Tabla 1. Relación de equipos
+
+    con el numero 1 dentro de un bookmark para referencia cruzada.
+    """
+    # Texto fijo
+    paragraph.add_run("Tabla ")
+
+    # Bookmark alrededor del número
+    bookmark_start = OxmlElement("w:bookmarkStart")
+    bookmark_start.set(qn("w:id"), "1")
+    bookmark_start.set(qn("w:name"), bookmark_name)
+    paragraph._element.append(bookmark_start)
+
+    paragraph.add_run(numero)
+
+    bookmark_end = OxmlElement("w:bookmarkEnd")
+    bookmark_end.set(qn("w:id"), "1")
+    paragraph._element.append(bookmark_end)
+
+    paragraph.add_run(f". {titulo}")
+    
+def aux_insertar_referencia_tabla(paragraph, bookmark_name="_Ref_Tabla_1"):
+    run = paragraph.add_run()
+    fldChar_begin = OxmlElement("w:fldChar")
+    fldChar_begin.set(qn("w:fldCharType"), "begin")
+
+    instrText = OxmlElement("w:instrText")
+    instrText.set(qn("xml:space"), "preserve")
+    instrText.text = f" REF {bookmark_name} \\h "
+
+    fldChar_separate = OxmlElement("w:fldChar")
+    fldChar_separate.set(qn("w:fldCharType"), "separate")
+
+    text_run = OxmlElement("w:r")
+    text_elem = OxmlElement("w:t")
+    text_elem.text = "XX"
+    text_run.append(text_elem)
+
+    fldChar_end = OxmlElement("w:fldChar")
+    fldChar_end.set(qn("w:fldCharType"), "end")
+
+    run._element.append(fldChar_begin)
+    run._element.append(instrText)
+    run._element.append(fldChar_separate)
+    run._element.append(text_run)
+    run._element.append(fldChar_end)
+    
+    from docx.oxml import OxmlElement
+from docx.oxml.ns import qn
+
+
+def agregar_campo_word(parrafo, instruccion):
+    """
+    Inserta un campo de Word.
+
+    Ejemplos:
+        { SEQ Tabla \\* ARABIC }
+        { REF tabla_1 }
+    """
+
+    run = parrafo.add_run()
+
+    fld_begin = OxmlElement("w:fldChar")
+    fld_begin.set(qn("w:fldCharType"), "begin")
+
+    instr_text = OxmlElement("w:instrText")
+    instr_text.set(qn("xml:space"), "preserve")
+    instr_text.text = f" {instruccion} "
+
+    fld_separate = OxmlElement("w:fldChar")
+    fld_separate.set(qn("w:fldCharType"), "separate")
+
+    # Valor provisional que Word puede mostrar antes de actualizar campos
+    run_resultado = OxmlElement("w:r")
+    texto_resultado = OxmlElement("w:t")
+    texto_resultado.text = "1"
+    run_resultado.append(texto_resultado)
+
+    fld_end = OxmlElement("w:fldChar")
+    fld_end.set(qn("w:fldCharType"), "end")
+
+    run._r.append(fld_begin)
+    run._r.append(instr_text)
+    run._r.append(fld_separate)
+    run._r.append(run_resultado)
+    run._r.append(fld_end)
+
+    return run
+
+
+def activar_actualizacion_de_campos(doc):
+    """
+    Hace que Word actualice los campos al abrir el documento.
+    """
+
+    settings = doc.settings.element
+
+    update_fields = settings.find(qn("w:updateFields"))
+
+    if update_fields is None:
+        update_fields = OxmlElement("w:updateFields")
+        settings.append(update_fields)
+
+    update_fields.set(qn("w:val"), "true")
+
+def insertar_caption_tabla(
+    parrafo,
+    bookmark,
+    texto_titulo,
+    bookmark_id
+):
+    """
+    Inserta:
+
+        Tabla { SEQ Tabla }: texto...
+
+    y crea un bookmark sobre "Tabla {SEQ Tabla}".
+    """
+
+    # "Tabla "
+    parrafo.add_run("Tabla ")
+
+    # El bookmark debe contener solo el número, igual que en las figuras.
+    bookmark_start = OxmlElement("w:bookmarkStart")
+    bookmark_start.set(qn("w:id"), str(bookmark_id))
+    bookmark_start.set(qn("w:name"), bookmark)
+    parrafo._p.append(bookmark_start)
+
+    # { SEQ Tabla }
+    agregar_campo_word(
+        parrafo,
+        r"SEQ Tabla \* ARABIC"
+    )
+
+    # Bookmark END
+    bookmark_end = OxmlElement("w:bookmarkEnd")
+    bookmark_end.set(qn("w:id"), str(bookmark_id))
+
+    parrafo._p.append(bookmark_end)
+
+    # Texto del título
+    parrafo.add_run(f". {texto_titulo}")
+
+
+def reemplazar_titulo_tabla_en_run(
+    parrafo,
+    run,
+    marcador,
+    bookmark,
+    texto_titulo,
+    bookmark_id
+):
+    """Inserta un caption donde está el marcador sin borrar el párrafo."""
+    texto = run.text or ""
+    posicion = texto.find(marcador)
+    if posicion == -1:
+        return False
+
+    texto_antes = texto[:posicion]
+    texto_despues = texto[posicion + len(marcador):]
+    run.text = texto_antes
+
+    parrafo_temporal = OxmlElement("w:p")
+    parrafo_caption = Paragraph(parrafo_temporal, parrafo._parent)
+    insertar_caption_tabla(
+        parrafo=parrafo_caption,
+        bookmark=bookmark,
+        texto_titulo=texto_titulo,
+        bookmark_id=bookmark_id
+    )
+
+    elementos_caption = list(parrafo_temporal)
+    ancla = run._r
+    for elemento in elementos_caption:
+        ancla.addnext(elemento)
+        ancla = elemento
+
+    if texto_despues:
+        run_despues = OxmlElement("w:r")
+        if run._r.rPr is not None:
+            run_despues.append(deepcopy(run._r.rPr))
+        texto_despues_xml = OxmlElement("w:t")
+        texto_despues_xml.text = texto_despues
+        run_despues.append(texto_despues_xml)
+        ancla.addnext(run_despues)
+
+    return True
+    
+def insertar_referencia_tabla(parrafo, bookmark):
+    run_referencia = parrafo.add_run("Tabla ")
+    run_campo = agregar_campo_word(
+        parrafo,
+        f"REF {bookmark} \\h"
+    )
+
+    # Mantener el prefijo y el campo REF en un único run permite moverlos
+    # juntos a la posición exacta del marcador original.
+    for elemento in list(run_campo._r):
+        run_referencia._r.append(elemento)
+    run_campo._r.getparent().remove(run_campo._r)
+
+    return run_referencia
+
+
+def reemplazar_referencia_tabla_en_run(parrafo, run, marcador, bookmark):
+    """Inserta el campo REF en la posición exacta del marcador dentro del run."""
+    texto = run.text
+    posicion = texto.find(marcador)
+    if posicion == -1:
+        return False
+
+    texto_antes = texto[:posicion]
+    texto_despues = texto[posicion + len(marcador):]
+    run.text = texto_antes
+
+    run_referencia = insertar_referencia_tabla(
+        parrafo=parrafo,
+        bookmark=bookmark
+    )
+    run._r.addnext(run_referencia._r)
+
+    if texto_despues:
+        run_despues = parrafo.add_run(texto_despues)
+        run_referencia._r.addnext(run_despues._r)
+
+    return True
+
+
+def reemplazar_referencia_tabla_en_parrafo(parrafo, marcador, bookmark):
+    """Reemplaza una referencia aunque el marcador cruce varios runs."""
+    runs = parrafo.runs
+    texto_completo = "".join(run.text or "" for run in runs)
+    inicio = texto_completo.find(marcador)
+    if inicio == -1:
+        return False
+
+    fin = inicio + len(marcador)
+    posiciones = []
+    offset = 0
+
+    for indice, run_actual in enumerate(runs):
+        texto_run = run_actual.text or ""
+        siguiente_offset = offset + len(texto_run)
+        if siguiente_offset > inicio and offset < fin:
+            posiciones.append((indice, offset, siguiente_offset))
+        offset = siguiente_offset
+
+    primer_indice, primer_offset, _ = posiciones[0]
+    ultimo_indice, _, ultimo_fin = posiciones[-1]
+    primer_run = runs[primer_indice]
+    ultimo_run = runs[ultimo_indice]
+
+    texto_antes = (primer_run.text or '')[:inicio - primer_offset]
+    inicio_ultimo = ultimo_fin - len(ultimo_run.text or '')
+    texto_despues = (ultimo_run.text or '')[fin - inicio_ultimo:]
+
+    if primer_indice == ultimo_indice:
+        primer_run.text = texto_antes
+    else:
+        primer_run.text = texto_antes
+        for indice, _, _ in posiciones[1:-1]:
+            runs[indice].text = ''
+        ultimo_run.text = texto_despues
+
+    run_referencia = insertar_referencia_tabla(
+        parrafo=parrafo,
+        bookmark=bookmark
+    )
+    primer_run._r.addnext(run_referencia._r)
+
+    if primer_indice == ultimo_indice and texto_despues:
+        run_despues = OxmlElement("w:r")
+        if primer_run._r.rPr is not None:
+            run_despues.append(deepcopy(primer_run._r.rPr))
+        texto_despues_xml = OxmlElement("w:t")
+        texto_despues_xml.text = texto_despues
+        run_despues.append(texto_despues_xml)
+        run_referencia._r.addnext(run_despues)
+
+    return True
+
+def obtener_todos_los_parrafos(doc):
+    """
+    Devuelve todos los párrafos del documento,
+    incluyendo los que están dentro de tablas.
+    """
+
+    # Párrafos normales
+    for parrafo in doc.paragraphs:
+        yield parrafo
+
+    # Párrafos dentro de tablas
+    for tabla in doc.tables:
+        yield from obtener_parrafos_de_tabla(tabla)
+
+    # Párrafos dentro de cuadros de texto
+    partes_vistas = set()
+    partes = [doc.element]
+
+    for section in doc.sections:
+        partes.extend([
+            section.header._element,
+            section.footer._element
+        ])
+
+    for part in doc.part.package.parts:
+        elemento = getattr(part, "_element", None)
+        if elemento is not None:
+            partes.append(elemento)
+
+    for parte in partes:
+        identificador = id(parte)
+        if identificador in partes_vistas:
+            continue
+        partes_vistas.add(identificador)
+
+        for nodo in parte.iter():
+            if nodo.tag.split("}")[-1] != "txbxContent":
+                continue
+
+            for nodo_parrafo in nodo.iter():
+                if nodo_parrafo.tag.split("}")[-1] == "p":
+                    yield Paragraph(nodo_parrafo, nodo)
+
+
+def obtener_parrafos_de_tabla(tabla):
+    """
+    Recorre recursivamente una tabla y devuelve
+    los párrafos de sus celdas, incluyendo tablas
+    anidadas.
+    """
+
+    for fila in tabla.rows:
+
+        for celda in fila.cells:
+
+            for parrafo in celda.paragraphs:
+                yield parrafo
+
+            # Tablas anidadas
+            for tabla_anidada in celda.tables:
+                yield from obtener_parrafos_de_tabla(tabla_anidada)
+
+
+def limpiar_parrafo(parrafo):
+    """
+    Elimina todos los runs del párrafo.
+    """
+
+    for run in list(parrafo.runs):
+        run._element.getparent().remove(run._element)
+
+
+def procesar_titulos_y_referencias(
+    doc,
+    diccionario_de_reemplazos):
+    """Procesa:
+        <<titulo_tabla_1>>
+        <<ref_tabla_1>>
+    creando campos SEQ, REF y bookmarks de Word.
+    """
+    bookmark_id = 1000
+
+    for variable, config in diccionario_de_reemplazos.items():
+        # =====================================================
+        # TÍTULOS
+        # =====================================================
+        if variable.startswith("<<titulo_tabla_"):
+            numero = (
+                variable
+                .replace("<<titulo_tabla_", "")
+                .replace(">>", "")
+            )
+
+            bookmark = f"tabla_{numero}"
+
+            texto_titulo = config["texto"]
+
+            encontrado = False
+
+            for parrafo in obtener_todos_los_parrafos(doc):
+
+                if variable in parrafo.text:
+                    for run in parrafo.runs:
+                        if reemplazar_titulo_tabla_en_run(
+                            parrafo=parrafo,
+                            run=run,
+                            marcador=variable,
+                            bookmark=bookmark,
+                            texto_titulo=texto_titulo,
+                            bookmark_id=bookmark_id
+                        ):
+                            bookmark_id += 1
+                            encontrado = True
+                            break
+                    if encontrado:
+                        break
+
+            if not encontrado:
+                print(
+                    f"ADVERTENCIA: no se encontró "
+                    f"'{variable}' en la plantilla."
+                )
+
+        # =====================================================
+        # REFERENCIAS
+        # =====================================================
+
+        elif variable.startswith("<<ref_tabla_"):
+
+            numero = (
+                variable
+                .replace("<<ref_tabla_", "")
+                .replace(">>", "")
+            )
+
+            bookmark = f"tabla_{numero}"
+
+            encontrado = False
+
+            for parrafo in obtener_todos_los_parrafos(doc):
+
+                if variable in parrafo.text:
+
+                    if reemplazar_referencia_tabla_en_parrafo(
+                        parrafo=parrafo,
+                        marcador=variable,
+                        bookmark=bookmark
+                    ):
+                        encontrado = True
+            if not encontrado:
+                print(
+                    f"ADVERTENCIA: no se encontró "
+                    f"'{variable}' en la plantilla."
+                )
+
+    activar_actualizacion_de_campos(doc)

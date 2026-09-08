@@ -71,6 +71,8 @@ Dependencias:
 
 # Funciones principales del orquestador (API pública en español)
 from .api import (
+    insertar_destino_en_marcador,
+    insertar_referencia_en_marcador,
     reemplazar_texto_en_cuadros_de_texto,
     insertar_figuras_en_plantilla,
     insertar_referencias_cruzadas_en_plantilla,
@@ -93,6 +95,8 @@ from .utils import insert_line_feed
 
 __all__ = [
     # API principal (6 funciones orquestadoras)
+    'insertar_destino_en_marcador',
+    'insertar_referencia_en_marcador',
     'insertar_figuras_en_plantilla',
     'insertar_referencias_cruzadas_en_plantilla',
     'reemplazar_texto_en_plantilla',

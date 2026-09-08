@@ -8,6 +8,7 @@ Private module - Not intended for direct external use.
 Import from the public API in api.py instead.
 """
 
+from copy import deepcopy
 from genericpath import exists
 from docx.shared import Inches
 from docx.oxml import OxmlElement
@@ -188,7 +189,13 @@ def aux_insertar_figuras_con_titulo(paragraph, key, lista_figuras):
     return bookmarks_creados
 
 
-def aux_insertar_referencia_cruzada(paragraph, nombre_bookmark, texto_antes="Figura", mostrar_numero=True):
+def aux_insertar_referencia_cruzada(
+    paragraph,
+    nombre_bookmark,
+    texto_antes="Figura",
+    mostrar_numero=True,
+    formato=None
+):
     """Inserta una referencia cruzada a una figura en un párrafo.
     
     Args:
@@ -205,9 +212,14 @@ def aux_insertar_referencia_cruzada(paragraph, nombre_bookmark, texto_antes="Fig
     # Agregar texto antes si se proporciona
     if texto_antes:
         run_texto = paragraph.add_run(texto_antes + " ")
+        run_texto._r[-1].set(qn("xml:space"), "preserve")
+        if formato is not None:
+            run_texto._r.insert(0, deepcopy(formato))
     
     # Crear el run para el campo REF
     run = paragraph.add_run()
+    if formato is not None:
+        run._r.insert(0, deepcopy(formato))
     
     # Crear el campo REF para la figura
     fldChar_begin = OxmlElement('w:fldChar')
