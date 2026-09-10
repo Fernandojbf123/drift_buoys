@@ -267,24 +267,24 @@ def construir_diccionario_de_reemplazos_para_tablas(df_datos_despliegue: pd.Data
     estilos_de_tabla = EstilosTabla(doc)
     estilos_de_tabla.set_estilo_por_defecto("texto_tablas_centrado")
     
-    tabla2 = df_datos_despliegue[["serial_de_sonda","latitud_maniobra","longitud_maniobra"]]
+    tabla2 = df_datos_despliegue[["serial_de_sonda","latitud_plan","longitud_plan","fecha_y_hora_de_despliegue_plan"]]
     tabla2.insert(0,"secuencia", range(1, len(tabla2) + 1))
     tabla2["secuencia"] = tabla2["secuencia"].astype(int).astype(str)
     tabla2["serial_de_sonda"] = tabla2["serial_de_sonda"].astype(str)
-    tabla2["latitud_maniobra"] = (tabla2["latitud_maniobra"].astype(float).apply(lambda x: convertir_cualquier_coordenada_a_grados_y_minutos(x, tipo="lat")))
-    tabla2["longitud_maniobra"] = (tabla2["longitud_maniobra"].astype(float).apply(lambda x: convertir_cualquier_coordenada_a_grados_y_minutos(x, tipo="lon")))
+    tabla2["latitud_plan"] = (tabla2["latitud_plan"].astype(float).apply(lambda x: convertir_cualquier_coordenada_a_grados_y_minutos(x, tipo="lat")))
+    tabla2["longitud_plan"] = (tabla2["longitud_plan"].astype(float).apply(lambda x: convertir_cualquier_coordenada_a_grados_y_minutos(x, tipo="lon")))
     diccionario_de_reemplazos["<<tabla_plan>>"] = {
         "tabla": tabla2,
         "estilos_de_tabla": estilos_de_tabla,
         "opciones_de_tabla": opciones_de_tabla
     }
 
-    tabla3 = df_datos_despliegue[["serial_de_sonda","latitud_plan","longitud_plan","fecha_y_hora_de_despliegue_maniobra","estado_despliegue"]]
+    tabla3 = df_datos_despliegue[["serial_de_sonda","latitud_maniobra","longitud_maniobra","fecha_y_hora_de_despliegue_maniobra","estado_despliegue"]]
     tabla3.insert(0,"secuencia", range(1, len(tabla3) + 1))
     tabla3["secuencia"] = tabla3["secuencia"].astype(int).astype(str)
     tabla3["serial_de_sonda"] = tabla3["serial_de_sonda"].astype(str)
-    tabla3["latitud_plan"] = (tabla3["latitud_plan"].astype(float).apply(lambda x: convertir_cualquier_coordenada_a_grados_y_minutos(x, tipo="lat")))
-    tabla3["longitud_plan"] = (tabla3["longitud_plan"].astype(float).apply(lambda x: convertir_cualquier_coordenada_a_grados_y_minutos(x, tipo="lon")))
+    tabla3["latitud_maniobra"] = (tabla3["latitud_maniobra"].astype(float).apply(lambda x: convertir_cualquier_coordenada_a_grados_y_minutos(x, tipo="lat")))
+    tabla3["longitud_maniobra"] = (tabla3["longitud_maniobra"].astype(float).apply(lambda x: convertir_cualquier_coordenada_a_grados_y_minutos(x, tipo="lon")))
     tabla3["fecha_y_hora_de_despliegue_maniobra"] = pd.to_datetime(tabla3["fecha_y_hora_de_despliegue_maniobra"], format = "%d/%m/%Y %H:%M:%S").dt.strftime("%d/%m/%Y %H:%M")
     
     diccionario_de_reemplazos["<<tabla_maniobra>>"] = {

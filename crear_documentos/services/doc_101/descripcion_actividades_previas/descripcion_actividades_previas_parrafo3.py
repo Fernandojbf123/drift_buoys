@@ -41,7 +41,7 @@ def descripcion_actividades_previas_parrafo3(df_datos_campanias: pd.DataFrame, d
             elif i == len(fechas_campanias_unicos) - 1:
                 texto += f" y {cantidad_de_sondas_por_campania} sondas se liberaron el {timestamp_a_texto_espanol(fecha_campania, mes_y_anio = False)}"
             
-    texto += f". La ruta de liberación de las sondas en {p['la_las']} {p['campania_campanias']},"
+    texto += f". La ruta de liberación de las sondas en {p['la_las']} {p['campania_campanias']}"
     texto += f" obedeció el trayecto óptimo considerando la distancia desde tierra hasta el lugar de liberación acordado con PEMEX,"
     texto += f" teniendo en cuenta las condiciones atmosféricas y las posiciones en las cuales se hicieron las liberaciones."
     texto += f" El derrotero consideró el sitio donde se dispuso del equipo que se utilizó para la liberación de las sondas y los"

@@ -17,7 +17,7 @@ def descripcion_actividades_previas_parrafo2(df_datos_campanias: pd.DataFrame, d
     texto = f"Las actividades previas a {articulo} {palabra_campania} de liberación comenzaron una vez que PEMEX proporcionó"
     texto += f" al personal de ASM-CICESE las coordenadas para el despliegue de las {numero_de_sondas} sondas oceanográficas,"
     texto += f" diseñadas conforme a las necesidades específicas de PEMEX. Previo al despliegue de las sondas se realizaron las"
-    texto += f" actividades determinadas de acuerdo al plan de trabajo del personal y, en la medida de lo posible, se consideraron"
+    texto += f" actividades determinadas de acuerdo con el plan de trabajo del personal y, en la medida de lo posible, se consideraron"
     texto += f" los tiempos de cada despliegue en {p['el_los']} {p['plan_planes']} de {p['campania_campanias']}."
     
     return texto

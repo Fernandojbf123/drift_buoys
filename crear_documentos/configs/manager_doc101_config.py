@@ -2,20 +2,21 @@ import os
 import re
 import dotenv
 import importlib
-import configs.configuracion_documentos
+# import configs.configuracion_documentos
+import configs.configuracion_101
 import services
-importlib.reload(configs.configuracion_documentos)
+
 
 dotenv.load_dotenv()  # Carga las variables de entorno desde el archivo .env
 
 def validate_config_value(attr_name: str, expect_type: type | tuple | None = None, must_exist_path: bool = False, allow_empty: bool = False) -> tuple[bool, str]:
-    """Valida una variable en `configs.configuracion_documentos`.
+    """Valida una variable en `configs.configuracion_101`.
 
     Retorna `(True, "")` si pasa, o `(False, mensaje_de_error)` si falla.
     """
     errors: list[str] = []
     try:
-        value = getattr(configs.configuracion_documentos, attr_name)
+        value = getattr(configs.configuracion_101, attr_name)
     except AttributeError:
         return False, f"Falta la variable de configuración: {attr_name}"
 
