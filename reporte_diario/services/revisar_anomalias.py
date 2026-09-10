@@ -13,7 +13,7 @@ def revisar_anomalias():
     output_dict = {
         "serial": [],
         "fecha_y_hora_de_ultima_medicion_CST": [],
-        "tiene_valores_anomalos_en_las_ultimas_24_horas": [],
+        "rapidez_dentro_del_rango": [],
         "voltaje_dentro_del_rango": []
     }
 
@@ -32,6 +32,7 @@ def revisar_anomalias():
             if df.empty:    
                 return f"El archivo para el serial {serial} está vacío o no tiene datos válidos."
             
+            print(ruta_al_archivo)
             df.rename(columns={"fecha": "fecha_utc"}, inplace=True)
             df["fecha_utc"] = pd.to_datetime(df["fecha_utc"], format="%Y-%m-%dT%H:%M:%S.%fZ", errors='coerce')  # Convertir la columna 'fecha' a datetime
             # Los datos vienen en hora UTC; cambiarlos a CST
@@ -46,20 +47,21 @@ def revisar_anomalias():
             # Si el df_cortado está vacío (No hay datos en las últimas 24 horas)
             if df_cortado.empty:
                 print(f"El archivo para el serial {serial} no tiene datos en las últimas 24 horas.")
-                output_dict["tiene_valores_anomalos_en_las_ultimas_24_horas"].append(f"No. La sonda fue desactivada el {fecha_de_ultima_medicion}")
-            
+                output_dict["rapidez_dentro_del_rango"].append(f"Sonda desactivada el {fecha_de_ultima_medicion_str}")
+                output_dict["voltaje_dentro_del_rango"].append(f"Sonda fue desactivada el {fecha_de_ultima_medicion_str}")
+                
             # Si el df_cortado tiene datos (hay datos en las últimas 24 horas)
             else: 
                 # Busco si tiene valores anómalos de velocidad
                 velocidad_mayor_a_2 = df_cortado[df_cortado["speed"] > 2]
                 if velocidad_mayor_a_2.empty:
-                    output_dict["tiene_valores_anomalos_en_las_ultimas_24_horas"].append("No")
+                    output_dict["rapidez_dentro_del_rango"].append("Si")
                 else:
                     print(" ")
-                    print(f"Anomalía de velocidad detectada en el serial {serial}: Velocidad mayor a 2 m/s en los últimos 24 horas.")
+                    print(f"Anomalía de rapidez detectada en el serial {serial}: Velocidad mayor a 2 m/s en los últimos 24 horas.")
                     print(velocidad_mayor_a_2)
                     print(" ")
-                    output_dict["tiene_valores_anomalos_en_las_ultimas_24_horas"].append(f"Si")
+                    output_dict["rapidez_dentro_del_rango"].append(f"No; se detectaron valores anómalos")
                 
                 # Buscar si existen valores anómalos en el voltaje
                 voltaje_menor_a_39 = df_cortado[df_cortado["volt"] <= 39]

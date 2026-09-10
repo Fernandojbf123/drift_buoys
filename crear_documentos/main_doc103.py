@@ -68,10 +68,10 @@ def main() -> int:
         
         reemplazar_texto_en_cuadros_de_texto(doc=doc, diccionario_de_reemplazos=dict_demo)
         reemplazar_texto_en_plantilla(doc=doc,diccionario_de_reemplazos=dict_demo)
-        insertar_destino_en_marcador(doc=doc,marcador="<<destino_entregable_101>>",bookmark="referencia_entregable_101",numero="1",)
+        insertar_destino_en_marcador(doc=doc,marcador="<<destino_entregable_101>>",bookmark="referencia_entregable_101",numero="1")
         insertar_figuras_en_plantilla(doc=doc, diccionario_de_reemplazos=dict_demo)
         insertar_referencias_cruzadas_en_plantilla(doc=doc, diccionario_de_reemplazos=dict_demo)
-        insertar_referencia_en_marcador(doc=doc,marcador="<<ref_entregable_101>>",bookmark="referencia_entregable_101",)
+        insertar_referencia_en_marcador(doc=doc,marcador="<<ref_entregable_101>>",bookmark="referencia_entregable_101")
         insertar_documento_externo_en_plantilla(doc=doc, diccionario_de_reemplazos=dict_demo)
         rellenar_tablas_en_plantilla(doc=doc,diccionario_de_reemplazos=dict_demo)
         reemplazar_variables_en_tablas(doc=doc, diccionario_de_reemplazos=dict_demo)
