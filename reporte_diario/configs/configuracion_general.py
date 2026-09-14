@@ -9,6 +9,11 @@ seriales_de_sondas = [
     "B060-5339972",
     "B066-5340046",
     "B065-5340042"
+    "B054-4912199",
+    "B067-5339837",
+    "B049-4870926",
+    "B055-4912205",
+    "B058-4912223"  
 ] # 
 
 carpeta_de_datos_crudos = "C:\\Users\\Atmosfera\\Desktop\\datos_crudos\\doris\\todos_los_datos" # Para pruebas de lab
