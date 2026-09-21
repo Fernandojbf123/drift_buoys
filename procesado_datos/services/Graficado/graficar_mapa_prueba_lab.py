@@ -52,7 +52,7 @@ def graficar_mapa_prueba_lab(datos, mostrar_figura: bool = False, ruta_a_la_carp
     
     ax.plot(lon_boya, lat_boya, linestyle='', marker='o', markerfacecolor='red', markeredgecolor='black', markersize=8, transform=ccrs.PlateCarree())
     
-    dic_titulos = {"titulo": "MAPA DE UBICACIÓN DE SONDA DURANTE PRUEBAS DE LABORATORIO", "subtitulo": "", "nombre_de_guardado": "mapa_de_prueba_lab"}
+    dic_titulos = {"titulo": "MAPA DE UBICACIÓN DE SONDAS DURANTE PRUEBAS DE LABORATORIO", "subtitulo": "", "nombre_de_guardado": "mapa_de_prueba_lab"}
                 
     # Preparar las propiedades del mapa (títulos, etiquetas, colorbar, etc.)
     propieadades_de_mapa = {
