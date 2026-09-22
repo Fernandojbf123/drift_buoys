@@ -6,8 +6,8 @@ from services.leer_excel import leer_excel
 
 ############################## DEL 10.1 ########################################
 
-def get_df_datos_documento() -> pd.DataFrame:
-    df_datos_documento = leer_excel(ruta_al_excel_para_crear_documento(), nombre_de_hoja=hoja_del_excel_para_crear_documento(), header=None)
+def get_df_datos_documento(ruta_al_excel_para_crear_documento, hoja_del_excel_para_crear_documento) -> pd.DataFrame:
+    df_datos_documento = leer_excel(ruta_al_excel_para_crear_documento, nombre_de_hoja=hoja_del_excel_para_crear_documento, header=None)
     return df_datos_documento
 
 def get_varnames_documento(df_datos_documento: pd.DataFrame) -> list:

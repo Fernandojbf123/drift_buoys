@@ -15,6 +15,7 @@ Functions:
 """
 
 from copy import deepcopy
+from docx.oxml import OxmlElement
 from docx.oxml.ns import qn
 
 # Import helper functions from private modules
@@ -31,13 +32,6 @@ from ._text_helpers import (
 )
 from ._document_helpers import insert_external_document
 from ._table_helpers import fill_table
-
-
-def _preservar_espacios_del_run(run):
-    for elemento in run._r:
-        if elemento.tag == qn("w:t") and elemento.text:
-            if elemento.text[:1].isspace() or elemento.text[-1:].isspace():
-                elemento.set(qn("xml:space"), "preserve")
 
 
 def insertar_figuras_en_plantilla(doc, diccionario_de_reemplazos: dict):
@@ -190,105 +184,123 @@ def insertar_referencias_cruzadas_en_plantilla(doc, diccionario_de_reemplazos: d
             and not k.startswith("<<ref_tabla_")
         )
     }
-    
+
+    def _crear_run_texto(texto, formato):
+        """Crea un elemento <w:r> aislado (no adjunto a ningún párrafo todavía)."""
+        r = OxmlElement("w:r")
+        if formato is not None:
+            r.append(deepcopy(formato))
+        t = OxmlElement("w:t")
+        t.text = texto
+        if texto[:1].isspace() or texto[-1:].isspace():
+            t.set(qn("xml:space"), "preserve")
+        r.append(t)
+        return r
+
     # Para cada párrafo
     for parrafo in doc.paragraphs:
-        runs_originales = []
+        # Mapear cada run a su rango de caracteres dentro del texto del párrafo
+        runs_info = []
         offset_original = 0
         for run in parrafo.runs:
             texto_run = run.text or ""
-            formato_run = deepcopy(run._r.rPr) if run._r.rPr is not None else None
-            runs_originales.append(
-                (offset_original, offset_original + len(texto_run), formato_run)
-            )
+            runs_info.append([offset_original, offset_original + len(texto_run), run])
             offset_original += len(texto_run)
 
-        def formato_en_posicion(posicion):
-            for inicio_run, fin_run, formato_run in runs_originales:
-                if inicio_run <= posicion < fin_run:
-                    return formato_run
-            return None
-
         full_text = "".join(run.text for run in parrafo.runs)
-        
+
         # Encontrar TODOS los marcadores <<ref_*>> en este párrafo
         marcadores_en_parrafo = []
         for variable_ref, lista_bookmarks in variables_validas.items():
-            if variable_ref in full_text:
-                # Encontrar todas las ocurrencias del marcador en el párrafo
-                pos = full_text.find(variable_ref)
-                if pos != -1:
-                    marcadores_en_parrafo.append((pos, variable_ref, lista_bookmarks))
-        
+            pos = full_text.find(variable_ref)
+            if pos != -1:
+                marcadores_en_parrafo.append((pos, variable_ref, lista_bookmarks))
+
         # Si no hay marcadores en este párrafo, continuar al siguiente
         if not marcadores_en_parrafo:
             continue
-        
+
         # Ordenar marcadores por posición (de izquierda a derecha)
         marcadores_en_parrafo.sort(key=lambda x: x[0])
-        
-        # Limpiar todos los runs del párrafo
-        for run in parrafo.runs:
-            run.text = ""
-        
-        # Reconstruir el párrafo procesando todos los marcadores
-        pos_actual = 0
-        
-        for pos_marcador, variable_ref, lista_bookmarks in marcadores_en_parrafo:
-            # Agregar texto antes del marcador
-            if pos_marcador > pos_actual:
-                texto_antes = full_text[pos_actual:pos_marcador]
-                run_antes = parrafo.add_run(texto_antes)
-                _preservar_espacios_del_run(run_antes)
-                formato = formato_en_posicion(pos_actual)
-                if formato is not None:
-                    run_antes._r.insert(0, deepcopy(formato))
-            
-            # Insertar la referencia cruzada
+
+        # Procesar de derecha a izquierda: solo se tocan los runs que contienen
+        # cada marcador. Cualquier otro run del párrafo (incluidos campos de Word
+        # como referencias cruzadas ya existentes) permanece intacto.
+        for pos_marcador, variable_ref, lista_bookmarks in reversed(marcadores_en_parrafo):
+            fin_marcador = pos_marcador + len(variable_ref)
+
+            runs_afectados = [
+                info for info in runs_info
+                if info[1] > pos_marcador and info[0] < fin_marcador
+            ]
+            if not runs_afectados:
+                continue
+
+            primer_run = runs_afectados[0][2]
+            ultimo_run = runs_afectados[-1][2]
+            formato = deepcopy(primer_run._r.rPr) if primer_run._r.rPr is not None else None
+
+            texto_antes = primer_run.text[: pos_marcador - runs_afectados[0][0]]
+            texto_despues = ultimo_run.text[fin_marcador - runs_afectados[-1][0]:]
+
+            padre = primer_run._r.getparent()
+            indice_insercion = list(padre).index(primer_run._r)
+
+            # Eliminar del XML únicamente los runs que forman parte del marcador
+            for _, _, run_afectado in runs_afectados:
+                run_afectado._r.getparent().remove(run_afectado._r)
+
+            # Construir las referencias cruzadas apendizándolas al final del párrafo
+            # (limitación de aux_insertar_referencia_cruzada) y luego moverlas a su
+            # posición correcta dentro del XML.
+            cantidad_runs_previos = len(parrafo.runs)
+
             primer_bookmark = lista_bookmarks[0]
             ultimo_bookmark = lista_bookmarks[-1]
-            
+
             if len(lista_bookmarks) == 1:
-                # Caso: Solo una figura - "Figura X"
                 aux_insertar_referencia_cruzada(
                     parrafo,
                     primer_bookmark,
                     texto_antes="Figura",
                     mostrar_numero=True,
-                    formato=formato_en_posicion(pos_marcador)
+                    formato=formato,
                 )
             else:
-                # Caso: Múltiples figuras - "Figura X a la Y"
                 aux_insertar_referencia_cruzada(
                     parrafo,
                     primer_bookmark,
                     texto_antes="Figura",
                     mostrar_numero=True,
-                    formato=formato_en_posicion(pos_marcador)
+                    formato=formato,
                 )
-                parrafo.add_run(" a la ")
+                run_conector = parrafo.add_run(" a la ")
+                if formato is not None:
+                    run_conector._r.insert(0, deepcopy(formato))
                 aux_insertar_referencia_cruzada(
                     parrafo,
                     ultimo_bookmark,
                     texto_antes="Figura",
                     mostrar_numero=True,
-                    formato=formato_en_posicion(pos_marcador)
+                    formato=formato,
                 )
-            
-            # Avanzar posición actual
-            pos_actual = pos_marcador + len(variable_ref)
-        
-        # Agregar texto después del último marcador
-        if pos_actual < len(full_text):
-            texto_despues = full_text[pos_actual:]
-            run_despues = parrafo.add_run(texto_despues)
-            _preservar_espacios_del_run(run_despues)
-            formato = formato_en_posicion(pos_actual)
-            if formato is not None:
-                run_despues._r.insert(0, deepcopy(formato))
-            
-        # if variable_ref.startswith("<<ref_tabla_"):
-        #     prefijo = "Tabla"
+
+            elementos_referencia = [
+                r._r for r in parrafo.runs[cantidad_runs_previos:]
+            ]
+            for elemento in elementos_referencia:
+                elemento.getparent().remove(elemento)
+
+            # Ensamblar en orden: texto antes del marcador, referencias, texto después
+            elementos_a_insertar = []
+            if texto_antes:
+                elementos_a_insertar.append(_crear_run_texto(texto_antes, formato))
+            elementos_a_insertar.extend(elementos_referencia)
+            if texto_despues:
+                elementos_a_insertar.append(_crear_run_texto(texto_despues, formato))
+
+            for i, elemento in enumerate(elementos_a_insertar):
+                padre.insert(indice_insercion + i, elemento)
 
     msg = "Referencias cruzadas insertadas."
     print(msg)

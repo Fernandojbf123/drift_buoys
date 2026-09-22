@@ -1,9 +1,11 @@
 import os
 import pandas as pd
-from configs.manager_doc_config import *
 
 # modulo de construccion de diccionarios para templates de word de ezsnake by BelloDev
 from services.word_template_writer import *
+
+# Configuración general de documentos
+from configs.manager_doc_config import configuracion_documentos
 
 
 # Managers de variables de excel
@@ -28,19 +30,19 @@ from services.doc_101.ejecucion_de_la_campania.ejecucion_de_la_campania_parrafo6
 
 # ESQUEMA DEL DICCIONARIO DE FIGURAS
 class Dictfiguras():
-    def __init__(self):
+    def __init__(self, ruta_a_carpeta_de_figuras):
+        self.ruta_a_carpeta_de_figuras = ruta_a_carpeta_de_figuras
         self.ruta = ""
         self.titulo = ""
         self.tamanio = 6
         self.bookmark = ""
 
     def set_ruta(self, varvalue: str):
-        carpeta = get_ruta_a_carpeta_de_las_figuras(usar_NAS=True)
         extensiones = [".png", ".jpg", ".jpeg", ".tiff", ".tif"]
         ruta_completa = None
 
         for ext in extensiones:
-            posible_ruta = os.path.join(carpeta, varvalue + ext)
+            posible_ruta = os.path.join(self.ruta_a_carpeta_de_figuras, varvalue + ext)
             if os.path.exists(posible_ruta):
                 ruta_completa = posible_ruta
                 break
@@ -70,7 +72,9 @@ class Dictfiguras():
         }
 
 def construir_diccionario_agregar_figuras(
-    df_datos_documento: pd.DataFrame) -> dict:
+    df_datos_documento: pd.DataFrame,
+    ruta_a_carpeta_de_figuras,
+) -> dict:
 
     dict_documento = {}
 
@@ -91,7 +95,8 @@ def construir_diccionario_agregar_figuras(
 
             for ivarvalue, varvalue in enumerate(varvalues):
                 numero_de_sondas = len(varvalues)
-                dict_temporal = Dictfiguras()
+        
+                dict_temporal = Dictfiguras(ruta_a_carpeta_de_figuras=ruta_a_carpeta_de_figuras)
 
                 dict_temporal.set_ruta(varvalue)
                 dict_temporal.set_tamanio(3)
@@ -180,25 +185,26 @@ def construir_diccionario_agregar_figuras(
 def construir_diccionario_de_portada(df_datos_despliegue: pd.DataFrame, 
                                     df_datos_campanias: pd.DataFrame,
                                     df_datos_documento: pd.DataFrame,
-                                    diccionario_de_reemplazos: dict):
+                                    diccionario_de_reemplazos: dict,
+                                    orden_de_servicio: str):
     # seriales de sondas
-    seriales_de_sondas = get_seriales_de_sondas(df_datos_despliegue = df_datos_despliegue)
+    seriales_de_sondas = get_seriales_de_sondas(df_despliegue_filtrado = df_datos_despliegue)
     diccionario_de_reemplazos["<<seriales_de_sondas>>"] = ", ".join([str(serial) for serial in seriales_de_sondas])  
     diccionario_de_reemplazos["<<fecha_inicio_vigencia_portada>>"] = (get_fecha_inicio_vigencia_portada(df_datos_despliegue = df_datos_despliegue))
     diccionario_de_reemplazos["<<mes_anio_portada>>"] = get_mes_anio_portada(df_datos_despliegue = df_datos_despliegue)
-    diccionario_de_reemplazos["<<orden_de_servicio>>"] = get_orden_de_servicio_101()   
+    diccionario_de_reemplazos["<<orden_de_servicio>>"] = orden_de_servicio 
     diccionario_de_reemplazos["<<fecha_final_vigencia>>"] = get_fecha_final_vigencia(df_datos_despliegue = df_datos_despliegue)
    
       
 def construir_diccionario_de_datos_documento(df_datos_despliegue: pd.DataFrame, 
                                             df_datos_campanias: pd.DataFrame,
-                                            df_datos_documento: pd.DataFrame,
+                                            config: configuracion_documentos,
                                             diccionario_de_reemplazos: dict):
 
      ## orden de servicio
-    diccionario_de_reemplazos["<<orden_de_servicio>>"] = get_orden_de_servicio_101()    
+    diccionario_de_reemplazos["<<orden_de_servicio>>"] = config.get_orden_de_servicio()  
     # fecha de solicitud
-    diccionario_de_reemplazos["<<fecha_de_solicitud>>"] = get_fecha_de_solicitud()    
+    diccionario_de_reemplazos["<<fecha_de_solicitud>>"] = config.get_fecha_de_solicitud()    
     
     ## fechas de vigencia
     diccionario_de_reemplazos["<<fecha_inicio_vigencia>>"] = get_fecha_inicio_vigencia_texto(df_datos_despliegue = df_datos_despliegue)
@@ -209,7 +215,7 @@ def construir_diccionario_de_datos_documento(df_datos_despliegue: pd.DataFrame,
     diccionario_de_reemplazos["<<fecha_de_entrega>>"] = get_fecha_entrega(df_datos_despliegue = df_datos_despliegue)
     
     # seriales de sondas
-    seriales_de_sondas = get_seriales_de_sondas(df_datos_despliegue = df_datos_despliegue)
+    seriales_de_sondas = get_seriales_de_sondas(df_despliegue_filtrado = df_datos_despliegue)
     diccionario_de_reemplazos["<<seriales_de_sondas>>"] = ", ".join([str(serial) for serial in seriales_de_sondas])  
     diccionario_de_reemplazos["<<numero_de_sondas>>"] = get_numero_de_sondas(df_datos_despliegue = df_datos_despliegue) 
     
@@ -217,7 +223,8 @@ def construir_diccionario_de_datos_documento(df_datos_despliegue: pd.DataFrame,
     diccionario_de_reemplazos["<<mes_y_anio_de_liberacion>>"] = get_mes_y_anio_de_liberacion(df_datos_campanias = df_datos_campanias)
     
     diccionario_de_reemplazos["<<descripcion_actividades_previas_parrafo1>>"] = descripcion_actividades_previas_parrafo1(df_datos_campanias = df_datos_campanias, 
-                                                                                                                        df_datos_despliegue= df_datos_despliegue)
+                                                                                                                        df_datos_despliegue= df_datos_despliegue,
+                                                                                                                        orden_de_servicio = config.get_orden_de_servicio())
     
     diccionario_de_reemplazos["<<descripcion_actividades_previas_parrafo2>>"] = descripcion_actividades_previas_parrafo2(df_datos_campanias = df_datos_campanias, 
                                                                                                                         df_datos_despliegue= df_datos_despliegue)
@@ -243,7 +250,7 @@ def construir_diccionario_de_datos_documento(df_datos_despliegue: pd.DataFrame,
 ############################ DICCIONARIO DE REEMPLAZOS PARA PLANES DE CRUCEROS ############################
 def construir_diccionario_de_reemplazos_para_plan_de_cruceros(df_datos_despliegue: pd.DataFrame, 
                                                             df_datos_campanias: pd.DataFrame,
-                                                            df_datos_documento: pd.DataFrame,
+                                                            config: configuracion_documentos,
                                                             diccionario_de_reemplazos: dict):
 
     df_unicos= get_fecha_y_hora_de_embarque_y_campania_unicos(df_datos_campanias = df_datos_campanias)
@@ -251,7 +258,7 @@ def construir_diccionario_de_reemplazos_para_plan_de_cruceros(df_datos_despliegu
     rutas = []
     for campania in campanias_unicas:
         archivo = campania + ".docx"
-        ruta = os.path.join(get_ruta_a_carpeta_de_planes_de_crucero(usar_NAS=True), archivo)
+        ruta = os.path.join(config.get_ruta_a_carpeta_de_planes_de_crucero(), archivo)
         rutas.append(ruta)
     diccionario_de_reemplazos["<<external_doc_plan_de_crucero>>"] = rutas
 
@@ -267,7 +274,7 @@ def construir_diccionario_de_reemplazos_para_tablas(df_datos_despliegue: pd.Data
     estilos_de_tabla = EstilosTabla(doc)
     estilos_de_tabla.set_estilo_por_defecto("texto_tablas_centrado")
     
-    tabla2 = df_datos_despliegue[["serial_de_sonda","latitud_plan","longitud_plan","fecha_y_hora_de_despliegue_plan"]]
+    tabla2 = df_datos_despliegue[["serial_de_sonda","latitud_plan","longitud_plan"]]
     tabla2.insert(0,"secuencia", range(1, len(tabla2) + 1))
     tabla2["secuencia"] = tabla2["secuencia"].astype(int).astype(str)
     tabla2["serial_de_sonda"] = tabla2["serial_de_sonda"].astype(str)
@@ -306,7 +313,7 @@ def construir_diccionario_de_reemplazos_para_tablas(df_datos_despliegue: pd.Data
                 "Sensor de temperatura secundario", 
                 "Acelerómetro"]    
 
-    seriales = get_seriales_de_sondas(df_datos_despliegue = df_datos_despliegue)
+    seriales = get_seriales_de_sondas(df_despliegue_filtrado = df_datos_despliegue)
     
     array_secuencia_tabla4 = []
     array_seriales_tabla4 = []

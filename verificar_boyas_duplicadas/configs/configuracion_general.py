@@ -3,11 +3,12 @@
 config_verificacion = {
 
     "seriales_de_sondas": [
+        "B056-4912208",
+        "4866696",
+        "B068-5339830",
         "4878214",
-        "4878197",
-        "4869012",
-        "4912209",
-        "4909282",
+        "4878197", 
+   
     ], # 
 
     # Datos de la base de datos de despliegue de sondas
