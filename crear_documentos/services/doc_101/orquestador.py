@@ -42,7 +42,9 @@ def generar_documento_101(doc_config: dict):
 
     # Construir diccionarios (usar df filtrado donde corresponde)
     ruta_a_carpeta_de_las_figuras = config.get_ruta_a_carpeta_de_las_figuras()
-    dict_demo = construir_diccionario_agregar_figuras(df_datos_documento=df_documento, ruta_a_carpeta_de_figuras=ruta_a_carpeta_de_las_figuras)
+    dict_demo = construir_diccionario_agregar_figuras(df_datos_documento=df_documento, 
+                                                      ruta_a_carpeta_de_figuras=ruta_a_carpeta_de_las_figuras,
+                                                      df_datos_despliegue=df_datos_despliegue_filtrado)
 
     construir_diccionario_de_portada(df_datos_despliegue=df_datos_despliegue_filtrado,
                                     df_datos_campanias=df_campanias_filtrado,

@@ -73,7 +73,8 @@ class Dictfiguras():
 
 def construir_diccionario_agregar_figuras(
     df_datos_documento: pd.DataFrame,
-    ruta_a_carpeta_de_figuras,
+    ruta_a_carpeta_de_figuras: str,
+    df_datos_despliegue: pd.DataFrame,
 ) -> dict:
 
     dict_documento = {}
@@ -94,7 +95,7 @@ def construir_diccionario_agregar_figuras(
             array = []
 
             for ivarvalue, varvalue in enumerate(varvalues):
-                numero_de_sondas = len(varvalues)
+                
         
                 dict_temporal = Dictfiguras(ruta_a_carpeta_de_figuras=ruta_a_carpeta_de_figuras)
 
@@ -161,7 +162,7 @@ def construir_diccionario_agregar_figuras(
                     dict_temporal.set_tamanio(6)
 
                 elif varname.lower() == "fig_ubicacion_durante_pruebas".lower():
-
+                    numero_de_sondas = len(df_datos_despliegue)
                     titulo = (
                         "Mapa con la información de las primeras "
                         f"24 horas de transmisión de las {numero_de_sondas} sondas"
