@@ -18,6 +18,10 @@ def download_data(carpeta_de_datos_crudos, seriales_de_sondas):
         
         print(" ")
         print(f" ******* INICIA DESCARGA {serial} || {i+1}/{len(seriales_de_sondas)} ********  ")
+        if not os.path.exists(carpeta_de_datos_crudos):
+            print(f"La ruta {carpeta_de_datos_crudos} no existe. Creando directorio...")
+            os.makedirs(carpeta_de_datos_crudos)
+        
         ruta_de_descarga = os.path.join(carpeta_de_datos_crudos, f"datos_Localizacion_{serial}_TOTAL.csv")
         
         if not decide_downloads(serial):

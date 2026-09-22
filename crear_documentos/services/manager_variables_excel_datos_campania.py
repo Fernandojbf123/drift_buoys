@@ -4,8 +4,8 @@ from services.leer_excel import leer_excel
 from services.timestamp_a_texto_espanol import *
 
 ## DATOS ASOCIADOS A LA HOJA DE CAMPAÑAS
-def get_df_datos_campanias():
-    df_datos_campanias = leer_excel(get_ruta_al_excel_de_campanias(), nombre_de_hoja=get_hoja_del_excel_de_campanias(), header=0)
+def get_df_datos_campanias(ruta_al_excel_de_campanias: str, nombre_de_hoja: str) -> pd.DataFrame:
+    df_datos_campanias = leer_excel(ruta_al_excel_de_campanias, nombre_de_hoja=nombre_de_hoja, header=0)
     return df_datos_campanias
 
 def filtrar_datos_de_campanias(df_datos_campanias: pd.DataFrame, seriales_de_sondas: list[str]) -> pd.DataFrame:

@@ -4,68 +4,72 @@ from services.leer_excel import leer_excel
 from services.timestamp_a_texto_espanol import *
 
 
-def validate_dataframe(df: pd.DataFrame, required_columns: list[str] | None = None, date_columns: list[str] | None = None, min_rows: int = 1) -> list[str]:
-    """Valida un DataFrame y devuelve una lista con mensajes de error.
+# def validate_dataframe(df: pd.DataFrame, required_columns: list[str] | None = None, date_columns: list[str] | None = None, min_rows: int = 1) -> list[str]:
+#     """Valida un DataFrame y devuelve una lista con mensajes de error.
 
-    - Comprueba que `df` sea un DataFrame y no esté vacío (si `min_rows` > 0).
-    - Verifica que existan las columnas en `required_columns`.
-    - Para cada columna en `date_columns` intenta parsear con formato DD/MM/YYYY y reporta filas con formato inválido.
+#     - Comprueba que `df` sea un DataFrame y no esté vacío (si `min_rows` > 0).
+#     - Verifica que existan las columnas en `required_columns`.
+#     - Para cada columna en `date_columns` intenta parsear con formato DD/MM/YYYY y reporta filas con formato inválido.
 
-    Uso recomendado desde los getters:
-        errores = validate_dataframe(df, required_columns=[...], date_columns=[...])
-        if errores:
-            raise ValueError("; ".join(errores))
-    """
-    errors: list[str] = []
-    if not isinstance(df, pd.DataFrame):
-        errors.append("El objeto proporcionado no es un DataFrame")
-        return errors
+#     Uso recomendado desde los getters:
+#         errores = validate_dataframe(df, required_columns=[...], date_columns=[...])
+#         if errores:
+#             raise ValueError("; ".join(errores))
+#     """
+#     errors: list[str] = []
+#     if not isinstance(df, pd.DataFrame):
+#         errors.append("El objeto proporcionado no es un DataFrame")
+#         return errors
 
-    if min_rows > 0 and df.shape[0] < min_rows:
-        errors.append(f"DataFrame tiene menos de {min_rows} filas (actual: {df.shape[0]})")
+#     if min_rows > 0 and df.shape[0] < min_rows:
+#         errors.append(f"DataFrame tiene menos de {min_rows} filas (actual: {df.shape[0]})")
 
-    if required_columns:
-        for col in required_columns:
-            if col not in df.columns:
-                errors.append(f"Falta la columna requerida: {col}")
+#     if required_columns:
+#         for col in required_columns:
+#             if col not in df.columns:
+#                 errors.append(f"Falta la columna requerida: {col}")
 
-    if date_columns:
-        for col in date_columns:
-            if col not in df.columns:
-                errors.append(f"Falta la columna de fecha: {col}")
-                continue
-            parsed = pd.to_datetime(df[col], format="%d/%m/%Y", errors="coerce")
-            invalid_idx = parsed[parsed.isna()].index.tolist()
-            if len(invalid_idx) > 0:
-                sample = invalid_idx[:5]
-                errors.append(f"Formato de fecha inválido en columna '{col}' en filas: {sample} (se encontraron {len(invalid_idx)} entradas inválidas)")
+#     if date_columns:
+#         for col in date_columns:
+#             if col not in df.columns:
+#                 errors.append(f"Falta la columna de fecha: {col}")
+#                 continue
+#             parsed = pd.to_datetime(df[col], format="%d/%m/%Y", errors="coerce")
+#             invalid_idx = parsed[parsed.isna()].index.tolist()
+#             if len(invalid_idx) > 0:
+#                 sample = invalid_idx[:5]
+#                 errors.append(f"Formato de fecha inválido en columna '{col}' en filas: {sample} (se encontraron {len(invalid_idx)} entradas inválidas)")
 
-    return errors
+#     return errors
 
-## Datos asociados a la hoja de datos de DORIS
-def get_df_datos_despliegue():
-    df_datos_despliegue = leer_excel(get_ruta_al_excel_de_despliegue_de_sondas(usar_NAS=True), nombre_de_hoja=get_hoja_del_excel_de_despliegue_de_sondas(), header=0)
+def get_datos_de_despliegue(ruta_al_excel_de_despliegue: str, nombre_de_hoja: str, ):
+    df_datos_despliegue = leer_excel(ruta_al_excel_de_despliegue, nombre_de_hoja=nombre_de_hoja, header=0)
     return df_datos_despliegue
 
-def get_fecha_de_solicitud():
-    fecha_de_solicitud = get_df_datos_despliegue()["fecha_de_solicitud"].iloc[0]
-    return fecha_de_solicitud
-
-def get_orden_de_servicio_101():
-    return get_orden_de_servicio()
-
-def get_orden_de_servicio_103():
-    return get_orden_de_servicio()
-
-def filtrar_df_datos_despliegue_por_orden_de_servicio_101(df_datos_despliegue: pd.DataFrame) -> pd.DataFrame:
-    orden_de_servicio = get_orden_de_servicio_101()
-    errores = validate_dataframe(df_datos_despliegue, required_columns=["OS_101"], min_rows=0)
-    if errores:
-        raise ValueError("Errores en DataFrame antes de filtrar por orden de servicio: " + "; ".join(errores))
+def filtrar_df_datos_despliegue_por_orden_de_servicio(df_datos_despliegue: pd.DataFrame, orden_de_servicio: str, columna: str) -> pd.DataFrame:
+    """ Filtra la orden de servicio en el DataFrame de datos de despliegue """
+    
     if not orden_de_servicio:
         raise ValueError("No hay una orden de servicio configurada")
-    os_101 = df_datos_despliegue["OS_101"].astype("string").str.strip().str.removesuffix(".0")
-    return df_datos_despliegue.loc[os_101 == orden_de_servicio].copy()
+    
+    df_datos_despliegue[columna] = df_datos_despliegue[columna].astype(str).str.strip().str.removesuffix(".0")
+    df_filtrado = df_datos_despliegue[df_datos_despliegue[columna] == orden_de_servicio]
+    return df_filtrado
+
+def get_seriales_de_sondas(df_despliegue_filtrado: pd.DataFrame) -> list[str]:
+    if df_despliegue_filtrado.empty:
+        raise ValueError("El DataFrame filtrado está vacío, no se pueden obtener seriales de sondas")
+    seriales_de_sondas = df_despliegue_filtrado["serial_de_sonda"].astype(str).str.strip().tolist()
+    return seriales_de_sondas
+
+
+
+
+
+
+def get_fecha_de_solicitud(df_despliegue_filtrado: pd.DataFrame):
+    fecha_de_solicitud = df_despliegue_filtrado["fecha_de_solicitud"].iloc[0]
+    return fecha_de_solicitud
 
 def filtrar_df_datos_despliegue_por_orden_de_servicio_103(df_datos_despliegue: pd.DataFrame) -> pd.DataFrame:
     orden_de_servicio = get_orden_de_servicio_103()
@@ -77,25 +81,12 @@ def filtrar_df_datos_despliegue_por_orden_de_servicio_103(df_datos_despliegue: p
     os_103 = df_datos_despliegue["OS_103"].astype("string").str.strip().str.removesuffix(".0")
     return df_datos_despliegue.loc[os_103 == orden_de_servicio].copy()
 
-def get_seriales_de_sondas(df_datos_despliegue: pd.DataFrame) -> list[str]:
-    errores = validate_dataframe(df_datos_despliegue, required_columns=["serial_de_sonda"], min_rows=1)
-    if errores:
-        raise ValueError("Errores en DataFrame al obtener seriales de sondas: " + "; ".join(errores))
-    seriales_de_sondas = df_datos_despliegue["serial_de_sonda"].astype(str).str.strip().tolist()
-    return seriales_de_sondas
-
 def get_numero_de_sondas(df_datos_despliegue: pd.DataFrame) -> int:
-    errores = validate_dataframe(df_datos_despliegue, min_rows=0)
-    if errores and any("DataFrame tiene menos" in e or "no es un DataFrame" in e for e in errores):
-        raise ValueError("Errores en DataFrame al contar sondas: " + "; ".join(errores))
     numero_de_sondas = len(df_datos_despliegue)
     return numero_de_sondas
 
 def get_fecha_inicio_vigencia(df_datos_despliegue: pd.DataFrame) -> pd.Timestamp:
     """Obtiene la fecha de inicio de vigencia como Timestamp."""
-    errores = validate_dataframe(df_datos_despliegue, required_columns=["fecha_inicio_vigencia"], date_columns=["fecha_inicio_vigencia"], min_rows=1)
-    if errores:
-        raise ValueError("Errores en DataFrame al obtener fecha de inicio de vigencia: " + "; ".join(errores))
     fecha_inicio_vigencia = df_datos_despliegue["fecha_inicio_vigencia"].iloc[0]
     fecha_inicio_vigencia = pd.to_datetime(fecha_inicio_vigencia, format="%d/%m/%Y", errors="coerce")
     return fecha_inicio_vigencia
@@ -111,9 +102,6 @@ def get_dia_inicio_vigencia(df_datos_despliegue: pd.DataFrame) -> int:
     return fecha_inicio_vigencia.day
 
 def get_fecha_final_vigencia(df_datos_despliegue: pd.DataFrame) -> str:
-    errores = validate_dataframe(df_datos_despliegue, required_columns=["fecha_inicio_vigencia"], date_columns=["fecha_inicio_vigencia"], min_rows=1)
-    if errores:
-        raise ValueError("Errores en DataFrame al calcular fecha final de vigencia: " + "; ".join(errores))
     fecha_inicio_vigencia = df_datos_despliegue["fecha_inicio_vigencia"].iloc[0]
     fecha_inicio_vigencia = pd.to_datetime(fecha_inicio_vigencia, format= "%d/%m/%Y", errors='coerce')
     fecha_final_vigencia = fecha_inicio_vigencia + pd.offsets.MonthEnd(0)
@@ -121,9 +109,7 @@ def get_fecha_final_vigencia(df_datos_despliegue: pd.DataFrame) -> str:
     return fecha_final_vigencia
 
 def get_fecha_entrega(df_datos_despliegue: pd.DataFrame) -> str:
-    errores = validate_dataframe(df_datos_despliegue, required_columns=["fecha_inicio_vigencia"], date_columns=["fecha_inicio_vigencia"], min_rows=1)
-    if errores:
-        raise ValueError("Errores en DataFrame al calcular fecha de entrega: " + "; ".join(errores))
+    
     fecha_inicio_vigencia = df_datos_despliegue["fecha_inicio_vigencia"].iloc[0]
     fecha_inicio_vigencia = pd.to_datetime(fecha_inicio_vigencia, format= "%d/%m/%Y", errors='coerce')
     fecha_entrega = fecha_inicio_vigencia + pd.DateOffset(months=1)

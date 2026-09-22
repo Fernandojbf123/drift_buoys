@@ -2,10 +2,10 @@ from configs.manager_doc_config import *
 from services.manager_variables_excel_datos_despliegue import *
 from services.manager_variables_excel_datos_campania import *
 
-def descripcion_actividades_previas_parrafo1(df_datos_campanias: pd.DataFrame, df_datos_despliegue: pd.DataFrame) -> str:
+def descripcion_actividades_previas_parrafo1(df_datos_campanias: pd.DataFrame,
+                                             df_datos_despliegue: pd.DataFrame,
+                                             orden_de_servicio: str) -> str:
     
-    orden_de_servicio = get_orden_de_servicio()
-        
     df_unicos= get_fecha_y_hora_de_embarque_y_campania_unicos(df_datos_campanias = df_datos_campanias)
     numero_total_de_sondas = get_numero_de_sondas(df_datos_despliegue = df_datos_despliegue)
 
