@@ -108,6 +108,8 @@ def graficar_mapa_de_despliegue(mostrar_figura: bool = False, ruta_a_la_carpeta_
         
     # # Aplicar el formato al mapa con las propiedades definidas
     dar_formato_al_mapa(propieadades_de_mapa, config)
+    ax.set_xticks(np.arange(np.floor(lon_min), np.ceil(lon_max), 0.5))  # Eliminar ticks del eje y
+    ax.set_yticks(np.arange(np.floor(lat_min), np.ceil(lat_max), 0.5))  # Eliminar ticks del eje x
     ax.legend(loc='upper right', fontsize=config.tamanio_de_letra, frameon=True, edgecolor='black')
     
     # Mostrar y cerrar figura
