@@ -139,5 +139,5 @@ def get_mes_anio_portada(
 
     fecha = get_fecha_inicio_vigencia(df_datos_despliegue)
 
-    return timestamp_a_texto_espanol(fecha=fecha, mes_y_anio=True).replace(" de ", " ", 1)
+    return timestamp_a_texto_espanol(fecha=fecha, mes_y_anio=True).replace(" de ", " ", 1).capitalize()
 
