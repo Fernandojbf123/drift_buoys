@@ -5,6 +5,7 @@ from services.manager_variables_excel_datos_despliegue import *
 from services.manager_variables_excel_datos_campania import *
 from services.manager_variables_excel_documento import *
 from services.doc_103.constructor_diccionario_datos_documento import *
+from services.doc_103.manager_doc103_config import get_ruta_a_carpeta_de_las_figuras
 from services.word_template_writer import *
 from services.guardar_documento import guardar_documento
 from services.doc_103.manager_porcentajes import *
@@ -38,8 +39,10 @@ def main() -> int:
         doc = abrir_plantilla_doris(plantilla)
 
         # Usar data filtrada también para figuras para mantener consistencia
+        ruta_a_carpeta_de_las_figuras = get_ruta_a_carpeta_de_las_figuras(usar_NAS=True)
         dict_demo = construir_diccionario_agregar_figuras(
             df_datos_documento=df_documento,
+            ruta_a_carpeta_de_figuras=ruta_a_carpeta_de_las_figuras,
             df_datos_despliegue=df_datos_despliegue_filtrado,
             df_datos_campanias=df_datos_campanias,
             df_porcentajes=df_porcentajes,

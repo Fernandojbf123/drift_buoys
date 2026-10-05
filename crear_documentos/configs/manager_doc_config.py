@@ -132,7 +132,28 @@ class configuracion_documentos():
     def get_ruta_al_excel_de_porcentajes(self):
         """Obtiene un valor de la configuración general de forma dinámica"""
         ruta_al_NAS = os.getenv("ruta_al_NAS")
-        carpeta = self.get("ruta_al_excel_de_porcentajes")
+        carpeta = self.get("ruta_a_la_carpeta_de_despliegue")
+        archivo = self.get("nombre_del_excel_de_porcentajes")
+        if self.get_usar_NAS() and ruta_al_NAS:
+            ruta_completa = os.path.join(ruta_al_NAS, carpeta, archivo)   
+        else:
+            ruta_completa = os.path.join(carpeta, archivo)  # Si no se encuentra la variable de entorno, usar la ruta relativa     
+        return ruta_completa
+    
+    def get_ruta_a_la_carpeta_de_despliegue(self):
+        """Obtiene un valor de la configuración general de forma dinámica"""
+        ruta_al_NAS = os.getenv("ruta_al_NAS")
+        carpeta = self.get("ruta_a_la_carpeta_de_despliegue")
+        if self.get_usar_NAS() and ruta_al_NAS:
+            ruta_completa = os.path.join(ruta_al_NAS, carpeta)   
+        else:
+            ruta_completa = carpeta  # Si no se encuentra la variable de entorno, usar la ruta relativa     
+        return ruta_completa
+    
+    def get_ruta_a_carpeta_de_plantilla(self):
+        """Obtiene un valor de la configuración general de forma dinámica"""
+        ruta_al_NAS = os.getenv("ruta_al_NAS")
+        carpeta = self.get("ruta_a_carpeta_de_plantilla")
         if self.get_usar_NAS() and ruta_al_NAS:
             ruta_completa = os.path.join(ruta_al_NAS, carpeta)   
         else:
