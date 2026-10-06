@@ -2,22 +2,22 @@
 #### Configuracion del documento 10.1. ###
 ### Los parámetros a modificar son la hoja del excel para el mes de vigencia ###
 doc_config = {
-    "orden_de_servicio": "393",
+    "orden_de_servicio": "394",
     "fecha_de_solicitud": "13 de agosto de 2026",
 
-    "ruta_a_carpeta_de_las_figuras": "\\Med_2025-2026\\Reportes_Edit\\Reporte_10.3\\202609\\documento_11",
-    "ruta_a_carpeta_de_guardado_del_documento": "\\Med_2025-2026\\Reportes_Edit\\Reporte_10.3\\202609\\documento_11\\documento",
+    "ruta_a_carpeta_de_las_figuras": "\\Med_2025-2026\\Reportes_Edit\\Reporte_10.3\\202609\\documento_21",
+    "ruta_a_carpeta_de_guardado_del_documento": "\\Med_2025-2026\\Reportes_Edit\\Reporte_10.3\\202609\\documento_21\\documento",
     
     # Necesarios del 10.1 para el 10.3
-    "ruta_a_la_carpeta_de_despliegue": "\\Med_2025-2026\\Reportes_Edit\\Reporte_10.1\\202609\\documento_11\\documento",
+    "ruta_a_la_carpeta_de_despliegue": "\\Med_2025-2026\\Reportes_Edit\\Reporte_10.1\\202609\\documento_21\\documento",
     "nombre_del_excel_de_porcentajes": "porcentajes_de_las_sondas.xlsx",
 
     # Excel con las rutas a figuras y descripción de figuras
     "ruta_al_excel_para_crear_documento": "\\Med_2025-2026\\General\\Sondas_DORIS\\2026_info_documentos_103.xlsx",
-    "hoja_del_excel_para_crear_documento": "09_1", # "01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12" 
+    "hoja_del_excel_para_crear_documento": "09_02", # "01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12" 
     
     # No suelen modificarse
-    "nombre_de_salida_del_documento": "ASM-CICESE-Concepto_10.3",
+    "nombre_de_salida_del_documento": "PRUEBA_ASM-CICESE-Concepto_10.3",
     "ruta_al_excel_de_despliegue_de_sondas": "\\Med_2025-2026\\General\\base_de_datos_planes_de_crucero_y_doris.xlsx",
     "hoja_del_excel_de_despliegue_de_sondas": "despliegue_doris",
     "rutal_al_excel_de_campanias": "\\Med_2025-2026\\General\\base_de_datos_planes_de_crucero_y_doris.xlsx",
