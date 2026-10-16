@@ -2,7 +2,7 @@ import os
 import pandas as pd
 from configs.manager_configuracion import get_carpeta_de_datos_crudos, get_seriales_sondas
 
-def revisar_anomalias():
+def revisar_anomalias(dias: int):
     """
     Revisa los archivos de datos descargados para detectar anomalías en los últimos 24 horas.
     Crea un archivo CSV de salida con la información de las anomalías detectadas.
@@ -41,7 +41,7 @@ def revisar_anomalias():
             fecha_de_ultima_medicion_str = df["fecha_cst"].max().strftime("%d/%m/%y %H:%M") # CST
 
             # Crear un DF filtrado para los últimos 24 horas
-            yesterday_tspan = (pd.Timestamp.now() - pd.Timedelta(days=1))
+            yesterday_tspan = (pd.Timestamp.now() - pd.Timedelta(days=dias))
             df_cortado = df[df["fecha_cst"] >= pd.Timestamp(yesterday_tspan)]  # Filtrar por fecha
 
             # Si el df_cortado está vacío (No hay datos en las últimas 24 horas)
@@ -78,6 +78,16 @@ def revisar_anomalias():
                 diferencia = (pd.Timestamp.now().normalize() - fecha_de_ultima_medicion).total_seconds()/3600
                 if diferencia > 5:
                     print(f"El serial {serial} dejó de transmitir hace más de 5 horas.")
+                    
+                    
+                # Avisar si hay intermitencias en la tranmisión
+                for irow in range(1,len(df_cortado)):
+                    fecha_actual = df_cortado.iloc[irow]["fecha_cst"]
+                    fecha_anterior = df_cortado.iloc[irow-1]["fecha_cst"]
+                    diferencia_entre_mediciones = round((fecha_actual - fecha_anterior).total_seconds()/3600,2)
+                    if diferencia_entre_mediciones > 1:
+                        print(f"Intermitencia detectada en el serial {serial}: {fecha_actual} - {fecha_anterior} CST. Diferencia {diferencia_entre_mediciones} horas).")
+                    
                     
             output_dict["serial"].append(serial)
             output_dict["fecha_y_hora_de_ultima_medicion_CST"].append(fecha_de_ultima_medicion_str)
