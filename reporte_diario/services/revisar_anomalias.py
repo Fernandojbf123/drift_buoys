@@ -26,11 +26,15 @@ def revisar_anomalias(dias: int):
                 df = pd.read_csv(ruta_al_archivo)
                 
             except pd.errors.EmptyDataError:
-                print(f"El archivo para el serial {serial} está vacío o no tiene datos válidos.")
-                raise FileNotFoundError(f"El archivo para el serial {serial} está vacío o no tiene datos válidos.")
+                df = pd.DataFrame()
             
             if df.empty:    
-                return f"El archivo para el serial {serial} está vacío o no tiene datos válidos."
+                print(f"El archivo para el serial {serial} está vacío o no tiene datos válidos.")
+                output_dict["serial"].append(serial)
+                output_dict["fecha_y_hora_de_ultima_medicion_CST"].append("")
+                output_dict["rapidez_dentro_del_rango"].append("Sin datos válidos")
+                output_dict["voltaje_dentro_del_rango"].append("Sin datos válidos")
+                continue
             
             print(ruta_al_archivo)
             df.rename(columns={"fecha": "fecha_utc"}, inplace=True)
