@@ -24,8 +24,11 @@ config_despliegue = {
     # "seriales_de_sondas" : ["4912208","4912223", "9909282", "4912205","4912209"], # 20 de julio 2026
     # "seriales_de_sondas" : ["B059-4912225","B063-5340036", "B061-5339989", "B062-5340045", "B064-5340026"], # 12 de agosto 2026
     # "seriales_de_sondas" : ["B066-5340046","B060-5339972", "B065-5340042", "B053-4912198", "B048-4869012"], # 13 de agosto 2026
+    # "seriales_de_sondas" :["B056-4912208","4866696","B068-5339830","4878214","4878197"],
+    # "seriales_de_sondas": ["B074-5339828", "B071-5339826", "B070-5339973", "B076-5339968", "B072-5339652"], # 16 de otubre 2026
+    "seriales_de_sondas": ["B073-5339822", "B048-4869012","B079-5339955","B077-5338569","B051-4909282"], # 16 de otubre 2026
     
-    "seriales_de_sondas" :["B056-4912208","4866696","B068-5339830","4878214","4878197"],
+    
     # 2. Rutas de guardado
     "carpeta_de_guardado_de_datos_lab": "C:\\Users\\Atmosfera\\Desktop\\datos_procesados\\doris\\10.1", # Carpeta donde se guardarán los archivos csv de las pruebas de lab
     "nombre_del_archivo_de_datos_procesados": "pruebas_lab_procesado", # Nombre del archivo pkl que contiene los datos procesados de las pruebas de laboratorio 
@@ -37,5 +40,7 @@ config_despliegue = {
         "lon_max": -90,
         "lat_min": 18,
         "lat_max": 21
-    }
+    },
+    
+    "carpeta_de_datos_crudos": "C:\\Users\\Atmosfera\\Desktop\\datos_crudos\\doris\\todos_los_datos",
 }
