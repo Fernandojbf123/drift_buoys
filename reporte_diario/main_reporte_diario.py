@@ -1,6 +1,6 @@
 import argparse
 
-from services.revisar_anomalias import revisar_anomalias
+from reporte_diario.services.revisar_anomalias import revisar_anomalias
 
 
 def main():

@@ -1,6 +1,6 @@
 import os
 import pandas as pd
-from configs.manager_configuracion import get_carpeta_de_datos_crudos, get_seriales_sondas
+from reporte_diario.configs.manager_configuracion import get_carpeta_de_datos_crudos, get_seriales_sondas
 
 def revisar_anomalias(dias: int):
     """

@@ -1,4 +1,4 @@
-import configs.configuracion_general as config
+import reporte_diario.configs.configuracion_general as config
 
 def _get_config_value(variable_name):
     """Obtiene un valor de la configuración general de forma dinámica"""
