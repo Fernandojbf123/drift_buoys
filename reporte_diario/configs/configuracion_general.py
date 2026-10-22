@@ -19,7 +19,6 @@ seriales_de_sondas = [
     "B048-4869012",	#   COORDENADAS 19.2794, -91.9758	     20:20
     "B079-5339955",	#   COORDENADAS 19.2288, -91.9077	     20:51
     "B077-5338569",	#   COORDENADAS 19.2628, -91.9525	     20:29
-    "B051-4909282", #   COORDENADAS 19.2461, -91.9307	      20:39
 ] # 
 
 carpeta_de_datos_crudos = "C:\\Users\\Atmosfera\\Desktop\\datos_crudos\\doris\\todos_los_datos" # Para pruebas de lab

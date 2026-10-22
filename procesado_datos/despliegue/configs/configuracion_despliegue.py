@@ -1,9 +1,9 @@
 config_despliegue = {
 
     # 1. Fechas y seriales
-    "fecha_del_estudio": "2026-08-01", # Indica el mes al que corresponde el estudio (i.e: Si el estudio se hizo en Marzo, pero los datos son de Enero; se coloca enero como fecha del estudio)
-    "fecha_de_inicio_pruebas_lab": "2026-08-10 15:00", # Formato: 'AAAA-MM-DD HH:MM:SS'
-    "fecha_de_fin_pruebas_lab": "2026-08-11 16:00", # Formato: 'AAAA-MM-DD HH:MM:SS'
+    "fecha_del_estudio": "2026-10-01", # Indica el mes al que corresponde el estudio (i.e: Si el estudio se hizo en Marzo, pero los datos son de Enero; se coloca enero como fecha del estudio)
+    "fecha_de_inicio_pruebas_lab": "2026-10-14 15:00", # Formato: 'AAAA-MM-DD HH:MM:SS'
+    "fecha_de_fin_pruebas_lab": "2026-10-15 16:00", # Formato: 'AAAA-MM-DD HH:MM:SS'
     
      # Lista de seriales de sondas a analizar
     # "seriales_de_sondas": ["4876187", "4878196", "4878205", "4878218","4866704","4878221","4878503","4876191","4876190"], # Todas
@@ -25,8 +25,8 @@ config_despliegue = {
     # "seriales_de_sondas" : ["B059-4912225","B063-5340036", "B061-5339989", "B062-5340045", "B064-5340026"], # 12 de agosto 2026
     # "seriales_de_sondas" : ["B066-5340046","B060-5339972", "B065-5340042", "B053-4912198", "B048-4869012"], # 13 de agosto 2026
     # "seriales_de_sondas" :["B056-4912208","4866696","B068-5339830","4878214","4878197"],
-    # "seriales_de_sondas": ["B074-5339828", "B071-5339826", "B070-5339973", "B076-5339968", "B072-5339652"], # 16 de otubre 2026
-    "seriales_de_sondas": ["B073-5339822", "B048-4869012","B079-5339955","B077-5338569","B051-4909282"], # 16 de otubre 2026
+    "seriales_de_sondas": ["B074-5339828", "B071-5339826", "B070-5339973", "B076-5339968", "B072-5339652"], # 16 de otubre 2026
+    # "seriales_de_sondas": ["B073-5339822", "B048-4869012","B079-5339955","B077-5338569","B051-4909282"], # 16 de otubre 2026
     
     
     # 2. Rutas de guardado

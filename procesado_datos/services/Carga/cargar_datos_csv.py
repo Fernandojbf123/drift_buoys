@@ -109,7 +109,7 @@ def leer_excel_de_despliegue_de_sondas(config) -> pd.DataFrame:
 
         df_excel = pd.read_excel(ruta_al_excel_de_despliegue_de_sondas, sheet_name=hoja)
         df_excel.dropna(subset=['serial_de_sonda'], inplace=True) # elimino ausentes o nulos para que la conversion no de error
-        df_excel['serial_de_sonda'] = df_excel['serial_de_sonda'].astype(str)
+        df_excel['serial_de_sonda'] = df_excel['serial_de_sonda'].astype(str).str.strip()
         
         return df_excel
     

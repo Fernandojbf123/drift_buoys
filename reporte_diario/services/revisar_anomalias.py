@@ -62,21 +62,21 @@ def revisar_anomalias(dias: int):
                     output_dict["rapidez_dentro_del_rango"].append("Si")
                 else:
                     print(" ")
-                    print(f"Anomalía de rapidez detectada en el serial {serial}: Velocidad mayor a 2 m/s en los últimos 24 horas.")
+                    print(f"Anomalía de rapidez detectada en el serial {serial}: Rapidez mayor a 2 m/s en los últimos 24 horas.")
                     print(velocidad_mayor_a_2)
                     print(" ")
-                    output_dict["rapidez_dentro_del_rango"].append(f"No; se detectaron valores anómalos")
+                    output_dict["rapidez_dentro_del_rango"].append(f"Anomalias rapidez > 2 m/s")
                 
                 # Buscar si existen valores anómalos en el voltaje
-                voltaje_menor_a_39 = df_cortado[df_cortado["volt"] <= 39]
+                voltaje_menor_a_39 = df_cortado[df_cortado["volt"] <= 3.9]
                 if voltaje_menor_a_39.empty:
-                    output_dict["voltaje_dentro_del_rango"].append("Si; entre 40 y 43 V")
+                    output_dict["voltaje_dentro_del_rango"].append("Si; entre 3.9 y 4.3 V")
                 else:
                     print(" ")
-                    print(f"Anomalía de voltaje detectada en el serial {serial}: Voltaje menor a 40 V en los últimos 24 horas.")
+                    print(f"Anomalía de voltaje detectada en el serial {serial}: Voltaje menor a 3.9 V en los últimos 24 horas.")
                     print(voltaje_menor_a_39)
                     print(" ")
-                    output_dict["voltaje_dentro_del_rango"].append("No; menor a 40 V")
+                    output_dict["voltaje_dentro_del_rango"].append("No; menor a 3.9 V")
                     
                 # Avisar si dejó de transmitir
                 diferencia = (pd.Timestamp.now().normalize() - fecha_de_ultima_medicion).total_seconds()/3600

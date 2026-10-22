@@ -27,7 +27,8 @@ def graficar_mapa_de_despliegue(mostrar_figura: bool = False, ruta_a_la_carpeta_
     
     df_excel_de_despliegue['serial_de_sonda'] = df_excel_de_despliegue['serial_de_sonda'].astype(str) # Convertir a string
     puerto_de_salida = df_excel_de_despliegue[df_excel_de_despliegue["serial_de_sonda"] == seriales_a_analizar[0]]["lugar_de_salida"].values[-1] # Acá me interesa ir al excel de despliegue buscar el serial y conseguir el puerto de salida
-
+    if puerto_de_salida is None or puerto_de_salida == "":
+        raise ValueError(f"la columna 'lugar_de_salida' de la base de datos de DORIS está vacío")
 
     # Cargar sitios de embarque del excel maestro y obtener las coordenadas del puerto de salida
     sitios_de_embarque = pd.read_excel(config.ruta_al_excel_de_despliegue_de_sondas, sheet_name="sitios_de_embarque") 
