@@ -75,7 +75,7 @@ def graficar_series_laboratorio_y_guardar(datos: dict,
         # Paso 3. Dar formato al axe
         dar_formato_al_axe(propiedades_del_axe, config)
         # ax.legend([f"{serial}"], loc="upper left", fontsize=12, frameon=True)
-        ax.set_ylim(39, 45)
+        ax.set_ylim(0, 5)
     
         fecha_inicial_str = tspan.iloc[0].strftime('%Y%m%d')
         fecha_final_str = tspan.iloc[-1].strftime('%Y%m%d')

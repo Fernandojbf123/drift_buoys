@@ -13,7 +13,7 @@ coordenadas={
 }
 
 ###############################
-def crear_fechas(fecha_inicio: str, fecha_fin: str, periodo: int, variacion: int) -> pd.DatetimeIndex: 
+def crear_fechas(fecha_inicio: pd.Timestamp, fecha_fin: pd.Timestamp, periodo: int, variacion: int) -> list[pd.Timestamp]: 
     """" 
     Crea una lista de fechas aleatorias entre fecha_inicio y fecha_fin.
     Las fechas se generan con un periodo fijo y una variacion en segundos.
@@ -31,6 +31,7 @@ def crear_fechas(fecha_inicio: str, fecha_fin: str, periodo: int, variacion: int
             current_time = current_time + pd.Timedelta(minutes=periodo)
         current_time = current_time.replace(second=0)
         fechas.append(current_time)
+    
     return fechas
 
 ##############################
@@ -82,6 +83,6 @@ def generar_datos(fecha_inicio: pd.Timestamp,
         output_dic["acc_x"].append(0)
         output_dic["acc_y"].append(0)
         output_dic["acc_z"].append(0)
-        output_dic["volt"].append(42+np.random.randint(-2,2))
+        output_dic["volt"].append(round(4.1+ np.random.randint(-2,2)/10,2))
 
     return output_dic
