@@ -69,10 +69,19 @@ def verificar_seriales_nuevos_vs_registrados(seriales_a_verificar: list, seriale
         for serial_registrado in seriales_registrados:
             # Asegurar que serial_registrado sea de tipo str
             serial_registrado = str(serial_registrado)
-            if serial == serial_registrado.split("-")[-1]:
+            
+            if serial.split("-")[-1] == serial_registrado.split("-")[-1]: # Verifica que los números finales coincidan
+                existe = True
+                break
+            
+            if serial == serial_registrado.split("-")[-1]: # Verifica que el número coincida con el final del serial registrado
                 existe = True
                 break
         
+            if  serial == serial_registrado: # Verifica si todo coincide con el serial registrado
+                existe = True
+                break
+
         if existe:
             seriales_dict[serial] = True
         else:
@@ -96,21 +105,35 @@ def notificador(seriales_dict: dict, columna: str):
             
 def cambia_el_serial(serial: str):
     serial = str(serial)
-    serial = serial.split("-")[-1]
+    
+    base = None
+    serial = serial
+    if len(serial.split("-")) == 2:
+        base = serial.split("-")[0]
+        serial = serial.split("-")[-1]
+        
     numeros = list(serial)
     primer_numero = numeros[0]
-    if primer_numero == "4":
-        numeros[0] = numeros[0].replace("4","9")
-    elif primer_numero == "9":
-        numeros[0] = numeros[0].replace("9","10")
-    elif primer_numero == "1":
+    
+    if primer_numero == "1":
         segundo_numero = int(numeros[1])
         if segundo_numero == 9:
             numeros[0] = numeros[0].replace("1","2")
             numeros[1] = numeros[1].replace("9", "0")
         else:
             numeros[1] = numeros[1].replace(str(segundo_numero), str(int(segundo_numero)+1))
-        
-    return "".join(numeros)
+    
+    elif primer_numero == "9":
+        numeros[0] = numeros[0].replace("9","10")
+    
+    else:
+        numeros[0] = numeros[0].replace(primer_numero,"9")
+
+    
+    serial = "".join(numeros)
+    if base:
+        serial = f"{base}-{serial}"
+    
+    return serial
     
     
