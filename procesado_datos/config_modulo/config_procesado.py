@@ -21,7 +21,7 @@ config_modulo_procesado = {
     "origen_de_los_datos": "REALT",  # Opciones: 'REALT', 'MEM'
     "decimales_en_figuras": 2,  # Cantidad de decimales a mostrar en las figuras
     "tipo_de_letra": "Arial",  # Opciones: 'Arial', 'Times New Roman', 'Calibri'
-    "tamanio_de_letra": 12,  # Tamaño de letra en las figuras
+    "tamanio_de_letra": 15,  # Tamaño de letra en las figuras
     "numero_de_bins_histograma": 30,  # Número de bins en los histogramas
     
 

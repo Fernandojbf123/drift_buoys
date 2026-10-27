@@ -48,7 +48,7 @@ def graficar_series_laboratorio_y_guardar(datos: dict,
     for serial, df in datos.items():
         
         
-        fig, axes = plt.subplots(nrows=1, ncols=1, figsize=(15, 2))
+        fig, axes = plt.subplots(nrows=1, ncols=1, figsize=(15, 3))
         axes = np.atleast_1d(axes)  # Asegurar que axes es siempre un array 1D
         
         ## Paso 2. # Graficar una serie de tiempo por cada axes

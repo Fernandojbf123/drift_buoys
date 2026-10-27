@@ -25,8 +25,8 @@ config_despliegue = {
     # "seriales_de_sondas" : ["B059-4912225","B063-5340036", "B061-5339989", "B062-5340045", "B064-5340026"], # 12 de agosto 2026
     # "seriales_de_sondas" : ["B066-5340046","B060-5339972", "B065-5340042", "B053-4912198", "B048-4869012"], # 13 de agosto 2026
     # "seriales_de_sondas" :["B056-4912208","4866696","B068-5339830","4878214","4878197"],
-    # "seriales_de_sondas": ["B074-5339828", "B051-4909282","B070-5339973", "B076-5339968", "B077-5338569"], # 16 de otubre 2026
-    "seriales_de_sondas": ["B048-4869012","B072-5339652","B071-5339826","B073-5339822","B079-5339955"], # 16 de otubre 2026
+     "seriales_de_sondas": ["B074-5339828", "B051-4909282","B070-5339973", "B076-5339968", "B077-5338569"], # 16 de otubre 2026
+    # "seriales_de_sondas": ["B048-4869012","B072-5339652","B071-5339826","B073-5339822","B079-5339955"], # 16 de otubre 2026
     
     # 2. Rutas de guardado
     "carpeta_de_guardado_de_datos_lab": "C:\\Users\\Atmosfera\\Desktop\\datos_procesados\\doris\\10.1", # Carpeta donde se guardarán los archivos csv de las pruebas de lab
