@@ -261,8 +261,23 @@ def calcular_xticks(tspan: pd.DatetimeIndex, n_ticks:int =5)-> tuple:
         formato_ticks = "hours"
     
         xlim = [fecha_inicial - pd.Timedelta(hours=2), fecha_final + pd.Timedelta(hours=2)]
-        paso = max(1, len(tspan) // (n_ticks - 1))
-        xticks = tspan[::paso][:n_ticks]
+        xticks = pd.date_range(start=xlim[0], end=xlim[-1], freq="h").floor("h")
+        n_ticks = 3
+        paso = len(xticks)/(n_ticks)
+        tmp_ticks = xticks[::int(paso)]
+
+        fin = 0
+        while fin == 0:
+            if n_ticks > 11:
+                break            
+            n_ticks += 1
+            paso = len(xticks)/(n_ticks)
+            if paso % 2 == 0:
+                if len(xticks[::int(paso)]) > 2:
+                    fin = 1
+                    break
+                
+        xticks = xticks[::int(paso)]
 
 
     else:
