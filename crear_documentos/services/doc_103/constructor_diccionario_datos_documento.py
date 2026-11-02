@@ -29,6 +29,10 @@ def construir_diccionario_agregar_figuras(
     df_datos_campanias: pd.DataFrame,
     df_porcentajes: pd.DataFrame,
 ) -> dict:
+    
+    """
+    Esta función toma el excel de datos del documento y construye un diccionario con la información de las figuras, incluyendo rutas, títulos y tamaños.
+    """
     dict_documento = {}
     varnames_documento = get_varnames_documento(df_datos_documento=df_datos_documento)
 
@@ -82,11 +86,16 @@ def construir_diccionario_agregar_figuras(
                     numero_de_serie = varvalue.split("_")[-1]
                     periodo = get_periodo_transmision_sonda_individual(df_porcentajes=df_porcentajes, serial_de_sonda= str(numero_de_serie))
 
-                    titulo = ("Series de tiempo de temperatura, componentes u y v, rapidez y dirección "
-                        f"de la sonda oceanográfica {numero_de_serie}. "
-                        f"El periodo va {periodo}.")
+                    titulo = ("Series de tiempo de temperatura, componentes u y v, rapidez, dirección y voltaje"
+                        f" de la sonda oceanográfica {numero_de_serie}."
+                        f" El periodo va {periodo}.")
 
                     dict_temporal.set_titulo(titulo)
+                    dict_temporal.set_tamanio(6)
+                    
+                elif varname.lower() == "fig_mensaje".lower():
+                    serial = varvalue.split("_")[-1]
+                    dict_temporal.set_titulo(f"Mensaje ejemplo de transmisión para la sonda oceanográfica NS {serial}.")
                     dict_temporal.set_tamanio(6)
                     
 

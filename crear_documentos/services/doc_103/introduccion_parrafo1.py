@@ -9,7 +9,7 @@ def introduccion_parrafo1(df_datos_campanias: pd.DataFrame, df_datos_despliegue:
     fechas_campanias_unicos = df_unicos["fecha_hora_de_embarque"].tolist()
     campanias_unicos = df_unicos["campania"].tolist()
     
-    texto = f' Como parte del Servicio de Medición y Análisis Metoceánicos del '
+    texto = f'Como parte del Servicio de Medición y Análisis Metoceánicos del '
     texto+= f'Golfo de México (Contrato No. 658225821), que se lleva a cabo por '
     texto+= f'el consorcio All Solutions de México S. A. de C. V. (en lo sucesivo, ASM) '
     texto+= f'y el Centro de Investigación Científica y Educación Superior de Ensenada '
